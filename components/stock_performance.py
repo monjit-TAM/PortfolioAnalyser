@@ -119,7 +119,7 @@ class StockPerformance:
             # Create price chart with buy price line and ATH marker
             fig = make_subplots(
                 rows=2, cols=1,
-                shared_xaxis=True,
+                shared_xaxes=True,
                 vertical_spacing=0.1,
                 subplot_titles=('Price Movement', 'Volume'),
                 row_heights=[0.7, 0.3]
@@ -143,8 +143,7 @@ class StockPerformance:
                 line_dash="dash",
                 line_color="green",
                 annotation_text=f"Buy Price: ₹{stock_data['Buy Price']:.2f}",
-                annotation_position="top left",
-                row=1, col=1
+                annotation_position="top left"
             )
             
             # All-time high line
@@ -153,8 +152,7 @@ class StockPerformance:
                 line_dash="dot",
                 line_color="red",
                 annotation_text=f"ATH: ₹{stock_data['All Time High Since Purchase']:.2f}",
-                annotation_position="top right",
-                row=1, col=1
+                annotation_position="top right"
             )
             
             # Volume bars

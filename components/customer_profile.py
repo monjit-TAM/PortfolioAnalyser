@@ -358,27 +358,27 @@ class CustomerProfile:
         
         if total_stocks > 0:
             # Value score
-            style_scores['Value Investor'] = (value_signals / total_stocks) * 100
+            style_scores['Value Investor'] = float((value_signals / total_stocks) * 100)
             
             # Growth score
-            style_scores['Growth Investor'] = (growth_signals / total_stocks) * 100
+            style_scores['Growth Investor'] = float((growth_signals / total_stocks) * 100)
             
             # Balanced score (based on diversification and mixed signals)
             sector_count = len(analysis_results['sector_analysis'])
             diversification_score = min(sector_count * 10, 50)  # Max 50 for 5+ sectors
             mixed_signals = abs(value_signals - growth_signals)
             balance_score = diversification_score + (mixed_signals * 10)
-            style_scores['Balanced Investor'] = min(balance_score, 100)
+            style_scores['Balanced Investor'] = float(min(balance_score, 100))
             
             # Speculative score (based on risk metrics and performance volatility)
             risk_score = analysis_results['risk_metrics']['portfolio_volatility'] * 200  # Convert to percentage
             performance_variance = abs(analysis_results['portfolio_summary']['total_gain_loss_percentage'])
             speculative_score = min(risk_score + performance_variance * 0.5, 100)
-            style_scores['Speculative Investor'] = speculative_score
+            style_scores['Speculative Investor'] = float(speculative_score)
         
         return {
             'style_scores': style_scores,
-            'primary_style': max(style_scores, key=style_scores.get),
+            'primary_style': max(style_scores.items(), key=lambda x: x[1])[0],
             'style_confidence': max(style_scores.values())
         }
     

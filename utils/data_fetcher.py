@@ -115,6 +115,10 @@ class DataFetcher:
             end_date = datetime.now()
             historical_data = ticker.history(start=start_date, end=end_date)
             
+            # Normalize index to timezone-naive to prevent comparison issues
+            if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
+                historical_data.index = historical_data.index.tz_localize(None)
+            
             return current_price, historical_data
             
         except Exception as e:
@@ -133,6 +137,11 @@ class DataFetcher:
             ticker = yf.Ticker(symbol)
             end_date = datetime.now()
             historical_data = ticker.history(start=start_date, end=end_date)
+            
+            # Normalize index to timezone-naive to prevent comparison issues
+            if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
+                historical_data.index = historical_data.index.tz_localize(None)
+            
             return historical_data
         except Exception as e:
             st.warning(f"Could not fetch index data for {index_name}: {str(e)}")

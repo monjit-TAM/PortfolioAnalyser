@@ -16,6 +16,9 @@ from components.stock_performance import StockPerformance
 from components.benchmark_comparison import BenchmarkComparison
 from components.recommendations import Recommendations
 from components.customer_profile import CustomerProfile
+from components.rebalancing import PortfolioRebalancing
+from components.historical_performance import HistoricalPerformance
+from utils.pdf_generator import PDFReportGenerator
 
 def main():
     st.set_page_config(
@@ -148,9 +151,12 @@ def analyze_portfolio():
             portfolio_df, current_data, historical_data
         )
         
-        # Generate recommendations
+        # Create enriched portfolio DataFrame from analysis results
+        enriched_portfolio_df = pd.DataFrame(analysis_results['stock_performance'])
+        
+        # Generate recommendations using enriched data
         recommendations = recommendation_engine.generate_recommendations(
-            portfolio_df, current_data, historical_data, analysis_results
+            enriched_portfolio_df, current_data, historical_data, analysis_results
         )
         
         # Store results in session state
@@ -170,16 +176,105 @@ def analyze_portfolio():
         st.error(f"Error during analysis: {str(e)}")
         st.session_state.analysis_complete = False
 
+def refresh_prices():
+    """Refresh stock prices with latest market data"""
+    try:
+        portfolio_df = st.session_state.portfolio_data
+        data_fetcher = DataFetcher()
+        portfolio_analyzer = PortfolioAnalyzer()
+        recommendation_engine = RecommendationEngine()
+        
+        # Fetch updated prices
+        current_data = {}
+        historical_data = st.session_state.historical_data  # Keep existing historical data
+        
+        for _, stock in portfolio_df.iterrows():
+            stock_name = stock['Stock Name']
+            buy_date = stock['Buy Date']
+            
+            # Fetch current price only
+            current_price, _ = data_fetcher.get_stock_data(stock_name, buy_date)
+            current_data[stock_name] = current_price
+        
+        # Re-analyze with updated prices
+        analysis_results = portfolio_analyzer.analyze_portfolio(
+            portfolio_df, current_data, historical_data
+        )
+        
+        # Create enriched portfolio DataFrame from analysis results
+        enriched_portfolio_df = pd.DataFrame(analysis_results['stock_performance'])
+        
+        recommendations = recommendation_engine.generate_recommendations(
+            enriched_portfolio_df, current_data, historical_data, analysis_results
+        )
+        
+        # Update session state
+        st.session_state.current_data = current_data
+        st.session_state.analysis_results = analysis_results
+        st.session_state.recommendations = recommendations
+        
+        st.success("Prices updated successfully!")
+        st.rerun()
+        
+    except Exception as e:
+        st.error(f"Error refreshing prices: {str(e)}")
+
 def display_analysis():
     """Display comprehensive portfolio analysis"""
     
+    # Add controls for refresh and PDF download
+    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+    
+    with col2:
+        if st.button("🔄 Refresh Prices", type="secondary", help="Update with latest stock prices"):
+            with st.spinner("Refreshing prices..."):
+                refresh_prices()
+    
+    with col3:
+        # Generate PDF report
+        if st.button("📄 Download Report", type="primary", help="Generate comprehensive PDF report"):
+            with st.spinner("Generating PDF report..."):
+                try:
+                    pdf_gen = PDFReportGenerator()
+                    filename = f"portfolio_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                    pdf_gen.generate_report(
+                        st.session_state.analysis_results,
+                        st.session_state.portfolio_data,
+                        st.session_state.recommendations,
+                        filename
+                    )
+                    
+                    # Read the generated PDF
+                    with open(filename, "rb") as pdf_file:
+                        pdf_bytes = pdf_file.read()
+                    
+                    st.download_button(
+                        label="⬇️ Download PDF",
+                        data=pdf_bytes,
+                        file_name=filename,
+                        mime="application/pdf"
+                    )
+                    st.success("PDF report generated successfully!")
+                except Exception as e:
+                    st.error(f"Error generating PDF: {str(e)}")
+    
+    with col4:
+        # Auto-refresh toggle
+        auto_refresh = st.checkbox("Auto-refresh", value=False, help="Auto-refresh every 5 minutes")
+        if auto_refresh:
+            import time
+            time.sleep(300)  # 5 minutes
+            st.rerun()
+    
     # Create tabs for different analysis sections
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
         "📊 Dashboard", 
         "🏭 Sector Analysis", 
         "📈 Stock Performance", 
         "📊 Benchmark Comparison", 
-        "💡 Recommendations", 
+        "💡 Recommendations",
+        "⚖️ Rebalancing",
+        "📅 Historical Performance",
         "👤 Customer Profile"
     ])
     
@@ -222,6 +317,22 @@ def display_analysis():
         )
     
     with tab6:
+        rebalancing = PortfolioRebalancing()
+        rebalancing.render(
+            st.session_state.analysis_results,
+            st.session_state.portfolio_data,
+            st.session_state.current_data
+        )
+    
+    with tab7:
+        historical_performance = HistoricalPerformance()
+        historical_performance.render(
+            st.session_state.analysis_results,
+            st.session_state.portfolio_data,
+            st.session_state.historical_data
+        )
+    
+    with tab8:
         customer_profile = CustomerProfile()
         customer_profile.render(
             st.session_state.analysis_results,

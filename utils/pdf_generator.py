@@ -1,0 +1,295 @@
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+import pandas as pd
+from datetime import datetime
+import io
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+
+class PDFReportGenerator:
+    def __init__(self):
+        self.styles = getSampleStyleSheet()
+        
+        # Custom styles
+        self.title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=self.styles['Heading1'],
+            fontSize=24,
+            textColor=colors.HexColor('#1f77b4'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+        
+        self.heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=self.styles['Heading2'],
+            fontSize=16,
+            textColor=colors.HexColor('#2c3e50'),
+            spaceAfter=12,
+            spaceBefore=12
+        )
+        
+        self.subheading_style = ParagraphStyle(
+            'CustomSubHeading',
+            parent=self.styles['Heading3'],
+            fontSize=14,
+            textColor=colors.HexColor('#34495e'),
+            spaceAfter=10
+        )
+    
+    def generate_report(self, analysis_results, portfolio_data, recommendations, filename="portfolio_report.pdf"):
+        """Generate comprehensive PDF report"""
+        
+        # Create PDF document
+        doc = SimpleDocTemplate(
+            filename,
+            pagesize=A4,
+            rightMargin=50,
+            leftMargin=50,
+            topMargin=50,
+            bottomMargin=50
+        )
+        
+        # Container for elements
+        elements = []
+        
+        # Title Page
+        elements.append(Paragraph("Indian Stock Market", self.title_style))
+        elements.append(Paragraph("Portfolio Analysis Report", self.title_style))
+        elements.append(Spacer(1, 30))
+        
+        # Report date
+        report_date = datetime.now().strftime('%d %B %Y')
+        date_style = ParagraphStyle('Date', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=12)
+        elements.append(Paragraph(f"Generated on: {report_date}", date_style))
+        elements.append(Spacer(1, 50))
+        
+        # Executive Summary
+        elements.append(Paragraph("Executive Summary", self.heading_style))
+        summary = analysis_results['portfolio_summary']
+        
+        summary_data = [
+            ['Metric', 'Value'],
+            ['Total Investment', f"₹{summary['total_investment']:,.2f}"],
+            ['Current Value', f"₹{summary['current_value']:,.2f}"],
+            ['Total Gain/Loss', f"₹{summary['total_gain_loss']:+,.2f}"],
+            ['Return %', f"{summary['total_gain_loss_percentage']:+.2f}%"],
+            ['Number of Stocks', f"{summary['number_of_stocks']}"],
+            ['Profitable Stocks', f"{summary['profitable_stocks']}"],
+            ['Loss-making Stocks', f"{summary['loss_making_stocks']}"]
+        ]
+        
+        summary_table = Table(summary_data, colWidths=[3*inch, 3*inch])
+        summary_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f77b4')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(summary_table)
+        elements.append(Spacer(1, 30))
+        
+        # Risk Metrics
+        elements.append(Paragraph("Risk Analysis", self.heading_style))
+        risk_metrics = analysis_results['risk_metrics']
+        
+        risk_data = [
+            ['Risk Metric', 'Value', 'Interpretation'],
+            ['Portfolio Volatility', f"{risk_metrics['portfolio_volatility']*100:.2f}%", 'Annualized risk'],
+            ['Sharpe Ratio', f"{risk_metrics['sharpe_ratio']:.2f}", 'Risk-adjusted return'],
+            ['Sortino Ratio', f"{risk_metrics.get('sortino_ratio', 0):.2f}", 'Downside risk focus'],
+            ['Portfolio Beta', f"{risk_metrics.get('portfolio_beta', 1.0):.2f}", 'Market sensitivity'],
+            ['VaR (95%)', f"{risk_metrics.get('var_95', 0)*100:.2f}%", 'Max daily loss (95%)'],
+            ['VaR (99%)', f"{risk_metrics.get('var_99', 0)*100:.2f}%", 'Max daily loss (99%)'],
+            ['Max Drawdown', f"{risk_metrics.get('max_drawdown', 0)*100:.2f}%", 'Peak-to-trough decline']
+        ]
+        
+        risk_table = Table(risk_data, colWidths=[2*inch, 1.5*inch, 2.5*inch])
+        risk_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e74c3c')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(risk_table)
+        elements.append(PageBreak())
+        
+        # Portfolio Holdings
+        elements.append(Paragraph("Portfolio Holdings", self.heading_style))
+        
+        stock_performance = pd.DataFrame(analysis_results['stock_performance'])
+        holdings_data = [['Stock', 'Sector', 'Qty', 'Buy Price', 'Current', 'Gain/Loss %']]
+        
+        for _, stock in stock_performance.iterrows():
+            holdings_data.append([
+                stock['Stock Name'],
+                stock['Sector'],
+                f"{stock['Quantity']:.0f}",
+                f"₹{stock['Buy Price']:.2f}",
+                f"₹{stock['Current Price']:.2f}",
+                f"{stock['Percentage Gain/Loss']:+.2f}%"
+            ])
+        
+        holdings_table = Table(holdings_data, colWidths=[1.5*inch, 1.2*inch, 0.7*inch, 1*inch, 1*inch, 1*inch])
+        holdings_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2ecc71')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(holdings_table)
+        elements.append(PageBreak())
+        
+        # Sector Analysis
+        elements.append(Paragraph("Sector Analysis", self.heading_style))
+        sector_analysis = pd.DataFrame(analysis_results['sector_analysis'])
+        
+        sector_data = [['Sector', 'Stocks', 'Investment', 'Current Value', 'Return %', '% of Portfolio']]
+        
+        for _, sector in sector_analysis.iterrows():
+            sector_data.append([
+                sector['Sector'],
+                f"{sector['Number of Stocks']:.0f}",
+                f"₹{sector['Investment Value']:,.0f}",
+                f"₹{sector['Current Value']:,.0f}",
+                f"{sector['Sector Return %']:+.2f}%",
+                f"{sector['Percentage of Portfolio']:.1f}%"
+            ])
+        
+        sector_table = Table(sector_data, colWidths=[1.5*inch, 0.7*inch, 1.3*inch, 1.3*inch, 1*inch, 1*inch])
+        sector_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#9b59b6')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(sector_table)
+        elements.append(Spacer(1, 30))
+        
+        # Recommendations Summary
+        elements.append(PageBreak())
+        elements.append(Paragraph("Investment Recommendations", self.heading_style))
+        
+        # Count recommendations
+        buy_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'BUY')
+        hold_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'HOLD')
+        sell_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'SELL')
+        
+        rec_summary = [
+            ['Action', 'Count', 'Description'],
+            ['BUY', f"{buy_count}", 'Stocks recommended for accumulation'],
+            ['HOLD', f"{hold_count}", 'Stocks to maintain position'],
+            ['SELL', f"{sell_count}", 'Stocks recommended for exit']
+        ]
+        
+        rec_table = Table(rec_summary, colWidths=[1.5*inch, 1*inch, 3.5*inch])
+        rec_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f39c12')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(rec_table)
+        elements.append(Spacer(1, 20))
+        
+        # Detailed recommendations
+        elements.append(Paragraph("Detailed Stock Recommendations", self.subheading_style))
+        
+        rec_details = [['Stock', 'Action', 'Confidence', 'Rationale']]
+        
+        for rec in recommendations[:10]:  # Limit to top 10
+            action = rec['overall_recommendation']['action']
+            confidence = rec['overall_recommendation']['confidence']
+            rationale = ' | '.join(rec['overall_recommendation']['rationale'][:2])  # First 2 reasons
+            
+            rec_details.append([
+                rec['stock_name'],
+                action,
+                confidence,
+                rationale[:80] + '...' if len(rationale) > 80 else rationale
+            ])
+        
+        rec_detail_table = Table(rec_details, colWidths=[1.2*inch, 0.8*inch, 1*inch, 3.5*inch])
+        rec_detail_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP')
+        ]))
+        
+        elements.append(rec_detail_table)
+        elements.append(PageBreak())
+        
+        # Disclaimer
+        elements.append(Paragraph("Disclaimer", self.heading_style))
+        disclaimer_text = """
+        This report is generated for informational purposes only and should not be considered as investment advice. 
+        Past performance is not indicative of future results. All investments involve risk, including the potential loss of principal. 
+        Please consult with a qualified financial advisor before making any investment decisions. The analysis is based on 
+        historical data and current market conditions which may change. Individual stock recommendations are based on quantitative 
+        analysis and do not account for all market factors or individual circumstances.
+        """
+        elements.append(Paragraph(disclaimer_text, self.styles['Normal']))
+        
+        # Build PDF
+        doc.build(elements)
+        
+        return filename
+    
+    def create_chart_image(self, data, chart_type='bar', title='Chart'):
+        """Create a matplotlib chart and return as image buffer"""
+        
+        fig, ax = plt.subplots(figsize=(8, 4))
+        
+        if chart_type == 'bar':
+            ax.bar(data.index, data.values)
+        elif chart_type == 'pie':
+            ax.pie(data.values, labels=data.index, autopct='%1.1f%%')
+        
+        ax.set_title(title)
+        
+        # Save to buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        plt.close()
+        
+        return buf

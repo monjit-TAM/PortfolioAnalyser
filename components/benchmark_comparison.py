@@ -235,8 +235,8 @@ class BenchmarkComparison:
         # Category-specific insights
         if not category_analysis.empty:
             for _, category in category_analysis.iterrows():
-                cat_name = category['Category']
-                cat_return = category['Category Return %']
+                cat_name = str(category['Category'])
+                cat_return = float(category['Category Return %'])
                 benchmark_index = self.benchmark_mapping.get(cat_name, 'NIFTY50')
                 benchmark_return = benchmark_returns.get(benchmark_index, 0)
                 cat_outperformance = cat_return - benchmark_return
@@ -278,8 +278,8 @@ class BenchmarkComparison:
         if not category_analysis.empty:
             underperforming_categories = []
             for _, category in category_analysis.iterrows():
-                cat_name = category['Category']
-                cat_return = category['Category Return %']
+                cat_name = str(category['Category'])
+                cat_return = float(category['Category Return %'])
                 benchmark_index = self.benchmark_mapping.get(cat_name, 'NIFTY50')
                 benchmark_return = benchmark_returns.get(benchmark_index, 0)
                 

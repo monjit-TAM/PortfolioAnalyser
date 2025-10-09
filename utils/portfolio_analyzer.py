@@ -16,10 +16,19 @@ class PortfolioAnalyzer:
         
         # Add current prices and calculations
         portfolio_df['Current Price'] = portfolio_df['Stock Name'].map(current_data)
+        
+        # Handle missing prices (fill with 0 or buy price as fallback)
+        portfolio_df['Current Price'] = portfolio_df['Current Price'].fillna(portfolio_df['Buy Price'])
+        
         portfolio_df['Investment Value'] = portfolio_df['Buy Price'] * portfolio_df['Quantity']
         portfolio_df['Current Value'] = portfolio_df['Current Price'] * portfolio_df['Quantity']
         portfolio_df['Absolute Gain/Loss'] = portfolio_df['Current Value'] - portfolio_df['Investment Value']
-        portfolio_df['Percentage Gain/Loss'] = (portfolio_df['Absolute Gain/Loss'] / portfolio_df['Investment Value']) * 100
+        
+        # Safely calculate percentage with division by zero protection
+        portfolio_df['Percentage Gain/Loss'] = portfolio_df.apply(
+            lambda row: (row['Absolute Gain/Loss'] / row['Investment Value'] * 100) if row['Investment Value'] != 0 else 0,
+            axis=1
+        )
         
         # Add stock categories and sectors
         portfolio_df['Category'] = portfolio_df['Stock Name'].apply(self.data_fetcher.get_stock_category)
@@ -63,10 +72,14 @@ class PortfolioAnalyzer:
         
         for _, stock in portfolio_df.iterrows():
             stock_name = stock['Stock Name']
-            buy_date = stock['Buy Date']
+            buy_date = pd.to_datetime(stock['Buy Date']).tz_localize(None)  # Make timezone-naive
             
             if stock_name in historical_data and not historical_data[stock_name].empty:
                 stock_hist = historical_data[stock_name]
+                # Normalize stock_hist index to be timezone-naive
+                if hasattr(stock_hist.index, 'tz') and stock_hist.index.tz is not None:
+                    stock_hist = stock_hist.copy()
+                    stock_hist.index = stock_hist.index.tz_localize(None)
                 post_buy_data = stock_hist[stock_hist.index >= buy_date]
                 
                 if not post_buy_data.empty:
@@ -110,14 +123,25 @@ class PortfolioAnalyzer:
         return category_analysis.to_dict('records')
     
     def calculate_risk_metrics(self, portfolio_df, historical_data):
-        """Calculate portfolio risk metrics"""
+        """Calculate comprehensive portfolio risk metrics including Beta, VaR, and Sharpe Ratio"""
         try:
             # Calculate portfolio weights
             weights = portfolio_df['Current Value'] / portfolio_df['Current Value'].sum()
             
-            # Calculate individual stock volatilities
+            # Calculate individual stock volatilities and collect returns
             volatilities = []
             returns_data = []
+            betas = []
+            
+            # Fetch NIFTY 50 data for beta calculation
+            nifty_returns = None
+            try:
+                earliest_date = pd.to_datetime(portfolio_df['Buy Date']).min()
+                nifty_data = self.data_fetcher.get_index_data('NIFTY50', earliest_date)
+                if not nifty_data.empty and len(nifty_data) > 1:
+                    nifty_returns = nifty_data['Close'].pct_change().dropna()
+            except:
+                pass
             
             for _, stock in portfolio_df.iterrows():
                 stock_name = stock['Stock Name']
@@ -129,24 +153,96 @@ class PortfolioAnalyzer:
                         volatility = returns.std() * np.sqrt(252)  # Annualized volatility
                         volatilities.append(volatility)
                         returns_data.append(returns)
+                        
+                        # Calculate Beta against NIFTY 50
+                        if nifty_returns is not None and len(returns) > 10:
+                            # Align returns
+                            aligned_returns = returns.reindex(nifty_returns.index).dropna()
+                            aligned_nifty = nifty_returns.reindex(aligned_returns.index).dropna()
+                            
+                            if len(aligned_returns) > 10 and len(aligned_nifty) > 10:
+                                covariance = aligned_returns.cov(aligned_nifty)
+                                market_variance = aligned_nifty.var()
+                                beta = covariance / market_variance if market_variance != 0 else 1.0
+                                betas.append(beta)
+                            else:
+                                betas.append(1.0)  # Default beta
+                        else:
+                            betas.append(1.0)  # Default beta
                     else:
                         volatilities.append(0)
                         returns_data.append(pd.Series([0]))
+                        betas.append(1.0)
                 else:
                     volatilities.append(0)
                     returns_data.append(pd.Series([0]))
+                    betas.append(1.0)
             
             # Portfolio volatility (simplified - assuming zero correlation)
             portfolio_volatility = np.sqrt(np.sum((weights ** 2) * np.array(volatilities) ** 2))
             
-            # Sharpe ratio (simplified - assuming risk-free rate of 6%)
+            # Portfolio Beta (weighted average)
+            portfolio_beta = np.sum(weights * np.array(betas))
+            
+            # Calculate portfolio returns for VaR
+            portfolio_return_annualized = (portfolio_df['Absolute Gain/Loss'].sum() / portfolio_df['Investment Value'].sum())
+            
+            # Sharpe ratio (assuming risk-free rate of 6%)
             risk_free_rate = 0.06
-            portfolio_return = (portfolio_df['Absolute Gain/Loss'].sum() / portfolio_df['Investment Value'].sum())
-            sharpe_ratio = (portfolio_return - risk_free_rate) / portfolio_volatility if portfolio_volatility > 0 else 0
+            sharpe_ratio = (portfolio_return_annualized - risk_free_rate) / portfolio_volatility if portfolio_volatility > 0 else 0
+            
+            # Value at Risk (VaR) - 95% confidence level
+            # Using parametric method: VaR = mean - (z_score * std_dev)
+            if returns_data and len([r for r in returns_data if len(r) > 0]) > 0:
+                # Calculate portfolio daily returns
+                portfolio_daily_returns = []
+                for i in range(len(returns_data)):
+                    if len(returns_data[i]) > 0:
+                        weighted_return = returns_data[i] * weights.iloc[i]
+                        portfolio_daily_returns.append(weighted_return)
+                
+                if portfolio_daily_returns:
+                    # Sum weighted returns
+                    combined_returns = pd.concat(portfolio_daily_returns, axis=1).sum(axis=1)
+                    mean_return = combined_returns.mean()
+                    std_return = combined_returns.std()
+                    
+                    # 95% VaR (1.65 for 95% confidence)
+                    var_95 = abs(mean_return - 1.65 * std_return)
+                    
+                    # 99% VaR (2.33 for 99% confidence)
+                    var_99 = abs(mean_return - 2.33 * std_return)
+                else:
+                    var_95 = 0
+                    var_99 = 0
+            else:
+                var_95 = 0
+                var_99 = 0
+            
+            # Sortino Ratio (focuses on downside risk)
+            downside_returns = [r for returns_series in returns_data for r in returns_series if r < 0]
+            if downside_returns:
+                downside_std = np.std(downside_returns) * np.sqrt(252)
+                sortino_ratio = (portfolio_return_annualized - risk_free_rate) / downside_std if downside_std > 0 else 0
+            else:
+                sortino_ratio = sharpe_ratio  # If no downside, use Sharpe
+            
+            # Maximum Drawdown
+            max_drawdown = 0
+            if returns_data and len([r for r in returns_data if len(r) > 0]) > 0:
+                cumulative_returns = (1 + combined_returns).cumprod()
+                running_max = cumulative_returns.expanding().max()
+                drawdown = (cumulative_returns - running_max) / running_max
+                max_drawdown = abs(drawdown.min()) if not drawdown.empty else 0
             
             return {
                 'portfolio_volatility': portfolio_volatility,
                 'sharpe_ratio': sharpe_ratio,
+                'sortino_ratio': sortino_ratio,
+                'portfolio_beta': portfolio_beta,
+                'var_95': var_95,
+                'var_99': var_99,
+                'max_drawdown': max_drawdown,
                 'max_stock_weight': weights.max(),
                 'min_stock_weight': weights.min(),
                 'diversification_ratio': len(portfolio_df) / portfolio_df['Current Value'].sum() * 1000000  # Stocks per million
@@ -156,6 +252,11 @@ class PortfolioAnalyzer:
             return {
                 'portfolio_volatility': 0,
                 'sharpe_ratio': 0,
+                'sortino_ratio': 0,
+                'portfolio_beta': 1.0,
+                'var_95': 0,
+                'var_99': 0,
+                'max_drawdown': 0,
                 'max_stock_weight': 0,
                 'min_stock_weight': 0,
                 'diversification_ratio': 0

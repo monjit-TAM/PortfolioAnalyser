@@ -137,34 +137,66 @@ class Dashboard:
         st.markdown("---")
         
         # Risk Metrics
-        st.subheader("⚠️ Risk Metrics")
+        st.subheader("⚠️ Advanced Risk Metrics")
         
         risk_metrics = analysis_results['risk_metrics']
         
+        # First row of metrics
         risk_col1, risk_col2, risk_col3, risk_col4 = st.columns(4)
         
         with risk_col1:
             st.metric(
                 label="Portfolio Volatility",
                 value=f"{risk_metrics['portfolio_volatility']*100:.2f}%",
-                help="Annualized portfolio volatility"
+                help="Annualized portfolio volatility (standard deviation)"
             )
         
         with risk_col2:
             st.metric(
                 label="Sharpe Ratio",
                 value=f"{risk_metrics['sharpe_ratio']:.2f}",
-                help="Risk-adjusted return metric"
+                help="Risk-adjusted return metric (higher is better)"
             )
         
         with risk_col3:
             st.metric(
-                label="Max Stock Weight",
-                value=f"{risk_metrics['max_stock_weight']*100:.2f}%",
-                help="Largest stock allocation"
+                label="Sortino Ratio",
+                value=f"{risk_metrics.get('sortino_ratio', 0):.2f}",
+                help="Downside risk-adjusted return (focuses on negative volatility)"
             )
         
         with risk_col4:
+            st.metric(
+                label="Portfolio Beta",
+                value=f"{risk_metrics.get('portfolio_beta', 1.0):.2f}",
+                help="Sensitivity to NIFTY 50 movements (1.0 = market average)"
+            )
+        
+        # Second row of metrics
+        risk_col5, risk_col6, risk_col7, risk_col8 = st.columns(4)
+        
+        with risk_col5:
+            st.metric(
+                label="VaR (95%)",
+                value=f"{risk_metrics.get('var_95', 0)*100:.2f}%",
+                help="Maximum expected daily loss at 95% confidence"
+            )
+        
+        with risk_col6:
+            st.metric(
+                label="VaR (99%)",
+                value=f"{risk_metrics.get('var_99', 0)*100:.2f}%",
+                help="Maximum expected daily loss at 99% confidence"
+            )
+        
+        with risk_col7:
+            st.metric(
+                label="Max Drawdown",
+                value=f"{risk_metrics.get('max_drawdown', 0)*100:.2f}%",
+                help="Largest peak-to-trough decline"
+            )
+        
+        with risk_col8:
             diversification_score = "High" if summary['number_of_stocks'] >= 10 else "Medium" if summary['number_of_stocks'] >= 5 else "Low"
             st.metric(
                 label="Diversification",
@@ -182,8 +214,8 @@ class Dashboard:
         # Format currency columns
         currency_cols = ['Buy Price', 'Current Price', 'Investment Value', 'Current Value', 'Absolute Gain/Loss']
         for col in currency_cols:
-            display_df[col] = display_df[col].apply(lambda x: f"₹{x:,.2f}")
+            display_df.loc[:, col] = display_df[col].apply(lambda x: f"₹{x:,.2f}")
         
-        display_df['Percentage Gain/Loss'] = display_df['Percentage Gain/Loss'].apply(lambda x: f"{x:+.2f}%")
+        display_df.loc[:, 'Percentage Gain/Loss'] = display_df['Percentage Gain/Loss'].apply(lambda x: f"{x:+.2f}%")
         
         st.dataframe(display_df, use_container_width=True, height=400)
