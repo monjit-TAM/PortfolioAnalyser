@@ -232,6 +232,33 @@ Preferred communication style: Simple, everyday language.
    - **Visual Hierarchy:** Clear distinction between primary actions and secondary information
    - **Brand Consistency:** Alphamarket colors and logo integrated throughout
 
+### Layout Refinement (October 2025)
+
+**Goal:** Move informational content from sidebar to main page for better visibility
+
+1. **Sidebar Simplification**
+   - **Removed:** "About & Features" expandable section from sidebar
+   - **Kept:** Portfolio Upload and Sample CSV Download sections only
+   - **Impact:** Cleaner, more focused sidebar with essential upload functionality
+
+2. **Main Page Content Enhancement**
+   - **Updated Heading:** "Portfolio Analysis - Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing"
+   - **Informational Sections Added to Welcome Screen:**
+     - CSV Format Required (column descriptions)
+     - How It Works (4-step process)
+     - Features Included (all 8 features listed)
+     - Dual Investment Perspectives (Value & Growth investing explanations)
+     - Advanced Risk Metrics description
+     - Call-to-action message
+   - **Layout:** Two-column design for CSV Format and Features, full-width for Investment Perspectives
+   - **Impact:** All essential information visible on main page before analysis
+
+3. **Application Flow**
+   - **Welcome Screen:** Shows all informational content and upload instructions
+   - **After Upload:** Portfolio preview displayed with call-to-action to analyze
+   - **After Analysis:** Welcome screen replaced by Dashboard with 8 analytical tabs
+   - **Design Rationale:** Progressive disclosure - users see getting started info first, then analysis results
+
 ### Testing Status
 - **End-to-End Testing:** PASSED (October 2025)
 - All 8 analytical tabs verified working correctly
