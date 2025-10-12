@@ -25,11 +25,11 @@ def main():
         page_title="Alphamarket Portfolio Analyzer",
         page_icon="📊",
         layout="wide",
-        initial_sidebar_state="expanded"
+        initial_sidebar_state="collapsed"
     )
     
-    # Display logo and title
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Display logo centered
+    col1, col2, col3 = st.columns([1.5, 1, 1.5])
     with col2:
         st.image("attached_assets/Alphamarket Logo without Background_1760262013341.png", use_container_width=True)
     
@@ -41,96 +41,13 @@ def main():
     if 'analysis_complete' not in st.session_state:
         st.session_state.analysis_complete = False
     
-    # Sidebar for file upload and controls
-    with st.sidebar:
-        st.header("📁 Portfolio Upload")
-        
-        uploaded_file = st.file_uploader(
-            "Choose CSV file",
-            type=['csv'],
-            help="Upload a CSV file with your portfolio data"
-        )
-        
-        if uploaded_file is not None:
-            try:
-                # Read and validate CSV
-                portfolio_df = pd.read_csv(uploaded_file)
-                
-                # Validate required columns
-                required_columns = ['Stock Name', 'Buy Price', 'Buy Date', 'Quantity']
-                missing_columns = [col for col in required_columns if col not in portfolio_df.columns]
-                
-                if missing_columns:
-                    st.error(f"Missing required columns: {', '.join(missing_columns)}")
-                else:
-                    # Data validation and cleaning
-                    portfolio_df['Buy Date'] = pd.to_datetime(portfolio_df['Buy Date'])
-                    portfolio_df['Buy Price'] = pd.to_numeric(portfolio_df['Buy Price'], errors='coerce')
-                    portfolio_df['Quantity'] = pd.to_numeric(portfolio_df['Quantity'], errors='coerce')
-                    
-                    # Remove rows with invalid data
-                    portfolio_df = portfolio_df.dropna()
-                    
-                    if len(portfolio_df) == 0:
-                        st.error("No valid data found in the uploaded file.")
-                    else:
-                        st.success(f"Successfully loaded {len(portfolio_df)} stocks")
-                        st.session_state.portfolio_data = portfolio_df
-                        
-                        # Analysis button
-                        if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
-                            st.session_state.analysis_complete = False
-                            with st.spinner("Fetching market data and analyzing portfolio..."):
-                                analyze_portfolio()
-                            
-            except Exception as e:
-                st.error(f"Error reading file: {str(e)}")
-        
-        # Sample CSV download
-        st.markdown("---")
-        st.subheader("📥 Sample CSV")
-        sample_data = {
-            'Stock Name': ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK'],
-            'Buy Price': [2500, 3200, 1800, 1600],
-            'Buy Date': ['2023-01-15', '2023-02-20', '2023-03-10', '2023-04-05'],
-            'Quantity': [10, 15, 20, 25]
-        }
-        sample_df = pd.DataFrame(sample_data)
-        csv = sample_df.to_csv(index=False)
-        st.download_button(
-            label="Download Sample CSV",
-            data=csv,
-            file_name="portfolio_sample.csv",
-            mime="text/csv",
-            use_container_width=True
-        )
-    
     # Main content area
     if st.session_state.portfolio_data is not None and st.session_state.analysis_complete:
         display_analysis()
     elif st.session_state.portfolio_data is not None:
-        st.markdown("<br>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.markdown("""
-            <div style='
-                background-color: #e8f4f8;
-                border-left: 5px solid #FF6B35;
-                border-radius: 5px;
-                padding: 20px;
-                text-align: center;
-            '>
-                <p style='color: #333; font-size: 16px; margin: 0;'>
-                    ✅ Portfolio uploaded successfully! Click <strong>'Analyze Portfolio'</strong> in the sidebar to continue.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.subheader("📋 Portfolio Preview")
-        st.dataframe(st.session_state.portfolio_data, use_container_width=True)
+        display_portfolio_preview()
     else:
-        # Welcome screen
+        # Welcome screen with integrated upload
         display_welcome_screen()
 
 def analyze_portfolio():
@@ -358,94 +275,177 @@ def display_analysis():
         )
 
 def display_welcome_screen():
-    """Display welcome screen with informational content"""
-    # Add vertical spacing
-    st.markdown("<br>", unsafe_allow_html=True)
+    """Display clean welcome screen with integrated file upload"""
     
     # Centered heading
     st.markdown("""
     <div style='text-align: center;'>
-        <h2 style='color: #FF6B35; margin-bottom: 30px; font-size: 28px; line-height: 1.4;'>
-            Portfolio Analysis - Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
+        <h2 style='color: #FF6B35; margin-bottom: 15px; font-size: 32px; font-weight: 600;'>
+            Portfolio Analysis
         </h2>
+        <p style='font-size: 18px; color: #666; margin-bottom: 40px;'>
+            Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
+        </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Upload card - centered
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Upload section - integrated into main page
+    col1, col2, col3 = st.columns([0.5, 2, 0.5])
     with col2:
         st.markdown("""
         <div style='
-            background-color: #f8f9fa;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
             padding: 40px;
-            text-align: center;
-            border: 2px dashed #FF6B35;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         '>
-            <h3 style='color: #333; margin-bottom: 15px;'>📁 Upload Your Portfolio</h3>
-            <p style='color: #666; font-size: 16px;'>
-                Use the sidebar to upload your CSV file and start analyzing
+            <h3 style='color: white; text-align: center; margin-bottom: 25px; font-size: 24px;'>
+                📁 Upload Your Portfolio
+            </h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # File uploader integrated
+        uploaded_file = st.file_uploader(
+            "Drag and drop your CSV file here or browse",
+            type=['csv'],
+            help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity",
+            label_visibility="collapsed"
+        )
+        
+        if uploaded_file is not None:
+            try:
+                portfolio_df = pd.read_csv(uploaded_file)
+                required_columns = ['Stock Name', 'Buy Price', 'Buy Date', 'Quantity']
+                missing_columns = [col for col in required_columns if col not in portfolio_df.columns]
+                
+                if missing_columns:
+                    st.error(f"❌ Missing required columns: {', '.join(missing_columns)}")
+                else:
+                    portfolio_df['Buy Date'] = pd.to_datetime(portfolio_df['Buy Date'])
+                    portfolio_df['Buy Price'] = pd.to_numeric(portfolio_df['Buy Price'], errors='coerce')
+                    portfolio_df['Quantity'] = pd.to_numeric(portfolio_df['Quantity'], errors='coerce')
+                    portfolio_df = portfolio_df.dropna()
+                    
+                    if len(portfolio_df) == 0:
+                        st.error("❌ No valid data found in the uploaded file.")
+                    else:
+                        st.success(f"✅ Successfully loaded {len(portfolio_df)} stocks")
+                        st.session_state.portfolio_data = portfolio_df
+                        
+                        if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
+                            st.session_state.analysis_complete = False
+                            with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
+                                analyze_portfolio()
+                            
+            except Exception as e:
+                st.error(f"❌ Error reading file: {str(e)}")
+        
+        # Sample CSV download
+        st.markdown("<br>", unsafe_allow_html=True)
+        col_a, col_b, col_c = st.columns([1, 2, 1])
+        with col_b:
+            sample_data = {
+                'Stock Name': ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK'],
+                'Buy Price': [2500, 3200, 1800, 1600],
+                'Buy Date': ['2023-01-15', '2023-02-20', '2023-03-10', '2023-04-05'],
+                'Quantity': [10, 15, 20, 25]
+            }
+            sample_df = pd.DataFrame(sample_data)
+            csv = sample_df.to_csv(index=False)
+            st.download_button(
+                label="📥 Download Sample CSV",
+                data=csv,
+                file_name="portfolio_sample.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+    
+    # Key features - clean and concise
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div style='text-align: center; padding: 25px; background-color: #f8f9fa; border-radius: 10px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 15px;'>📊 Dual Perspectives</h3>
+            <p style='color: #666; font-size: 15px;'>
+                Get insights from both <strong>Value</strong> and <strong>Growth</strong> investing viewpoints
             </p>
         </div>
         """, unsafe_allow_html=True)
     
-    # Informational sections
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        ### 📋 CSV Format Required
-        Your CSV file should contain the following columns:
-        - **Stock Name** (e.g., RELIANCE, TCS, INFY)
-        - **Buy Price** (in ₹)
-        - **Buy Date** (YYYY-MM-DD format)
-        - **Quantity** (number of shares)
-        
-        ### 🚀 How It Works
-        1. **Upload** your portfolio CSV file via the sidebar
-        2. **Analyze** - our system fetches real-time market data
-        3. **Review** comprehensive insights across multiple perspectives
-        4. **Act** on personalized investment recommendations
-        """)
-    
     with col2:
         st.markdown("""
-        ### ✨ Features Included
-        - **📊 Portfolio Dashboard**: Current value, gains/losses, returns
-        - **🏭 Sector Analysis**: Diversification and allocation insights
-        - **📈 Stock Performance**: Individual stock tracking and metrics
-        - **📊 Benchmark Comparison**: Compare against NIFTY indices
-        - **💡 Smart Recommendations**: Value & Growth perspectives
-        - **⚖️ Rebalancing**: Portfolio optimization suggestions
-        - **📅 Historical Tracking**: Performance over time with risk metrics
-        - **👤 Investor Profile**: Personalized investment style analysis
-        """)
+        <div style='text-align: center; padding: 25px; background-color: #f8f9fa; border-radius: 10px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 15px;'>📈 Advanced Analytics</h3>
+            <p style='color: #666; font-size: 15px;'>
+                Sector analysis, benchmark comparison, risk metrics, and performance tracking
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     
+    with col3:
+        st.markdown("""
+        <div style='text-align: center; padding: 25px; background-color: #f8f9fa; border-radius: 10px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 15px;'>💡 Smart Recommendations</h3>
+            <p style='color: #666; font-size: 15px;'>
+                Actionable insights with rebalancing suggestions and alternative stock picks
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # CSV Format info - minimal
+    with st.expander("📋 CSV Format & Requirements"):
+        col_x, col_y = st.columns(2)
+        with col_x:
+            st.markdown("""
+            **Required Columns:**
+            - Stock Name (e.g., RELIANCE, TCS)
+            - Buy Price (in ₹)
+            - Buy Date (YYYY-MM-DD)
+            - Quantity (number of shares)
+            """)
+        with col_y:
+            st.markdown("""
+            **Analysis Features:**
+            - Portfolio Dashboard & Performance
+            - Sector & Category Breakdown
+            - Benchmark Comparison (NIFTY)
+            - Risk Metrics (Beta, VaR, Sortino, Max Drawdown)
+            """)
+
+def display_portfolio_preview():
+    """Display portfolio preview after upload"""
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Additional info section
-    st.markdown("""
-    ### 📊 Dual Investment Perspectives
-    
-    Our analysis engine provides recommendations from two complementary viewpoints:
-    
-    **🔷 Value Investing Perspective**  
-    Focus on undervalued stocks with strong fundamentals, attractive P/E ratios, and solid long-term potential
-    
-    **🔶 Growth Investing Perspective**  
-    Emphasis on high-growth potential, momentum stocks, and companies with strong revenue growth
-    
-    **📈 Advanced Risk Metrics**  
-    Portfolio risk analysis including Beta, Value at Risk (VaR), Sortino Ratio, and Maximum Drawdown
-    """)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Call to action
-    st.info("👈 **Ready to start?** Upload your portfolio CSV file using the sidebar to begin your comprehensive analysis!")
+    col1, col2, col3 = st.columns([0.5, 2, 0.5])
+    with col2:
+        st.markdown("""
+        <div style='
+            background-color: #e8f4f8;
+            border-left: 5px solid #FF6B35;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        '>
+            <p style='color: #333; font-size: 18px; margin: 0;'>
+                ✅ Portfolio uploaded successfully! Click <strong>'Analyze Portfolio'</strong> to continue
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.subheader("📋 Portfolio Preview")
+        st.dataframe(st.session_state.portfolio_data, use_container_width=True)
+        
+        if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
+            st.session_state.analysis_complete = False
+            with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
+                analyze_portfolio()
 
 if __name__ == "__main__":
     main()
