@@ -12,11 +12,22 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 3. **Historical Performance ValueError**: Fixed "Series is ambiguous" error in historical_performance.py by ensuring price values are scalars before calculations
 4. **Price Fetching**: Uses yf.download() method for reliable end-of-day price data from Yahoo Finance
 5. **UI/UX**: Removed gradient background from upload section for cleaner, more professional appearance
+6. **Symbol Alias System** (NEW): Implemented intelligent stock symbol mapping to automatically convert common abbreviations to correct Yahoo Finance symbols
+
+### Symbol Alias Support:
+The application now intelligently handles common stock abbreviations:
+- **RIL** → RELIANCE (Reliance Industries)
+- **ICICI** → ICICIBANK (ICICI Bank)
+- **HDFC** → HDFCBANK (HDFC Bank)
+- **SBI** → SBIN (State Bank of India)
+- **KOTAK** → KOTAKBANK (Kotak Mahindra Bank)
+- And many more common abbreviations
 
 ### CSV Format Support:
-The application now accepts stock names in two formats:
+The application now accepts stock names in three formats:
 - Base names without suffix (e.g., TCS, RELIANCE) - system automatically adds .NS/.BO
 - Full symbols with suffix (e.g., TCS.NS, RELIANCE.NS) - system uses as-is without modification
+- Common abbreviations (e.g., RIL, ICICI, HDFC) - system automatically converts to correct symbols
 
 ## User Preferences
 

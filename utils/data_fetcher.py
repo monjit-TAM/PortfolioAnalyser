@@ -9,6 +9,28 @@ class DataFetcher:
         self.nse_suffix = ".NS"
         self.bse_suffix = ".BO"
         
+        # Symbol aliases - maps common abbreviations to correct Yahoo Finance symbols
+        self.symbol_aliases = {
+            'RIL': 'RELIANCE',
+            'ICICI': 'ICICIBANK',
+            'HDFC': 'HDFCBANK',
+            'KOTAK': 'KOTAKBANK',
+            'SBI': 'SBIN',
+            'BHARTI': 'BHARTIARTL',
+            'HINDUNILEVER': 'HINDUNILVR',
+            'HUL': 'HINDUNILVR',
+            'M&M': 'M&M',
+            'BAJAJFINSV': 'BAJAJFINSV',
+            'ADANI': 'ADANIENT',
+            'ADANIPORTS': 'ADANIPORTS',
+            'ONGC': 'ONGC',
+            'NTPC': 'NTPC',
+            'POWERGRID': 'POWERGRID',
+            'TATAMOTORS': 'TATAMOTORS',
+            'TATAPOWER': 'TATAPOWER',
+            'TATASTEEL': 'TATASTEEL',
+        }
+        
         # Indian market indices
         self.indices = {
             'NIFTY50': '^NSEI',
@@ -72,6 +94,13 @@ class DataFetcher:
         # If stock_name already has a suffix (.NS or .BO), return it as-is
         if stock_name.endswith(self.nse_suffix) or stock_name.endswith(self.bse_suffix):
             return stock_name
+        
+        # Check if this is a common abbreviation and convert to correct symbol
+        if stock_name in self.symbol_aliases:
+            original_name = stock_name
+            stock_name = self.symbol_aliases[stock_name]
+            # Quiet logging - avoid UI clutter for large portfolios
+            print(f"Symbol alias: {original_name} → {stock_name}")
         
         # Try NSE first
         nse_symbol = f"{stock_name}{self.nse_suffix}"
@@ -168,6 +197,9 @@ class DataFetcher:
         stock_name = stock_name.upper().strip()
         # Remove suffix for lookup
         base_name = stock_name.replace(self.nse_suffix, '').replace(self.bse_suffix, '')
+        # Check if this is an alias
+        if base_name in self.symbol_aliases:
+            base_name = self.symbol_aliases[base_name]
         return self.stock_categories.get(base_name, 'Mid Cap')  # Default to Mid Cap
     
     def get_stock_sector(self, stock_name):
@@ -175,6 +207,9 @@ class DataFetcher:
         stock_name = stock_name.upper().strip()
         # Remove suffix for lookup
         base_name = stock_name.replace(self.nse_suffix, '').replace(self.bse_suffix, '')
+        # Check if this is an alias
+        if base_name in self.symbol_aliases:
+            base_name = self.symbol_aliases[base_name]
         return self.sector_mapping.get(base_name, 'Others')  # Default to Others
     
     def get_stock_fundamentals(self, stock_name):
