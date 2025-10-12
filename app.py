@@ -22,14 +22,18 @@ from utils.pdf_generator import PDFReportGenerator
 
 def main():
     st.set_page_config(
-        page_title="Indian Stock Market Portfolio Analyzer",
+        page_title="Alphamarket Portfolio Analyzer",
         page_icon="📊",
         layout="wide",
         initial_sidebar_state="expanded"
     )
     
-    st.title("📊 Indian Stock Market Portfolio Analyzer")
-    st.markdown("### Comprehensive Portfolio Analysis with Value & Growth Investment Perspectives")
+    # Display logo and title
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image("attached_assets/Alphamarket Logo without Background_1760262013341.png", use_container_width=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
     
     # Initialize session state
     if 'portfolio_data' not in st.session_state:
@@ -40,11 +44,6 @@ def main():
     # Sidebar for file upload and controls
     with st.sidebar:
         st.header("📁 Portfolio Upload")
-        st.markdown("Upload your portfolio CSV file with the following columns:")
-        st.markdown("- **Stock Name** (e.g., RELIANCE, TCS, INFY)")
-        st.markdown("- **Buy Price** (in ₹)")
-        st.markdown("- **Buy Date** (YYYY-MM-DD)")
-        st.markdown("- **Quantity** (number of shares)")
         
         uploaded_file = st.file_uploader(
             "Choose CSV file",
@@ -79,7 +78,7 @@ def main():
                         st.session_state.portfolio_data = portfolio_df
                         
                         # Analysis button
-                        if st.button("🔍 Analyze Portfolio", type="primary"):
+                        if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
                             st.session_state.analysis_complete = False
                             with st.spinner("Fetching market data and analyzing portfolio..."):
                                 analyze_portfolio()
@@ -89,7 +88,7 @@ def main():
         
         # Sample CSV download
         st.markdown("---")
-        st.subheader("📥 Sample CSV Format")
+        st.subheader("📥 Sample CSV")
         sample_data = {
             'Stock Name': ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK'],
             'Buy Price': [2500, 3200, 1800, 1600],
@@ -102,15 +101,67 @@ def main():
             label="Download Sample CSV",
             data=csv,
             file_name="portfolio_sample.csv",
-            mime="text/csv"
+            mime="text/csv",
+            use_container_width=True
         )
+        
+        # About Section
+        st.markdown("---")
+        with st.expander("ℹ️ About & Features"):
+            st.markdown("""
+            ### 📋 CSV Format Required:
+            - **Stock Name** (e.g., RELIANCE, TCS)
+            - **Buy Price** (in ₹)
+            - **Buy Date** (YYYY-MM-DD)
+            - **Quantity** (number of shares)
+            
+            ### 🚀 How It Works:
+            1. Upload your portfolio CSV file
+            2. Our system fetches real-time market data
+            3. Get comprehensive analysis and insights
+            4. Receive personalized recommendations
+            
+            ### ✨ Features Included:
+            - **Portfolio Dashboard**: Current value, gains/losses, returns
+            - **Sector Analysis**: Diversification and allocation insights
+            - **Stock Performance**: Individual stock tracking and metrics
+            - **Benchmark Comparison**: Compare against NIFTY indices
+            - **Smart Recommendations**: Value & Growth perspectives
+            - **Risk Assessment**: Beta, VaR, Sortino Ratio, Max Drawdown
+            - **Rebalancing**: Portfolio optimization suggestions
+            - **Historical Tracking**: Performance over time
+            - **Investor Profile**: Personalized investment style analysis
+            
+            ### 📊 Supported Analysis:
+            - **Value Investing**: Focus on undervalued stocks
+            - **Growth Investing**: Emphasis on growth potential
+            - **Risk Metrics**: Advanced portfolio risk analysis
+            - **Alternative Suggestions**: Better investment opportunities
+            """)
     
     # Main content area
     if st.session_state.portfolio_data is not None and st.session_state.analysis_complete:
         display_analysis()
     elif st.session_state.portfolio_data is not None:
-        st.info("👆 Click 'Analyze Portfolio' in the sidebar to start the analysis.")
-        st.subheader("📋 Uploaded Portfolio Preview")
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.markdown("""
+            <div style='
+                background-color: #e8f4f8;
+                border-left: 5px solid #FF6B35;
+                border-radius: 5px;
+                padding: 20px;
+                text-align: center;
+            '>
+                <p style='color: #333; font-size: 16px; margin: 0;'>
+                    ✅ Portfolio uploaded successfully! Click <strong>'Analyze Portfolio'</strong> in the sidebar to continue.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader("📋 Portfolio Preview")
         st.dataframe(st.session_state.portfolio_data, use_container_width=True)
     else:
         # Welcome screen
@@ -341,40 +392,48 @@ def display_analysis():
         )
 
 def display_welcome_screen():
-    """Display welcome screen with instructions"""
+    """Display clean, centered welcome screen"""
+    # Add vertical spacing
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Centered content
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
         st.markdown("""
-        ## 🚀 Welcome to Portfolio Analyzer
+        <div style='text-align: center;'>
+            <h2 style='color: #FF6B35; margin-bottom: 10px;'>Comprehensive Indian Stock Market Analysis</h2>
+            <p style='font-size: 18px; color: #666; margin-bottom: 40px;'>
+                Upload your portfolio and get instant insights with AI-powered recommendations
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        ### How it works:
+        # Upload card
+        st.markdown("""
+        <div style='
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            border: 2px dashed #FF6B35;
+        '>
+            <h3 style='color: #333; margin-bottom: 20px;'>📁 Upload Your Portfolio</h3>
+            <p style='color: #666; font-size: 16px;'>
+                Upload a CSV file with your stock holdings to get started
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        1. **📁 Upload Portfolio**: Upload a CSV file with your stock holdings
-        2. **🔍 Analyze**: Our system fetches real-time data and analyzes your portfolio
-        3. **📊 Review**: Get comprehensive insights across multiple perspectives
-        4. **💡 Act**: Receive personalized investment recommendations
+        st.markdown("<br>", unsafe_allow_html=True)
         
-        ### Features Include:
-        
-        - **📊 Portfolio Dashboard**: Current value, gains/losses, returns
-        - **🏭 Sector Analysis**: Diversification and allocation insights
-        - **📈 Stock Performance**: Individual stock tracking and metrics
-        - **📊 Benchmark Comparison**: Compare against NIFTY indices
-        - **💡 Smart Recommendations**: Value & Growth investment perspectives
-        - **👤 Investor Profile**: Personalized investment style analysis
-        
-        ### Supported Analysis:
-        
-        - **Value Investing Perspective**: Focus on undervalued stocks with strong fundamentals
-        - **Growth Investing Perspective**: Emphasis on growth potential and momentum
-        - **Risk Assessment**: Portfolio risk analysis and diversification metrics
-        - **Alternative Suggestions**: Better investment opportunities when sell is recommended
-        
-        ---
-        
-        **Ready to start?** Upload your portfolio CSV file using the sidebar! 👈
-        """)
+        # Instructions with clean design
+        st.markdown("""
+        <div style='text-align: center; color: #666; font-size: 14px;'>
+            <p>👈 Use the sidebar to upload your portfolio CSV file</p>
+            <p style='margin-top: 10px;'>💡 Need help? Check the "About & Features" section in the sidebar</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
