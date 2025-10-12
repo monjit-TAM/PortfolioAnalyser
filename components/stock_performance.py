@@ -55,10 +55,24 @@ class StockPerformance:
             )
         
         with col4:
+            # Safely extract scalar values from Series
+            ath_value = stock_data['All Time High Since Purchase']
+            potential_gain = stock_data['Potential Gain from ATH']
+            
+            # Convert to scalar if needed
+            if isinstance(ath_value, pd.Series):
+                ath_value = ath_value.iloc[0] if len(ath_value) > 0 else 0.0
+            if isinstance(potential_gain, pd.Series):
+                potential_gain = potential_gain.iloc[0] if len(potential_gain) > 0 else 0.0
+            
+            # Handle NaN values
+            ath_value = 0.0 if pd.isna(ath_value) else float(ath_value)
+            potential_gain = 0.0 if pd.isna(potential_gain) else float(potential_gain)
+                
             st.metric(
                 label="All-Time High Since Purchase",
-                value=f"₹{stock_data['All Time High Since Purchase']:.2f}",
-                delta=f"{stock_data['Potential Gain from ATH']:+.2f}%"
+                value=f"₹{ath_value:.2f}",
+                delta=f"{potential_gain:+.2f}%"
             )
         
         st.markdown("---")
@@ -97,6 +111,22 @@ class StockPerformance:
                 
                 # Average trading volume
                 avg_volume = stock_history['Volume'].mean() if 'Volume' in stock_history.columns else 0
+                
+                # Convert to scalars if they are Series
+                if isinstance(volatility, pd.Series):
+                    volatility = float(volatility.iloc[0]) if len(volatility) > 0 else 0.0
+                else:
+                    volatility = float(volatility) if not pd.isna(volatility) else 0.0
+                    
+                if isinstance(max_drawdown, pd.Series):
+                    max_drawdown = float(max_drawdown.iloc[0]) if len(max_drawdown) > 0 else 0.0
+                else:
+                    max_drawdown = float(max_drawdown) if not pd.isna(max_drawdown) else 0.0
+                    
+                if isinstance(avg_volume, pd.Series):
+                    avg_volume = float(avg_volume.iloc[0]) if len(avg_volume) > 0 else 0.0
+                else:
+                    avg_volume = float(avg_volume) if not pd.isna(avg_volume) else 0.0
                 
                 metrics_data = {
                     "Volatility (Annualized)": f"{volatility:.2f}%",
@@ -148,10 +178,10 @@ class StockPerformance:
             
             # All-time high line
             fig.add_hline(
-                y=stock_data['All Time High Since Purchase'],
+                y=ath_value,
                 line_dash="dot",
                 line_color="red",
-                annotation_text=f"ATH: ₹{stock_data['All Time High Since Purchase']:.2f}",
+                annotation_text=f"ATH: ₹{ath_value:.2f}",
                 annotation_position="top right"
             )
             
@@ -217,10 +247,15 @@ class StockPerformance:
         with col2:
             st.write("#### Potential vs Reality")
             
-            potential_gain_ath = stock_data['Potential Gain from ATH']
-            current_vs_ath = ((stock_data['Current Price'] - stock_data['All Time High Since Purchase']) / stock_data['All Time High Since Purchase']) * 100
+            # Use already-converted ath_value from earlier
+            current_vs_ath = ((stock_data['Current Price'] - ath_value) / ath_value) * 100 if ath_value > 0 else 0
+            # Convert to scalar if needed
+            if isinstance(current_vs_ath, pd.Series):
+                current_vs_ath = float(current_vs_ath.iloc[0]) if len(current_vs_ath) > 0 else 0.0
+            else:
+                current_vs_ath = float(current_vs_ath) if not pd.isna(current_vs_ath) else 0.0
             
-            st.write(f"• **Potential gain from ATH:** {potential_gain_ath:+.2f}%")
+            st.write(f"• **Potential gain from ATH:** {potential_gain:+.2f}%")
             st.write(f"• **Current vs ATH:** {current_vs_ath:+.2f}%")
             
             if current_vs_ath > -10:

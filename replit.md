@@ -4,6 +4,20 @@
 
 This Streamlit application offers comprehensive Indian stock market portfolio analysis, providing investors with detailed insights into performance, including sector analysis, benchmark comparisons, historical tracking, and AI-driven investment recommendations. It supports both value and growth investment perspectives, helping users make informed decisions based on uploaded portfolio data and real-time market information from Yahoo Finance. The system generates actionable insights across individual stock performance, sector allocation, benchmark comparisons, and rebalancing suggestions.
 
+## Recent Changes (October 2025)
+
+### Bug Fixes Completed:
+1. **Double Suffix Bug** (CRITICAL): Fixed data_fetcher.py to prevent duplicate .NS/.BO suffixes when stock names already include exchange identifiers (e.g., TCS.NS was becoming TCS.NS.NS)
+2. **Series Formatting Errors**: Resolved multiple pandas Series-to-scalar conversion issues in stock_performance.py for metrics like volatility, ATH, max drawdown, and potential gains
+3. **Historical Performance ValueError**: Fixed "Series is ambiguous" error in historical_performance.py by ensuring price values are scalars before calculations
+4. **Price Fetching**: Uses yf.download() method for reliable end-of-day price data from Yahoo Finance
+5. **UI/UX**: Removed gradient background from upload section for cleaner, more professional appearance
+
+### CSV Format Support:
+The application now accepts stock names in two formats:
+- Base names without suffix (e.g., TCS, RELIANCE) - system automatically adds .NS/.BO
+- Full symbols with suffix (e.g., TCS.NS, RELIANCE.NS) - system uses as-is without modification
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -35,7 +49,7 @@ The current implementation does not include an authentication system, as it is d
 
 ### UI/UX Design
 
-The application features a premium, professional design with a focus on a single-page experience. The sidebar has been removed, and all functionality, including file upload, is integrated into the main page. It utilizes a gradient purple background for the upload card, professional typography, and a clean layout with feature cards highlighting dual investment perspectives, advanced analytics, and smart recommendations. The Alphamarket logo and #FF6B35 accent color are consistently used for branding. Informational content, such as CSV format requirements and features, is presented concisely or in expandable sections.
+The application features a premium, professional design with a focus on a single-page experience. The sidebar has been removed, and all functionality, including file upload, is integrated into the main page. It utilizes clean, professional styling with the Alphamarket logo and #FF6B35 accent color consistently used for branding. The upload section features a streamlined design without background gradients for a more refined appearance. Informational content, such as CSV format requirements and features, is presented concisely or in expandable sections.
 
 ## External Dependencies
 

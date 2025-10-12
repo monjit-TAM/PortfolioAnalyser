@@ -69,6 +69,10 @@ class DataFetcher:
         """Convert stock name to Yahoo Finance symbol"""
         stock_name = stock_name.upper().strip()
         
+        # If stock_name already has a suffix (.NS or .BO), return it as-is
+        if stock_name.endswith(self.nse_suffix) or stock_name.endswith(self.bse_suffix):
+            return stock_name
+        
         # Try NSE first
         nse_symbol = f"{stock_name}{self.nse_suffix}"
         try:
@@ -93,38 +97,50 @@ class DataFetcher:
         return nse_symbol
     
     def get_stock_data(self, stock_name, start_date):
-        """Fetch stock data including current price and historical data"""
+        """Fetch stock data including current price and historical data using EOD data"""
         symbol = self.get_stock_symbol(stock_name)
         
         try:
-            ticker = yf.Ticker(symbol)
-            
-            # Get current price
-            info = ticker.info
-            current_price = info.get('regularMarketPrice') or info.get('currentPrice') or info.get('previousClose')
-            
-            if current_price is None:
-                # Fallback: get latest price from history
-                hist = ticker.history(period="5d")
-                if not hist.empty:
-                    current_price = hist['Close'].iloc[-1]
-                else:
-                    raise ValueError(f"Could not fetch price for {stock_name}")
-            
-            # Get historical data from buy date
+            # Use yf.download for more reliable EOD price data
             end_date = datetime.now()
-            historical_data = ticker.history(start=start_date, end=end_date)
+            
+            # Download historical data from start_date to today
+            historical_data = yf.download(symbol, start=start_date, end=end_date, progress=False)
             
             # Normalize index to timezone-naive to prevent comparison issues
             if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                 historical_data.index = historical_data.index.tz_localize(None)
             
+            if historical_data.empty:
+                # If no historical data, try to get recent data
+                historical_data = yf.download(symbol, period="1mo", progress=False)
+                if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
+                    historical_data.index = historical_data.index.tz_localize(None)
+            
+            if historical_data.empty:
+                raise ValueError(f"No data available for {stock_name}")
+            
+            # Get current price from the most recent closing price
+            current_price = float(historical_data['Close'].iloc[-1])
+            
             return current_price, historical_data
             
         except Exception as e:
-            st.warning(f"Could not fetch data for {stock_name}: {str(e)}")
-            # Return dummy data to prevent crashes
-            return 100.0, pd.DataFrame()
+            st.error(f"❌ Could not fetch data for {stock_name} ({symbol}): {str(e)}")
+            # Try fallback with ticker.info
+            try:
+                ticker = yf.Ticker(symbol)
+                info = ticker.info
+                current_price = info.get('regularMarketPrice') or info.get('currentPrice') or info.get('previousClose')
+                
+                if current_price:
+                    st.warning(f"⚠️ Using fallback price for {stock_name}: ₹{current_price}")
+                    return float(current_price), pd.DataFrame()
+            except:
+                pass
+            
+            st.error(f"❌ Unable to fetch any price data for {stock_name}. Please check the stock symbol.")
+            return None, pd.DataFrame()
     
     def get_index_data(self, index_name, start_date):
         """Fetch index data for benchmark comparison"""
@@ -150,12 +166,16 @@ class DataFetcher:
     def get_stock_category(self, stock_name):
         """Get stock category (Large Cap, Mid Cap, Small Cap)"""
         stock_name = stock_name.upper().strip()
-        return self.stock_categories.get(stock_name, 'Mid Cap')  # Default to Mid Cap
+        # Remove suffix for lookup
+        base_name = stock_name.replace(self.nse_suffix, '').replace(self.bse_suffix, '')
+        return self.stock_categories.get(base_name, 'Mid Cap')  # Default to Mid Cap
     
     def get_stock_sector(self, stock_name):
         """Get stock sector"""
         stock_name = stock_name.upper().strip()
-        return self.sector_mapping.get(stock_name, 'Others')  # Default to Others
+        # Remove suffix for lookup
+        base_name = stock_name.replace(self.nse_suffix, '').replace(self.bse_suffix, '')
+        return self.sector_mapping.get(base_name, 'Others')  # Default to Others
     
     def get_stock_fundamentals(self, stock_name):
         """Get basic fundamental data for the stock"""

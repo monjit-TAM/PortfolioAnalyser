@@ -318,6 +318,11 @@ class HistoricalPerformance:
                         if len(available_dates) > 0:
                             closest_date = available_dates[-1]
                             price = hist.loc[closest_date, 'Close']
+                            # Convert to scalar if Series
+                            if isinstance(price, pd.Series):
+                                price = float(price.iloc[0]) if len(price) > 0 else 0.0
+                            else:
+                                price = float(price) if not pd.isna(price) else 0.0
                             total_value += price * quantity
                             total_investment += buy_price * quantity
             

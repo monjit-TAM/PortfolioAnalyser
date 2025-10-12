@@ -73,8 +73,13 @@ def analyze_portfolio():
             
             # Fetch current price and historical data
             current_price, hist_data = data_fetcher.get_stock_data(stock_name, buy_date)
-            current_data[stock_name] = current_price
-            historical_data[stock_name] = hist_data
+            
+            # Only add to current_data if price was successfully fetched
+            if current_price is not None:
+                current_data[stock_name] = current_price
+                historical_data[stock_name] = hist_data
+            else:
+                st.error(f"⚠️ Skipping {stock_name} due to data fetch failure")
             
             progress_bar.progress((idx + 1) / len(portfolio_df))
         
@@ -128,7 +133,10 @@ def refresh_prices():
             
             # Fetch current price only
             current_price, _ = data_fetcher.get_stock_data(stock_name, buy_date)
-            current_data[stock_name] = current_price
+            
+            # Only add if price was successfully fetched
+            if current_price is not None:
+                current_data[stock_name] = current_price
         
         # Re-analyze with updated prices
         analysis_results = portfolio_analyzer.analyze_portfolio(
@@ -289,29 +297,20 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
-    # Upload section - integrated into main page
+    # Upload section - clean and integrated into main page
     col1, col2, col3 = st.columns([0.5, 2, 0.5])
     with col2:
         st.markdown("""
-        <div style='
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        '>
-            <h3 style='color: white; text-align: center; margin-bottom: 25px; font-size: 24px;'>
-                📁 Upload Your Portfolio
-            </h3>
-        </div>
+        <h3 style='color: #FF6B35; text-align: center; margin-bottom: 25px; font-size: 24px;'>
+            📁 Upload Your Portfolio
+        </h3>
         """, unsafe_allow_html=True)
         
         # File uploader integrated
         uploaded_file = st.file_uploader(
             "Drag and drop your CSV file here or browse",
             type=['csv'],
-            help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity",
-            label_visibility="collapsed"
+            help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity"
         )
         
         if uploaded_file is not None:
