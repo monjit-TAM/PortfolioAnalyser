@@ -104,40 +104,6 @@ def main():
             mime="text/csv",
             use_container_width=True
         )
-        
-        # About Section
-        st.markdown("---")
-        with st.expander("ℹ️ About & Features"):
-            st.markdown("""
-            ### 📋 CSV Format Required:
-            - **Stock Name** (e.g., RELIANCE, TCS)
-            - **Buy Price** (in ₹)
-            - **Buy Date** (YYYY-MM-DD)
-            - **Quantity** (number of shares)
-            
-            ### 🚀 How It Works:
-            1. Upload your portfolio CSV file
-            2. Our system fetches real-time market data
-            3. Get comprehensive analysis and insights
-            4. Receive personalized recommendations
-            
-            ### ✨ Features Included:
-            - **Portfolio Dashboard**: Current value, gains/losses, returns
-            - **Sector Analysis**: Diversification and allocation insights
-            - **Stock Performance**: Individual stock tracking and metrics
-            - **Benchmark Comparison**: Compare against NIFTY indices
-            - **Smart Recommendations**: Value & Growth perspectives
-            - **Risk Assessment**: Beta, VaR, Sortino Ratio, Max Drawdown
-            - **Rebalancing**: Portfolio optimization suggestions
-            - **Historical Tracking**: Performance over time
-            - **Investor Profile**: Personalized investment style analysis
-            
-            ### 📊 Supported Analysis:
-            - **Value Investing**: Focus on undervalued stocks
-            - **Growth Investing**: Emphasis on growth potential
-            - **Risk Metrics**: Advanced portfolio risk analysis
-            - **Alternative Suggestions**: Better investment opportunities
-            """)
     
     # Main content area
     if st.session_state.portfolio_data is not None and st.session_state.analysis_complete:
@@ -392,24 +358,22 @@ def display_analysis():
         )
 
 def display_welcome_screen():
-    """Display clean, centered welcome screen"""
+    """Display welcome screen with informational content"""
     # Add vertical spacing
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    # Centered content
+    # Centered heading
+    st.markdown("""
+    <div style='text-align: center;'>
+        <h2 style='color: #FF6B35; margin-bottom: 30px; font-size: 28px; line-height: 1.4;'>
+            Portfolio Analysis - Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Upload card - centered
     col1, col2, col3 = st.columns([1, 2, 1])
-    
     with col2:
-        st.markdown("""
-        <div style='text-align: center;'>
-            <h2 style='color: #FF6B35; margin-bottom: 10px;'>Comprehensive Indian Stock Market Analysis</h2>
-            <p style='font-size: 18px; color: #666; margin-bottom: 40px;'>
-                Upload your portfolio and get instant insights with AI-powered recommendations
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Upload card
         st.markdown("""
         <div style='
             background-color: #f8f9fa;
@@ -417,23 +381,71 @@ def display_welcome_screen():
             padding: 40px;
             text-align: center;
             border: 2px dashed #FF6B35;
+            margin-bottom: 30px;
         '>
-            <h3 style='color: #333; margin-bottom: 20px;'>📁 Upload Your Portfolio</h3>
+            <h3 style='color: #333; margin-bottom: 15px;'>📁 Upload Your Portfolio</h3>
             <p style='color: #666; font-size: 16px;'>
-                Upload a CSV file with your stock holdings to get started
+                Use the sidebar to upload your CSV file and start analyzing
             </p>
         </div>
         """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Instructions with clean design
+    
+    # Informational sections
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
         st.markdown("""
-        <div style='text-align: center; color: #666; font-size: 14px;'>
-            <p>👈 Use the sidebar to upload your portfolio CSV file</p>
-            <p style='margin-top: 10px;'>💡 Need help? Check the "About & Features" section in the sidebar</p>
-        </div>
-        """, unsafe_allow_html=True)
+        ### 📋 CSV Format Required
+        Your CSV file should contain the following columns:
+        - **Stock Name** (e.g., RELIANCE, TCS, INFY)
+        - **Buy Price** (in ₹)
+        - **Buy Date** (YYYY-MM-DD format)
+        - **Quantity** (number of shares)
+        
+        ### 🚀 How It Works
+        1. **Upload** your portfolio CSV file via the sidebar
+        2. **Analyze** - our system fetches real-time market data
+        3. **Review** comprehensive insights across multiple perspectives
+        4. **Act** on personalized investment recommendations
+        """)
+    
+    with col2:
+        st.markdown("""
+        ### ✨ Features Included
+        - **📊 Portfolio Dashboard**: Current value, gains/losses, returns
+        - **🏭 Sector Analysis**: Diversification and allocation insights
+        - **📈 Stock Performance**: Individual stock tracking and metrics
+        - **📊 Benchmark Comparison**: Compare against NIFTY indices
+        - **💡 Smart Recommendations**: Value & Growth perspectives
+        - **⚖️ Rebalancing**: Portfolio optimization suggestions
+        - **📅 Historical Tracking**: Performance over time with risk metrics
+        - **👤 Investor Profile**: Personalized investment style analysis
+        """)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Additional info section
+    st.markdown("""
+    ### 📊 Dual Investment Perspectives
+    
+    Our analysis engine provides recommendations from two complementary viewpoints:
+    
+    **🔷 Value Investing Perspective**  
+    Focus on undervalued stocks with strong fundamentals, attractive P/E ratios, and solid long-term potential
+    
+    **🔶 Growth Investing Perspective**  
+    Emphasis on high-growth potential, momentum stocks, and companies with strong revenue growth
+    
+    **📈 Advanced Risk Metrics**  
+    Portfolio risk analysis including Beta, Value at Risk (VaR), Sortino Ratio, and Maximum Drawdown
+    """)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Call to action
+    st.info("👈 **Ready to start?** Upload your portfolio CSV file using the sidebar to begin your comprehensive analysis!")
 
 if __name__ == "__main__":
     main()
