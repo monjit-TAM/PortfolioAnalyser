@@ -191,9 +191,51 @@ Preferred communication style: Simple, everyday language.
    - **Files Changed:** `utils/portfolio_analyzer.py`
    - **Impact:** Application now handles missing data gracefully without crashes
 
+### UI Redesign (October 2025)
+
+**Goal:** Create a clean, professional, and centered UI with Alphamarket branding
+
+1. **Alphamarket Logo Integration**
+   - **Asset:** `attached_assets/Alphamarket Logo without Background_1760262013341.png`
+   - **Implementation:** Logo displayed prominently at the top of the page in centered layout
+   - **Impact:** Professional branding throughout the application
+
+2. **Homepage Redesign**
+   - **Previous:** Cluttered with extensive text about features, how it works, and supported analysis
+   - **New Design:**
+     - Clean, centered layout with minimal content
+     - Prominent heading: "Comprehensive Indian Stock Market Analysis"
+     - Centered upload card with dashed border (#FF6B35 brand color)
+     - Simple call-to-action directing users to sidebar upload
+   - **Impact:** Improved user experience with cleaner, more focused interface
+
+3. **Informational Content Reorganization**
+   - **Moved Content:** "How It Works", "Features Included", and "Supported Analysis" sections
+   - **New Location:** Expandable "About & Features" section in sidebar
+   - **Benefit:** Homepage remains uncluttered while information stays accessible
+   - **Content Included:**
+     - CSV format requirements
+     - Step-by-step workflow explanation
+     - Complete feature list
+     - Supported analysis types
+
+4. **Enhanced UI Elements**
+   - **Sidebar:** Clean portfolio upload section with improved button styling
+   - **Notifications:** Professional styling for success messages with brand colors
+   - **Spacing:** Consistent vertical and horizontal spacing throughout
+   - **Buttons:** Full-width buttons for better mobile experience
+   - **Colors:** Consistent use of #FF6B35 (Alphamarket orange) for primary actions and highlights
+
+5. **Design Philosophy**
+   - **Minimalist Approach:** Focus on essential actions (upload and analyze)
+   - **Progressive Disclosure:** Information available through expandable sections
+   - **Visual Hierarchy:** Clear distinction between primary actions and secondary information
+   - **Brand Consistency:** Alphamarket colors and logo integrated throughout
+
 ### Testing Status
 - **End-to-End Testing:** PASSED (October 2025)
 - All 8 analytical tabs verified working correctly
 - Portfolio upload, analysis, refresh, and PDF export functional
 - Real-time price updates working
 - Rebalancing and historical performance features operational
+- **UI/UX Testing:** PASSED - Clean, centered design with Alphamarket branding verified
