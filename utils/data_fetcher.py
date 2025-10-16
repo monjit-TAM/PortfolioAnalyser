@@ -156,7 +156,7 @@ class DataFetcher:
             
         except Exception as e:
             st.error(f"❌ Could not fetch data for {stock_name} ({symbol}): {str(e)}")
-            # Try fallback with ticker.info
+            # Try fallback with ticker.info and ticker.history
             try:
                 ticker = yf.Ticker(symbol)
                 info = ticker.info
@@ -164,7 +164,27 @@ class DataFetcher:
                 
                 if current_price:
                     st.warning(f"⚠️ Using fallback price for {stock_name}: ₹{current_price}")
-                    return float(current_price), pd.DataFrame()
+                    
+                    # Try to get historical data using ticker.history() method
+                    try:
+                        end_date = datetime.now()
+                        historical_data = ticker.history(start=start_date, end=end_date)
+                        
+                        # Normalize index
+                        if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
+                            historical_data.index = historical_data.index.tz_localize(None)
+                        
+                        if not historical_data.empty:
+                            return float(current_price), historical_data
+                        else:
+                            # Try shorter period if full history fails
+                            historical_data = ticker.history(period="1y")
+                            if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
+                                historical_data.index = historical_data.index.tz_localize(None)
+                            return float(current_price), historical_data
+                    except:
+                        # If historical data fetch fails, return price with empty history
+                        return float(current_price), pd.DataFrame()
             except:
                 pass
             

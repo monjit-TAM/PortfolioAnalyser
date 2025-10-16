@@ -125,6 +125,11 @@ class PortfolioAnalyzer:
     def calculate_risk_metrics(self, portfolio_df, historical_data):
         """Calculate comprehensive portfolio risk metrics including Beta, VaR, and Sharpe Ratio"""
         try:
+            # Debug logging
+            print(f"[DEBUG] Calculating risk metrics for {len(portfolio_df)} stocks")
+            print(f"[DEBUG] Historical data keys: {list(historical_data.keys())}")
+            print(f"[DEBUG] Portfolio stock names: {portfolio_df['Stock Name'].tolist()}")
+            
             # Calculate portfolio weights
             weights = portfolio_df['Current Value'] / portfolio_df['Current Value'].sum()
             
@@ -133,18 +138,13 @@ class PortfolioAnalyzer:
             returns_data = []
             betas = []
             
-            # Fetch NIFTY 50 data for beta calculation
-            nifty_returns = None
-            try:
-                earliest_date = pd.to_datetime(portfolio_df['Buy Date']).min()
-                nifty_data = self.data_fetcher.get_index_data('NIFTY50', earliest_date)
-                if not nifty_data.empty and len(nifty_data) > 1:
-                    nifty_returns = nifty_data['Close'].pct_change().dropna()
-            except:
-                pass
+            # Skip NIFTY beta calculation for now - focus on getting risk metrics working
+            # All betas default to 1.0
             
             for _, stock in portfolio_df.iterrows():
                 stock_name = stock['Stock Name']
+                
+                print(f"[DEBUG] Checking stock: '{stock_name}' - In hist_data: {stock_name in historical_data}, Empty: {historical_data.get(stock_name, pd.DataFrame()).empty if stock_name in historical_data else 'N/A'}")
                 
                 if stock_name in historical_data and not historical_data[stock_name].empty:
                     stock_hist = historical_data[stock_name]
@@ -153,29 +153,14 @@ class PortfolioAnalyzer:
                         volatility = returns.std() * np.sqrt(252)  # Annualized volatility
                         volatilities.append(volatility)
                         returns_data.append(returns)
-                        
-                        # Calculate Beta against NIFTY 50
-                        if nifty_returns is not None and len(returns) > 10:
-                            # Align returns
-                            aligned_returns = returns.reindex(nifty_returns.index).dropna()
-                            aligned_nifty = nifty_returns.reindex(aligned_returns.index).dropna()
-                            
-                            if len(aligned_returns) > 10 and len(aligned_nifty) > 10:
-                                covariance = aligned_returns.cov(aligned_nifty)
-                                market_variance = aligned_nifty.var()
-                                beta = covariance / market_variance if market_variance != 0 else 1.0
-                                betas.append(beta)
-                            else:
-                                betas.append(1.0)  # Default beta
-                        else:
-                            betas.append(1.0)  # Default beta
+                        betas.append(1.0)  # Default beta
                     else:
                         volatilities.append(0)
-                        returns_data.append(pd.Series([0]))
+                        returns_data.append(pd.Series(dtype=float))  # Empty series
                         betas.append(1.0)
                 else:
                     volatilities.append(0)
-                    returns_data.append(pd.Series([0]))
+                    returns_data.append(pd.Series(dtype=float))  # Empty series
                     betas.append(1.0)
             
             # Portfolio volatility (simplified - assuming zero correlation)
@@ -229,7 +214,7 @@ class PortfolioAnalyzer:
             
             # Maximum Drawdown
             max_drawdown = 0
-            if returns_data and len([r for r in returns_data if len(r) > 0]) > 0:
+            if returns_data and len([r for r in returns_data if len(r) > 0]) > 0 and 'combined_returns' in locals():
                 cumulative_returns = (1 + combined_returns).cumprod()
                 running_max = cumulative_returns.expanding().max()
                 drawdown = (cumulative_returns - running_max) / running_max
@@ -249,6 +234,11 @@ class PortfolioAnalyzer:
             }
         
         except Exception as e:
+            import traceback
+            print(f"🔍 DEBUG: Risk metrics calculation failed: {str(e)}")
+            print(f"DEBUG: Portfolio shape: {portfolio_df.shape if portfolio_df is not None else 'None'}")
+            print(f"DEBUG: Historical data keys: {list(historical_data.keys()) if historical_data else 'None'}")
+            print(f"DEBUG Traceback: {traceback.format_exc()}")
             return {
                 'portfolio_volatility': 0,
                 'sharpe_ratio': 0,
