@@ -246,19 +246,6 @@ class BenchmarkComparison:
                 elif cat_outperformance < -10:
                     insights.append(f"⚠️ **{cat_name} stocks struggling**: Underperforming {benchmark_index} by {abs(cat_outperformance):.2f}%")
         
-        # Risk-adjusted performance
-        portfolio_volatility = analysis_results['risk_metrics']['portfolio_volatility']
-        sharpe_ratio = analysis_results['risk_metrics']['sharpe_ratio']
-        
-        if sharpe_ratio > 1:
-            insights.append(f"✨ **Excellent risk-adjusted returns**: Sharpe ratio of {sharpe_ratio:.2f} indicates strong performance per unit of risk")
-        elif sharpe_ratio > 0.5:
-            insights.append(f"👍 **Good risk-adjusted returns**: Sharpe ratio of {sharpe_ratio:.2f} shows decent risk compensation")
-        elif sharpe_ratio > 0:
-            insights.append(f"📊 **Moderate risk-adjusted returns**: Sharpe ratio of {sharpe_ratio:.2f} suggests room for improvement")
-        else:
-            insights.append(f"⚠️ **Poor risk-adjusted returns**: Negative Sharpe ratio of {sharpe_ratio:.2f} indicates inadequate compensation for risk taken")
-        
         for insight in insights:
             st.markdown(insight)
         
@@ -288,10 +275,6 @@ class BenchmarkComparison:
             
             if underperforming_categories:
                 recommendations.append(f"🎯 **Focus on {', '.join(underperforming_categories)}**: These categories are significantly underperforming their benchmarks")
-        
-        # Risk-based recommendations
-        if portfolio_volatility > 0.25:  # High volatility
-            recommendations.append("⚖️ **Consider risk management**: High portfolio volatility suggests need for diversification or position sizing review")
         
         for rec in recommendations:
             st.markdown(rec)

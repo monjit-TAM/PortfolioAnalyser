@@ -133,7 +133,6 @@ class CustomerProfile:
         with col2:
             st.subheader("⚖️ Risk Profile")
             
-            risk_metrics = analysis_results['risk_metrics']
             risk_profile = self.assess_risk_profile(analysis_results, style_analysis)
             
             # Risk assessment display
@@ -370,10 +369,9 @@ class CustomerProfile:
             balance_score = diversification_score + (mixed_signals * 10)
             style_scores['Balanced Investor'] = float(min(balance_score, 100))
             
-            # Speculative score (based on risk metrics and performance volatility)
-            risk_score = analysis_results['risk_metrics']['portfolio_volatility'] * 200  # Convert to percentage
+            # Speculative score (based on performance volatility)
             performance_variance = abs(analysis_results['portfolio_summary']['total_gain_loss_percentage'])
-            speculative_score = min(risk_score + performance_variance * 0.5, 100)
+            speculative_score = min(performance_variance * 1.5, 100)  # Simplified without volatility
             style_scores['Speculative Investor'] = float(speculative_score)
         
         return {
@@ -388,11 +386,14 @@ class CustomerProfile:
         risk_factors = []
         risk_score = 0
         
-        # Portfolio concentration risk
-        max_stock_weight = analysis_results['risk_metrics']['max_stock_weight']
-        if max_stock_weight > 0.3:  # More than 30% in one stock
-            risk_factors.append(f"High concentration: {max_stock_weight*100:.1f}% in single stock")
-            risk_score += 20
+        # Portfolio concentration risk (calculate from portfolio data)
+        portfolio_df = pd.DataFrame(analysis_results['stock_performance'])
+        if not portfolio_df.empty:
+            total_value = portfolio_df['Current Value'].sum()
+            max_stock_weight = portfolio_df['Current Value'].max() / total_value if total_value > 0 else 0
+            if max_stock_weight > 0.3:  # More than 30% in one stock
+                risk_factors.append(f"High concentration: {max_stock_weight*100:.1f}% in single stock")
+                risk_score += 20
         
         # Sector concentration
         sector_data = pd.DataFrame(analysis_results['sector_analysis'])
@@ -402,11 +403,7 @@ class CustomerProfile:
                 risk_factors.append(f"Sector concentration: {max_sector_allocation:.1f}% in one sector")
                 risk_score += 15
         
-        # Volatility
-        portfolio_volatility = analysis_results['risk_metrics']['portfolio_volatility']
-        if portfolio_volatility > 0.25:  # High volatility
-            risk_factors.append(f"High volatility: {portfolio_volatility*100:.1f}%")
-            risk_score += 20
+        # Note: Volatility assessment removed as advanced risk metrics are no longer calculated
         
         # Number of stocks (diversification)
         num_stocks = analysis_results['portfolio_summary']['number_of_stocks']
@@ -481,15 +478,14 @@ class CustomerProfile:
         success_rate = profitable_stocks / total_stocks if total_stocks > 0 else 0
         
         avg_return = analysis_results['portfolio_summary']['total_gain_loss_percentage']
-        volatility = analysis_results['risk_metrics']['portfolio_volatility']
         
-        if success_rate > 0.7 and avg_return > 0 and volatility < 0.2:
+        if success_rate > 0.7 and avg_return > 0 and avg_return < 15:
             decision_style = "Conservative"
-            decision_characteristics = ["Risk-averse", "Steady performance", "Low volatility preference"]
-        elif success_rate > 0.5 and volatility < 0.3:
+            decision_characteristics = ["Risk-averse", "Steady performance", "Stable returns preference"]
+        elif success_rate > 0.5 and abs(avg_return) < 20:
             decision_style = "Moderate"
             decision_characteristics = ["Balanced approach", "Moderate risk tolerance", "Diversified thinking"]
-        elif volatility > 0.3 or abs(avg_return) > 30:
+        elif abs(avg_return) > 30:
             decision_style = "Aggressive"
             decision_characteristics = ["High risk tolerance", "Growth-focused", "Performance-driven"]
         else:
@@ -520,9 +516,9 @@ class CustomerProfile:
         elif stock_diversity >= 5 and sector_diversity >= 3:
             investment_horizon = "Medium-term"
             time_preferences = ["Balanced time horizon", "Moderate diversification", "Growth with stability"]
-        elif volatility > 0.3 or abs(avg_return) > 30:
+        elif abs(avg_return) > 30:
             investment_horizon = "Short-term"
-            time_preferences = ["Quick returns focus", "High volatility acceptance", "Active trading mindset"]
+            time_preferences = ["Quick returns focus", "High performance acceptance", "Active trading mindset"]
         else:
             investment_horizon = "Mixed"
             time_preferences = ["Flexible time horizon", "Adaptive strategy", "Opportunity-based decisions"]

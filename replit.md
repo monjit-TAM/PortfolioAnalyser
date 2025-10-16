@@ -13,6 +13,7 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 4. **Price Fetching**: Uses yf.download() method for reliable end-of-day price data from Yahoo Finance
 5. **UI/UX**: Removed gradient background from upload section for cleaner, more professional appearance
 6. **Symbol Alias System** (NEW): Implemented intelligent stock symbol mapping to automatically convert common abbreviations to correct Yahoo Finance symbols
+7. **Advanced Risk Metrics Removed**: Removed the Advanced Risk Metrics section from both the dashboard and PDF report due to calculation issues. The application now focuses on core portfolio analysis features including performance tracking, sector analysis, and recommendations.
 
 ### Symbol Alias Support:
 The application now intelligently handles common stock abbreviations:
