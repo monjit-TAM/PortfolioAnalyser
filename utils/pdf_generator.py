@@ -97,36 +97,6 @@ class PDFReportGenerator:
         ]))
         
         elements.append(summary_table)
-        elements.append(Spacer(1, 30))
-        
-        # Risk Metrics
-        elements.append(Paragraph("Risk Analysis", self.heading_style))
-        risk_metrics = analysis_results['risk_metrics']
-        
-        risk_data = [
-            ['Risk Metric', 'Value', 'Interpretation'],
-            ['Portfolio Volatility', f"{risk_metrics['portfolio_volatility']*100:.2f}%", 'Annualized risk'],
-            ['Sharpe Ratio', f"{risk_metrics['sharpe_ratio']:.2f}", 'Risk-adjusted return'],
-            ['Sortino Ratio', f"{risk_metrics.get('sortino_ratio', 0):.2f}", 'Downside risk focus'],
-            ['Portfolio Beta', f"{risk_metrics.get('portfolio_beta', 1.0):.2f}", 'Market sensitivity'],
-            ['VaR (95%)', f"{risk_metrics.get('var_95', 0)*100:.2f}%", 'Max daily loss (95%)'],
-            ['VaR (99%)', f"{risk_metrics.get('var_99', 0)*100:.2f}%", 'Max daily loss (99%)'],
-            ['Max Drawdown', f"{risk_metrics.get('max_drawdown', 0)*100:.2f}%", 'Peak-to-trough decline']
-        ]
-        
-        risk_table = Table(risk_data, colWidths=[2*inch, 1.5*inch, 2.5*inch])
-        risk_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e74c3c')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-        
-        elements.append(risk_table)
         elements.append(PageBreak())
         
         # Portfolio Holdings
