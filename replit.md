@@ -15,6 +15,8 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 6. **Symbol Alias System** (NEW): Implemented intelligent stock symbol mapping to automatically convert common abbreviations to correct Yahoo Finance symbols
 7. **Advanced Risk Metrics Removed**: Removed the Advanced Risk Metrics section from both the dashboard and PDF report due to calculation issues. The application now focuses on core portfolio analysis features including performance tracking, sector analysis, and recommendations.
 8. **Branding Update**: Updated logo from Alphamarket to Alphalens across all pages (web interface and PDF reports)
+9. **Compact Layout Update**: Redesigned homepage layout to be more compact and fit within one screen without scrolling. Logo repositioned to top-right corner (enlarged to 250px width), reduced whitespace throughout, and optimized spacing between sections.
+10. **Footer Addition**: Added professional footer with disclaimer and company details (Edhaz Financial Services Private Limited, registered office address, email, and phone number)
 
 ### Symbol Alias Support:
 The application now intelligently handles common stock abbreviations:
@@ -62,7 +64,7 @@ The current implementation does not include an authentication system, as it is d
 
 ### UI/UX Design
 
-The application features a premium, professional design with a focus on a single-page experience. The sidebar has been removed, and all functionality, including file upload, is integrated into the main page. It utilizes clean, professional styling with the Alphalens logo consistently used for branding. The upload section features a streamlined design without background gradients for a more refined appearance. Informational content, such as CSV format requirements and features, is presented concisely or in expandable sections.
+The application features a premium, professional design with a focus on a single-page experience. The sidebar has been removed, and all functionality, including file upload, is integrated into the main page. It utilizes clean, professional styling with the Alphalens logo (250px width) positioned in the top-right corner for branding. The layout is optimized for compactness with minimal whitespace to fit the entire homepage within one screen view. The upload section features a streamlined design without background gradients for a more refined appearance. Informational content, such as CSV format requirements and features, is presented concisely or in expandable sections. A professional footer displays disclaimer text and company details including registered office, email (hello@thealphamarket.com), and phone (+91-91089 67788).
 
 ## External Dependencies
 
