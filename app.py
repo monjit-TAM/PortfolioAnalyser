@@ -22,18 +22,30 @@ from utils.pdf_generator import PDFReportGenerator
 
 def main():
     st.set_page_config(
-        page_title="Alphamarket Portfolio Analyzer",
+        page_title="Alphalens Portfolio Analyzer",
         page_icon="📊",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
     
-    # Display logo centered
-    col1, col2, col3 = st.columns([1.5, 1, 1.5])
-    with col2:
-        st.image("attached_assets/Alphalens_1760976199318.png", use_container_width=True)
+    # Custom CSS for compact layout
+    st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        h2, h3 {
+            margin-top: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
-    st.markdown("<br>", unsafe_allow_html=True)
+    # Display logo in top-right corner, larger size
+    col1, col2 = st.columns([3, 1])
+    with col2:
+        st.image("attached_assets/Alphalens_1760976199318.png", width=250)
     
     # Initialize session state
     if 'portfolio_data' not in st.session_state:
@@ -49,6 +61,9 @@ def main():
     else:
         # Welcome screen with integrated upload
         display_welcome_screen()
+    
+    # Footer with disclaimer and company details
+    add_footer()
 
 def analyze_portfolio():
     """Perform comprehensive portfolio analysis"""
@@ -285,13 +300,13 @@ def display_analysis():
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
     
-    # Centered heading
+    # Centered heading - compact
     st.markdown("""
     <div style='text-align: center;'>
-        <h2 style='color: #FF6B35; margin-bottom: 15px; font-size: 32px; font-weight: 600;'>
+        <h2 style='color: #FF6B35; margin-bottom: 10px; margin-top: 0px; font-size: 28px; font-weight: 600;'>
             Portfolio Analysis
         </h2>
-        <p style='font-size: 18px; color: #666; margin-bottom: 40px;'>
+        <p style='font-size: 16px; color: #666; margin-bottom: 20px;'>
             Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
         </p>
     </div>
@@ -301,7 +316,7 @@ def display_welcome_screen():
     col1, col2, col3 = st.columns([0.5, 2, 0.5])
     with col2:
         st.markdown("""
-        <h3 style='color: #FF6B35; text-align: center; margin-bottom: 25px; font-size: 24px;'>
+        <h3 style='color: #FF6B35; text-align: center; margin-bottom: 15px; margin-top: 5px; font-size: 22px;'>
             📁 Upload Your Portfolio
         </h3>
         """, unsafe_allow_html=True)
@@ -342,7 +357,6 @@ def display_welcome_screen():
                 st.error(f"❌ Error reading file: {str(e)}")
         
         # Sample CSV download
-        st.markdown("<br>", unsafe_allow_html=True)
         col_a, col_b, col_c = st.columns([1, 2, 1])
         with col_b:
             sample_data = {
@@ -362,14 +376,14 @@ def display_welcome_screen():
             )
     
     # Key features - clean and concise
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("""
-        <div style='text-align: center; padding: 25px; background-color: #f8f9fa; border-radius: 10px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 15px;'>📊 Dual Perspectives</h3>
-            <p style='color: #666; font-size: 15px;'>
+        <div style='text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 8px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 18px;'>📊 Dual Perspectives</h3>
+            <p style='color: #666; font-size: 14px;'>
                 Get insights from both <strong>Value</strong> and <strong>Growth</strong> investing viewpoints
             </p>
         </div>
@@ -377,25 +391,25 @@ def display_welcome_screen():
     
     with col2:
         st.markdown("""
-        <div style='text-align: center; padding: 25px; background-color: #f8f9fa; border-radius: 10px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 15px;'>📈 Advanced Analytics</h3>
-            <p style='color: #666; font-size: 15px;'>
-                Sector analysis, benchmark comparison, risk metrics, and performance tracking
+        <div style='text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 8px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 18px;'>📈 Advanced Analytics</h3>
+            <p style='color: #666; font-size: 14px;'>
+                Sector analysis, benchmark comparison, and performance tracking
             </p>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
-        <div style='text-align: center; padding: 25px; background-color: #f8f9fa; border-radius: 10px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 15px;'>💡 Smart Recommendations</h3>
-            <p style='color: #666; font-size: 15px;'>
+        <div style='text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 8px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 18px;'>💡 Smart Recommendations</h3>
+            <p style='color: #666; font-size: 14px;'>
                 Actionable insights with rebalancing suggestions and alternative stock picks
             </p>
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     
     # CSV Format info - minimal
     with st.expander("📋 CSV Format & Requirements"):
@@ -414,7 +428,7 @@ def display_welcome_screen():
             - Portfolio Dashboard & Performance
             - Sector & Category Breakdown
             - Benchmark Comparison (NIFTY)
-            - Risk Metrics (Beta, VaR, Sortino, Max Drawdown)
+            - Stock Recommendations & Rebalancing
             """)
 
 def display_portfolio_preview():
@@ -445,6 +459,32 @@ def display_portfolio_preview():
             st.session_state.analysis_complete = False
             with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
                 analyze_portfolio()
+
+def add_footer():
+    """Add footer with disclaimer and company details"""
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 8px;'>
+        <p style='font-size: 12px; color: #666; margin-bottom: 10px;'>
+            <strong>Disclaimer:</strong> The information provided in this portfolio analysis is for informational purposes only 
+            and should not be considered as financial advice. Investment decisions should be made after careful consideration 
+            of your financial situation and in consultation with a qualified financial advisor. Past performance is not 
+            indicative of future results.
+        </p>
+        <hr style='margin: 15px 0; border: 0; border-top: 1px solid #ddd;'>
+        <p style='font-size: 13px; color: #333; margin-bottom: 5px;'>
+            <strong>Alphalens</strong> is a product of <strong>Edhaz Financial Services Private Limited</strong>
+        </p>
+        <p style='font-size: 12px; color: #666; margin-bottom: 5px;'>
+            Registered Office: Alpine Eco, Doddenekkundi, K R Puram Hobli, Bangalore 560037
+        </p>
+        <p style='font-size: 12px; color: #666;'>
+            📧 <a href='mailto:hello@thealphamarket.com' style='color: #FF6B35; text-decoration: none;'>hello@thealphamarket.com</a> | 
+            📞 <a href='tel:+919108967788' style='color: #FF6B35; text-decoration: none;'>+91-91089 67788</a>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
