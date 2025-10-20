@@ -312,6 +312,13 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
+    # Hero banner image
+    col_banner1, col_banner2, col_banner3 = st.columns([0.5, 2, 0.5])
+    with col_banner2:
+        st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # Upload section - clean and integrated into main page
     col1, col2, col3 = st.columns([0.5, 2, 0.5])
     with col2:
