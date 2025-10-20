@@ -31,7 +31,7 @@ def main():
     # Display logo centered
     col1, col2, col3 = st.columns([1.5, 1, 1.5])
     with col2:
-        st.image("attached_assets/Alphamarket Logo without Background_1760262013341.png", use_container_width=True)
+        st.image("attached_assets/Alphalens_1760976199318.png", use_container_width=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     

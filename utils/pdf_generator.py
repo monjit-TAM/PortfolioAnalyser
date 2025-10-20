@@ -58,6 +58,15 @@ class PDFReportGenerator:
         # Container for elements
         elements = []
         
+        # Add logo
+        try:
+            logo = Image("attached_assets/Alphalens_1760976199318.png", width=4*inch, height=1.5*inch)
+            logo.hAlign = 'CENTER'
+            elements.append(logo)
+            elements.append(Spacer(1, 20))
+        except:
+            pass  # If logo not found, continue without it
+        
         # Title Page
         elements.append(Paragraph("Indian Stock Market", self.title_style))
         elements.append(Paragraph("Portfolio Analysis Report", self.title_style))
