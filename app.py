@@ -329,16 +329,14 @@ def display_analysis():
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
     
-    # Logo in top-right with tight spacing
-    st.markdown('<div class="content-section" style="margin-bottom: -260px;">', unsafe_allow_html=True)
-    col1, col2 = st.columns([3, 1])
+    # Logo in top-right with reduced spacing
+    col1, col2 = st.columns([2.5, 1])
     with col2:
         st.image("attached_assets/Alphalens_1760976199318.png", width=250)
-    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Heading section - tight spacing below logo
+    # Heading section - minimal spacing
     st.markdown("""
-    <div class="content-section" style='text-align: center; margin-top: 0px; padding-top: 0px; margin-bottom: 10px;'>
+    <div class="content-section" style='text-align: center; margin-top: -15px; padding-top: 0px; margin-bottom: 8px;'>
         <h2 style='color: #FF6B35; margin-bottom: 5px; margin-top: 0px; font-size: 26px; font-weight: 600;'>
             Portfolio Analysis
         </h2>
@@ -348,7 +346,17 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image - full width edge-to-edge
+    # Hero banner image with targeted CSS
+    st.markdown("""
+    <style>
+    /* Target hero banner by source path */
+    img[src*="BzIo2GnlaVnXUEmTRTUqs"] {
+        max-height: 250px !important;
+        object-fit: cover !important;
+        object-position: center !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
     
     # Upload section - clean and integrated into main page (with padding)
