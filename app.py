@@ -28,24 +28,39 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
-    # Custom CSS for compact layout
+    # Custom CSS for compact layout and full-width banner
     st.markdown("""
     <style>
         .block-container {
             padding-top: 1rem;
             padding-bottom: 1rem;
+            padding-left: 0rem !important;
+            padding-right: 0rem !important;
+            max-width: 100% !important;
         }
         h2, h3 {
             margin-top: 0.5rem !important;
             margin-bottom: 0.5rem !important;
         }
+        /* Full width image container */
+        .stImage {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        /* Add padding back for content sections */
+        .content-section {
+            padding-left: 5rem;
+            padding-right: 5rem;
+        }
     </style>
     """, unsafe_allow_html=True)
     
-    # Display logo in top-right corner, larger size
+    # Display logo in top-right corner, larger size (with padding)
+    st.markdown('<div class="content-section">', unsafe_allow_html=True)
     col1, col2 = st.columns([3, 1])
     with col2:
         st.image("attached_assets/Alphalens_1760976199318.png", width=250)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Initialize session state
     if 'portfolio_data' not in st.session_state:
@@ -300,30 +315,27 @@ def display_analysis():
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
     
-    # Centered heading - compact
+    # Centered heading - compact (with padding)
     st.markdown("""
-    <div style='text-align: center;'>
-        <h2 style='color: #FF6B35; margin-bottom: 10px; margin-top: 0px; font-size: 28px; font-weight: 600;'>
+    <div class="content-section" style='text-align: center;'>
+        <h2 style='color: #FF6B35; margin-bottom: 5px; margin-top: 0px; font-size: 26px; font-weight: 600;'>
             Portfolio Analysis
         </h2>
-        <p style='font-size: 16px; color: #666; margin-bottom: 20px;'>
+        <p style='font-size: 15px; color: #666; margin-bottom: 10px;'>
             Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image
-    col_banner1, col_banner2, col_banner3 = st.columns([0.5, 2, 0.5])
-    with col_banner2:
-        st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
+    # Hero banner image - full width edge-to-edge
+    st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
     
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Upload section - clean and integrated into main page
+    # Upload section - clean and integrated into main page (with padding)
+    st.markdown('<div class="content-section">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([0.5, 2, 0.5])
     with col2:
         st.markdown("""
-        <h3 style='color: #FF6B35; text-align: center; margin-bottom: 15px; margin-top: 5px; font-size: 22px;'>
+        <h3 style='color: #FF6B35; text-align: center; margin-bottom: 10px; margin-top: 10px; font-size: 20px;'>
             📁 Upload Your Portfolio
         </h3>
         """, unsafe_allow_html=True)
@@ -383,14 +395,12 @@ def display_welcome_screen():
             )
     
     # Key features - clean and concise
-    st.markdown("<br>", unsafe_allow_html=True)
-    
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("""
-        <div style='text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 8px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 18px;'>📊 Dual Perspectives</h3>
-            <p style='color: #666; font-size: 14px;'>
+        <div style='text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 8px; font-size: 16px;'>📊 Dual Perspectives</h3>
+            <p style='color: #666; font-size: 13px; margin: 0;'>
                 Get insights from both <strong>Value</strong> and <strong>Growth</strong> investing viewpoints
             </p>
         </div>
@@ -398,9 +408,9 @@ def display_welcome_screen():
     
     with col2:
         st.markdown("""
-        <div style='text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 8px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 18px;'>📈 Advanced Analytics</h3>
-            <p style='color: #666; font-size: 14px;'>
+        <div style='text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 8px; font-size: 16px;'>📈 Advanced Analytics</h3>
+            <p style='color: #666; font-size: 13px; margin: 0;'>
                 Sector analysis, benchmark comparison, and performance tracking
             </p>
         </div>
@@ -408,15 +418,13 @@ def display_welcome_screen():
     
     with col3:
         st.markdown("""
-        <div style='text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 8px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 18px;'>💡 Smart Recommendations</h3>
-            <p style='color: #666; font-size: 14px;'>
+        <div style='text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px; height: 100%;'>
+            <h3 style='color: #FF6B35; margin-bottom: 8px; font-size: 16px;'>💡 Smart Recommendations</h3>
+            <p style='color: #666; font-size: 13px; margin: 0;'>
                 Actionable insights with rebalancing suggestions and alternative stock picks
             </p>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
     
     # CSV Format info - minimal
     with st.expander("📋 CSV Format & Requirements"):
@@ -437,11 +445,11 @@ def display_welcome_screen():
             - Benchmark Comparison (NIFTY)
             - Stock Recommendations & Rebalancing
             """)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def display_portfolio_preview():
     """Display portfolio preview after upload"""
-    st.markdown("<br>", unsafe_allow_html=True)
-    
+    st.markdown('<div class="content-section">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([0.5, 2, 0.5])
     with col2:
         st.markdown("""
@@ -449,9 +457,10 @@ def display_portfolio_preview():
             background-color: #e8f4f8;
             border-left: 5px solid #FF6B35;
             border-radius: 8px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
+            margin-top: 10px;
         '>
             <p style='color: #333; font-size: 18px; margin: 0;'>
                 ✅ Portfolio uploaded successfully! Click <strong>'Analyze Portfolio'</strong> to continue
@@ -466,10 +475,10 @@ def display_portfolio_preview():
             st.session_state.analysis_complete = False
             with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
                 analyze_portfolio()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def add_footer():
     """Add footer with disclaimer and company details"""
-    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 8px;'>
