@@ -32,7 +32,7 @@ def main():
     st.markdown("""
     <style>
         .block-container {
-            padding-top: 1rem;
+            padding-top: 0.5rem;
             padding-bottom: 1rem;
             padding-left: 0rem !important;
             padding-right: 0rem !important;
@@ -52,11 +52,15 @@ def main():
             padding-left: 5rem;
             padding-right: 5rem;
         }
+        /* Reduce logo section spacing */
+        .logo-section {
+            margin-bottom: 0px !important;
+        }
     </style>
     """, unsafe_allow_html=True)
     
     # Display logo in top-right corner, larger size (with padding)
-    st.markdown('<div class="content-section">', unsafe_allow_html=True)
+    st.markdown('<div class="content-section logo-section">', unsafe_allow_html=True)
     col1, col2 = st.columns([3, 1])
     with col2:
         st.image("attached_assets/Alphalens_1760976199318.png", width=250)
@@ -315,13 +319,13 @@ def display_analysis():
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
     
-    # Centered heading - compact (with padding)
+    # Centered heading - compact (with padding) - pulled way up to reduce logo gap
     st.markdown("""
-    <div class="content-section" style='text-align: center;'>
+    <div class="content-section" style='text-align: center; margin-top: -250px; padding-top: 0px;'>
         <h2 style='color: #FF6B35; margin-bottom: 5px; margin-top: 0px; font-size: 26px; font-weight: 600;'>
             Portfolio Analysis
         </h2>
-        <p style='font-size: 15px; color: #666; margin-bottom: 10px;'>
+        <p style='font-size: 15px; color: #666; margin-bottom: 8px;'>
             Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
         </p>
     </div>
