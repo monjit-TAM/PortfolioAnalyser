@@ -32,7 +32,7 @@ def main():
     st.markdown("""
     <style>
         .block-container {
-            padding-top: 0.5rem;
+            padding-top: 0.2rem;
             padding-bottom: 1rem;
             padding-left: 0rem !important;
             padding-right: 0rem !important;
@@ -52,19 +52,29 @@ def main():
             padding-left: 5rem;
             padding-right: 5rem;
         }
-        /* Reduce logo section spacing */
-        .logo-section {
-            margin-bottom: 0px !important;
+        /* Hero header flexbox container for tight logo+heading layout */
+        .hero-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+            padding-left: 5rem;
+            padding-right: 5rem;
+        }
+        .hero-header .logo-row {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        .hero-header .heading-row {
+            text-align: center;
+            width: 100%;
         }
     </style>
     """, unsafe_allow_html=True)
     
-    # Display logo in top-right corner, larger size (with padding)
-    st.markdown('<div class="content-section logo-section">', unsafe_allow_html=True)
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        st.image("attached_assets/Alphalens_1760976199318.png", width=250)
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # Initialize session state
     if 'portfolio_data' not in st.session_state:
@@ -319,15 +329,20 @@ def display_analysis():
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
     
-    # Centered heading - compact (with padding) - pulled way up to reduce logo gap
+    # Combined logo and heading in single flexbox container for tight spacing
     st.markdown("""
-    <div class="content-section" style='text-align: center; margin-top: -250px; padding-top: 0px;'>
-        <h2 style='color: #FF6B35; margin-bottom: 5px; margin-top: 0px; font-size: 26px; font-weight: 600;'>
-            Portfolio Analysis
-        </h2>
-        <p style='font-size: 15px; color: #666; margin-bottom: 8px;'>
-            Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
-        </p>
+    <div class="hero-header">
+        <div class="logo-row">
+            <img src="attached_assets/Alphalens_1760976199318.png" width="250" alt="Alphalens Logo">
+        </div>
+        <div class="heading-row">
+            <h2 style='color: #FF6B35; margin-bottom: 5px; margin-top: 0px; font-size: 26px; font-weight: 600;'>
+                Portfolio Analysis
+            </h2>
+            <p style='font-size: 15px; color: #666; margin-bottom: 0px;'>
+                Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
+            </p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
