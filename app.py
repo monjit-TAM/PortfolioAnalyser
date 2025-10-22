@@ -347,21 +347,9 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image with targeted CSS
-    st.markdown("""
-    <style>
-    /* Target hero banner by image index */
-    div[data-testid="stImage"]:nth-of-type(2) img {
-        max-height: 125px !important;
-        object-fit: cover !important;
-        object-position: center !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Load and display hero banner
+    # Hero banner image - full size display
     try:
-        hero_image = Image.open("attached_assets/PortfolioAnalysisherobanner_1761113423621.png")
+        hero_image = Image.open("attached_assets/Portfolio Analysis Banner_1761113674623.png")
         st.image(hero_image, use_container_width=True)
     except:
         # Fallback to old banner if new one fails
