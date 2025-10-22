@@ -337,7 +337,7 @@ def display_welcome_screen():
     
     # Heading section - minimal spacing
     st.markdown("""
-    <div class="content-section" style='text-align: center; margin-top: -15px; padding-top: 0px; margin-bottom: 8px;'>
+    <div class="content-section" style='text-align: center; margin-top: -40px; padding-top: 0px; margin-bottom: 8px;'>
         <h2 style='color: #FF6B35; margin-bottom: 5px; margin-top: 0px; font-size: 26px; font-weight: 600;'>
             Portfolio Analysis
         </h2>
