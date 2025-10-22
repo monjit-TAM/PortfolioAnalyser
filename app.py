@@ -347,7 +347,18 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image - full size display
+    # Hero banner image with height reduction
+    st.markdown("""
+    <style>
+    /* Reduce banner height by ~25% while maintaining aspect ratio */
+    div[data-testid="stImage"]:nth-of-type(2) img {
+        max-height: 430px !important;
+        object-fit: contain !important;
+        width: 100% !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     try:
         hero_image = Image.open("attached_assets/Portfolio Analysis Banner_1761113674623.png")
         st.image(hero_image, use_container_width=True)
