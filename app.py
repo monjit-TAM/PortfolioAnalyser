@@ -347,14 +347,20 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image with height reduction
+    # Hero banner image with height reduction and center alignment
     st.markdown("""
     <style>
-    /* Reduce banner height by ~25% while maintaining aspect ratio */
+    /* Reduce banner height and center align */
+    div[data-testid="stImage"]:nth-of-type(2) {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
     div[data-testid="stImage"]:nth-of-type(2) img {
-        max-height: 430px !important;
+        max-height: 320px !important;
         object-fit: contain !important;
-        width: 100% !important;
+        margin: 0 auto !important;
+        display: block !important;
     }
     </style>
     """, unsafe_allow_html=True)
