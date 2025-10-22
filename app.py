@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from PIL import Image
 
 # Import custom modules
 from utils.data_fetcher import DataFetcher
@@ -346,18 +347,25 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image with targeted CSS - temporarily using old banner with new height
+    # Hero banner image with targeted CSS
     st.markdown("""
     <style>
-    /* Target hero banner by source path */
-    img[src*="BzIo2GnlaVnXUEmTRTUqs"] {
+    /* Target hero banner by image index */
+    div[data-testid="stImage"]:nth-of-type(2) img {
         max-height: 125px !important;
         object-fit: cover !important;
         object-position: center !important;
     }
     </style>
     """, unsafe_allow_html=True)
-    st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
+    
+    # Load and display hero banner using PIL to handle filename with spaces
+    try:
+        hero_image = Image.open("attached_assets/Screenshot 2025-10-22 at 11.24.41 AM_1761113005428.png")
+        st.image(hero_image, use_container_width=True)
+    except:
+        # Fallback to old banner if new one fails
+        st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
     
     # Upload section - clean and integrated into main page (with padding)
     st.markdown('<div class="content-section">', unsafe_allow_html=True)
