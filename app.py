@@ -346,12 +346,12 @@ def display_welcome_screen():
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image with targeted CSS
+    # Hero banner image with targeted CSS - temporarily using old banner with new height
     st.markdown("""
     <style>
     /* Target hero banner by source path */
     img[src*="BzIo2GnlaVnXUEmTRTUqs"] {
-        max-height: 250px !important;
+        max-height: 125px !important;
         object-fit: cover !important;
         object-position: center !important;
     }
