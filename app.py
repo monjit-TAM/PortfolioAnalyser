@@ -359,9 +359,9 @@ def display_welcome_screen():
     </style>
     """, unsafe_allow_html=True)
     
-    # Load and display hero banner using PIL to handle filename with spaces
+    # Load and display hero banner
     try:
-        hero_image = Image.open("attached_assets/Screenshot 2025-10-22 at 11.24.41 AM_1761113005428.png")
+        hero_image = Image.open("attached_assets/PortfolioAnalysisherobanner_1761113423621.png")
         st.image(hero_image, use_container_width=True)
     except:
         # Fallback to old banner if new one fails
