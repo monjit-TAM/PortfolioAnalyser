@@ -7,7 +7,13 @@ class Dashboard:
     def render(self, analysis_results, portfolio_data, current_data):
         """Render the main dashboard"""
         
-        st.header("📊 Portfolio Dashboard")
+        # Section header
+        st.markdown("""
+        <div style='margin-bottom: 20px;'>
+            <h2 style='color: #FF6B35; margin-bottom: 5px;'>📊 Portfolio Dashboard</h2>
+            <p style='color: #666; font-size: 14px;'>Key performance metrics and portfolio overview</p>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Key Metrics Row
         summary = analysis_results['portfolio_summary']
@@ -42,14 +48,14 @@ class Dashboard:
                 delta=None
             )
         
-        st.markdown("---")
+        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
         
-        # Portfolio Composition Charts
+        # Portfolio Composition Charts - with proper spacing
+        st.markdown("### 📈 Performance Overview")
+        st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("📈 Portfolio Performance Overview")
-            
             # Profit/Loss Distribution
             profit_stocks = summary['profitable_stocks']
             loss_stocks = summary['loss_making_stocks']
@@ -74,8 +80,6 @@ class Dashboard:
             st.plotly_chart(fig_performance, use_container_width=True)
         
         with col2:
-            st.subheader("💰 Investment vs Current Value")
-            
             # Investment vs Current Value
             fig_value = go.Figure()
             
@@ -95,9 +99,11 @@ class Dashboard:
             
             st.plotly_chart(fig_value, use_container_width=True)
         
-        st.markdown("---")
+        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
         
-        # Top Performers and Worst Performers
+        # Top Performers and Worst Performers - with proper headers
+        st.markdown("### 🏆 Stock Performance Highlights")
+        st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         
         stock_performance = pd.DataFrame(analysis_results['stock_performance'])
@@ -135,8 +141,9 @@ class Dashboard:
                 )
         
         # Portfolio Allocation Table
-        st.markdown("---")
-        st.subheader("📋 Portfolio Holdings Summary")
+        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
+        st.markdown("### 📋 Portfolio Holdings Summary")
+        st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
         
         display_df = stock_performance[['Stock Name', 'Sector', 'Category', 'Quantity', 'Buy Price', 'Current Price', 
                                       'Investment Value', 'Current Value', 'Absolute Gain/Loss', 'Percentage Gain/Loss']].copy()

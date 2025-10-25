@@ -209,17 +209,31 @@ def refresh_prices():
 def display_analysis():
     """Display comprehensive portfolio analysis"""
     
-    # Add controls for refresh and PDF download
+    # Professional header with centered title
+    st.markdown("""
+    <div style='text-align: center; margin-bottom: 25px; margin-top: 20px;'>
+        <h1 style='color: #FF6B35; margin-bottom: 10px; font-size: 32px; font-weight: 600;'>📊 Portfolio Analysis Report</h1>
+        <p style='color: #666; font-size: 16px; margin-bottom: 0;'>Comprehensive analysis of your investment portfolio</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Centered container for consistent width
+    st.markdown('<div style="max-width: 1400px; margin: 0 auto; padding: 0 15px;">', unsafe_allow_html=True)
+    
+    # Add controls for refresh and PDF download - aligned in a professional row
     col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
     
+    with col1:
+        st.markdown(f"**📅 Analysis Date:** {datetime.now().strftime('%B %d, %Y at %I:%M %p')}")
+    
     with col2:
-        if st.button("🔄 Refresh Prices", type="secondary", help="Update with latest stock prices"):
+        if st.button("🔄 Refresh Prices", type="secondary", help="Update with latest stock prices", use_container_width=True):
             with st.spinner("Refreshing prices..."):
                 refresh_prices()
     
     with col3:
         # Generate PDF report
-        if st.button("📄 Download Report", type="primary", help="Generate comprehensive PDF report"):
+        if st.button("📄 Download Report", type="primary", help="Generate comprehensive PDF report", use_container_width=True):
             with st.spinner("Generating PDF report..."):
                 try:
                     pdf_gen = PDFReportGenerator()
@@ -253,7 +267,9 @@ def display_analysis():
             time.sleep(300)  # 5 minutes
             st.rerun()
     
-    # Create tabs for different analysis sections
+    st.markdown("---")
+    
+    # Create tabs for different analysis sections - wrapped in centered professional container
     tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
         "📊 Dashboard", 
         "🏭 Sector Analysis", 
@@ -326,6 +342,9 @@ def display_analysis():
             st.session_state.portfolio_data,
             st.session_state.recommendations
         )
+    
+    # Close the centered container div
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
