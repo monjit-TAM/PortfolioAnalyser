@@ -209,16 +209,29 @@ def refresh_prices():
 def display_analysis():
     """Display comprehensive portfolio analysis"""
     
+    # Professional bordered container with shadow
+    st.markdown("""
+    <style>
+    .analysis-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    </style>
+    <div class="analysis-container">
+    """, unsafe_allow_html=True)
+    
     # Professional header with centered title
     st.markdown("""
-    <div style='text-align: center; margin-bottom: 25px; margin-top: 20px;'>
+    <div style='text-align: center; margin-bottom: 25px;'>
         <h1 style='color: #FF6B35; margin-bottom: 10px; font-size: 32px; font-weight: 600;'>📊 Portfolio Analysis Report</h1>
         <p style='color: #666; font-size: 16px; margin-bottom: 0;'>Comprehensive analysis of your investment portfolio</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Centered container for consistent width
-    st.markdown('<div style="max-width: 1400px; margin: 0 auto; padding: 0 15px;">', unsafe_allow_html=True)
     
     # Add controls for refresh and PDF download - aligned in a professional row
     col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
@@ -343,7 +356,7 @@ def display_analysis():
             st.session_state.recommendations
         )
     
-    # Close the centered container div
+    # Close the bordered container div
     st.markdown('</div>', unsafe_allow_html=True)
 
 def display_welcome_screen():
