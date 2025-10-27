@@ -7,16 +7,14 @@ class Dashboard:
     def render(self, analysis_results, portfolio_data, current_data):
         """Render the main dashboard"""
         
-        # Section header
-        st.markdown("""
-        <div style='margin-bottom: 20px;'>
-            <h2 style='color: #FF6B35; margin-bottom: 5px;'>📊 Portfolio Dashboard</h2>
-            <p style='color: #666; font-size: 14px;'>Key performance metrics and portfolio overview</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Key Metrics Row
+        # Key Metrics Row - in a card
         summary = analysis_results['portfolio_summary']
+        
+        st.markdown("""
+        <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
+                    padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
+            <h3 style='color: #FF6B35; margin-bottom: 15px; margin-top: 0;'>📊 Key Performance Metrics</h3>
+        """, unsafe_allow_html=True)
         
         col1, col2, col3, col4 = st.columns(4)
         
@@ -48,11 +46,15 @@ class Dashboard:
                 delta=None
             )
         
-        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)  # Close metrics card
         
-        # Portfolio Composition Charts - with proper spacing
-        st.markdown("### 📈 Performance Overview")
-        st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+        # Portfolio Composition Charts - in a card
+        st.markdown("""
+        <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
+                    padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
+            <h3 style='color: #FF6B35; margin-bottom: 15px; margin-top: 0;'>📈 Performance Overview</h3>
+        """, unsafe_allow_html=True)
+        
         col1, col2 = st.columns(2)
         
         with col1:
@@ -99,11 +101,15 @@ class Dashboard:
             
             st.plotly_chart(fig_value, use_container_width=True)
         
-        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)  # Close performance overview card
         
-        # Top Performers and Worst Performers - with proper headers
-        st.markdown("### 🏆 Stock Performance Highlights")
-        st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+        # Top Performers and Worst Performers - in a card
+        st.markdown("""
+        <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
+                    padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
+            <h3 style='color: #FF6B35; margin-bottom: 15px; margin-top: 0;'>🏆 Stock Performance Highlights</h3>
+        """, unsafe_allow_html=True)
+        
         col1, col2 = st.columns(2)
         
         stock_performance = pd.DataFrame(analysis_results['stock_performance'])
@@ -140,10 +146,14 @@ class Dashboard:
                     unsafe_allow_html=True
                 )
         
-        # Portfolio Allocation Table
-        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
-        st.markdown("### 📋 Portfolio Holdings Summary")
-        st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)  # Close highlights card
+        
+        # Portfolio Allocation Table - in a card
+        st.markdown("""
+        <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
+                    padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
+            <h3 style='color: #FF6B35; margin-bottom: 15px; margin-top: 0;'>📋 Portfolio Holdings Summary</h3>
+        """, unsafe_allow_html=True)
         
         display_df = stock_performance[['Stock Name', 'Sector', 'Category', 'Quantity', 'Buy Price', 'Current Price', 
                                       'Investment Value', 'Current Value', 'Absolute Gain/Loss', 'Percentage Gain/Loss']].copy()
@@ -156,3 +166,5 @@ class Dashboard:
         display_df.loc[:, 'Percentage Gain/Loss'] = display_df['Percentage Gain/Loss'].apply(lambda x: f"{x:+.2f}%")
         
         st.dataframe(display_df, use_container_width=True, height=400)
+        
+        st.markdown("</div>", unsafe_allow_html=True)  # Close holdings table card

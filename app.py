@@ -209,29 +209,61 @@ def refresh_prices():
 def display_analysis():
     """Display comprehensive portfolio analysis"""
     
-    # Professional bordered container with shadow
+    # Apply global styling for margins and card-based sections
     st.markdown("""
     <style>
-    .analysis-container {
-        max-width: 1400px;
-        margin: 20px auto;
-        padding: 30px;
+    /* Add margins to main container */
+    .main .block-container {
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 1400px !important;
+    }
+    
+    /* Style for section cards */
+    .section-card {
         background-color: #ffffff;
-        border: 2px solid #e0e0e0;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Header card styling */
+    .header-card {
+        background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
+        border: 2px solid #FF6B35;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 8px rgba(255, 107, 53, 0.1);
+    }
+    
+    /* Tab content styling */
+    div[data-testid="stTabs"] > div {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     </style>
-    <div class="analysis-container">
     """, unsafe_allow_html=True)
     
-    # Professional header with centered title
+    # Professional header with card styling
     st.markdown("""
-    <div style='text-align: center; margin-bottom: 25px;'>
-        <h1 style='color: #FF6B35; margin-bottom: 10px; font-size: 32px; font-weight: 600;'>📊 Portfolio Analysis Report</h1>
-        <p style='color: #666; font-size: 16px; margin-bottom: 0;'>Comprehensive analysis of your investment portfolio</p>
+    <div class="header-card">
+        <div style='text-align: center;'>
+            <h1 style='color: #FF6B35; margin-bottom: 10px; font-size: 32px; font-weight: 600;'>📊 Portfolio Analysis Report</h1>
+            <p style='color: #666; font-size: 16px; margin-bottom: 0;'>Comprehensive analysis of your investment portfolio</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Action buttons in a card
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
     
     # Add controls for refresh and PDF download - aligned in a professional row
     col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
@@ -280,9 +312,9 @@ def display_analysis():
             time.sleep(300)  # 5 minutes
             st.rerun()
     
-    st.markdown("---")
+    st.markdown('</div>', unsafe_allow_html=True)  # Close action buttons card
     
-    # Create tabs for different analysis sections - wrapped in centered professional container
+    # Create tabs for different analysis sections
     tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
         "📊 Dashboard", 
         "🏭 Sector Analysis", 
@@ -355,9 +387,6 @@ def display_analysis():
             st.session_state.portfolio_data,
             st.session_state.recommendations
         )
-    
-    # Close the bordered container div
-    st.markdown('</div>', unsafe_allow_html=True)
 
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
