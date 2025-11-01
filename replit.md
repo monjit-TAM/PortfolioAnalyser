@@ -4,9 +4,18 @@
 
 This Streamlit application offers comprehensive Indian stock market portfolio analysis, providing investors with detailed insights into performance, including sector analysis, benchmark comparisons, historical tracking, and AI-driven investment recommendations. It supports both value and growth investment perspectives, helping users make informed decisions based on uploaded portfolio data and real-time market information from Yahoo Finance. The system generates actionable insights across individual stock performance, sector allocation, benchmark comparisons, and rebalancing suggestions.
 
-## Recent Changes (October 2025)
+## Recent Changes (November 2025)
 
-### Bug Fixes Completed:
+### PDF Report Enhancements (November 1, 2025):
+1. **Comprehensive PDF Report**: Completely redesigned PDF generator to include ALL web dashboard sections for a truly comprehensive report matching the online analysis
+2. **Historical Performance Section**: Added portfolio value tracking over time with cumulative returns, peak value analysis, current drawdown calculations, and annualized volatility metrics
+3. **Rebalancing Suggestions**: Integrated portfolio rebalancing recommendations with current vs target allocation analysis (Balanced strategy: 50% Large Cap, 30% Mid Cap, 20% Small Cap), specific rebalancing actions by category
+4. **Customer Investment Profile**: Added comprehensive investor profiling including portfolio size categorization (Emerging/Moderate/Affluent/High Net Worth), experience level assessment, investment style analysis (Value/Growth/Balanced), and portfolio health score (0-100 scale)
+5. **Value/Growth Perspective Fix**: Fixed critical bug where Value and Growth investing perspectives were empty in PDF - corrected data key access from `value_perspective/growth_perspective` to `value_analysis/growth_analysis`
+6. **Ultra-Compact Layout**: Reduced all spacing throughout PDF to 3px for extremely compact, professional presentation while maintaining readability through proper table padding
+7. **Helper Methods**: Implemented robust calculation methods: `_calculate_portfolio_history()`, `_calculate_current_allocation()`, `_generate_rebalancing_actions()`, `_calculate_health_score()` with proper guard clauses for missing data
+
+### Bug Fixes Completed (October 2025):
 1. **Double Suffix Bug** (CRITICAL): Fixed data_fetcher.py to prevent duplicate .NS/.BO suffixes when stock names already include exchange identifiers (e.g., TCS.NS was becoming TCS.NS.NS)
 2. **Series Formatting Errors**: Resolved multiple pandas Series-to-scalar conversion issues in stock_performance.py for metrics like volatility, ATH, max drawdown, and potential gains
 3. **Historical Performance ValueError**: Fixed "Series is ambiguous" error in historical_performance.py by ensuring price values are scalars before calculations
