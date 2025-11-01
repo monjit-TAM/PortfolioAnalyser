@@ -67,8 +67,9 @@ class PDFReportGenerator:
             header_color = self.brand_color
         
         # Create table with or without column widths
+        # Note: reportlab's Table uses 'colWidths' (camelCase), not 'col_widths'
         if col_widths:
-            table = Table(data, col_widths=col_widths)
+            table = Table(data, colWidths=col_widths)
         else:
             table = Table(data)
         table.setStyle(TableStyle([
