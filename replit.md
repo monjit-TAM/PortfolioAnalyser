@@ -7,13 +7,25 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 ## Recent Changes (November 2025)
 
 ### PDF Report Enhancements (November 1, 2025):
-1. **Comprehensive PDF Report**: Completely redesigned PDF generator to include ALL web dashboard sections for a truly comprehensive report matching the online analysis
-2. **Historical Performance Section**: Added portfolio value tracking over time with cumulative returns, peak value analysis, current drawdown calculations, and annualized volatility metrics
-3. **Rebalancing Suggestions**: Integrated portfolio rebalancing recommendations with current vs target allocation analysis (Balanced strategy: 50% Large Cap, 30% Mid Cap, 20% Small Cap), specific rebalancing actions by category
-4. **Customer Investment Profile**: Added comprehensive investor profiling including portfolio size categorization (Emerging/Moderate/Affluent/High Net Worth), experience level assessment, investment style analysis (Value/Growth/Balanced), and portfolio health score (0-100 scale)
-5. **Value/Growth Perspective Fix**: Fixed critical bug where Value and Growth investing perspectives were empty in PDF - corrected data key access from `value_perspective/growth_perspective` to `value_analysis/growth_analysis`
-6. **Ultra-Compact Layout**: Reduced all spacing throughout PDF to 3px for extremely compact, professional presentation while maintaining readability through proper table padding
-7. **Helper Methods**: Implemented robust calculation methods: `_calculate_portfolio_history()`, `_calculate_current_allocation()`, `_generate_rebalancing_actions()`, `_calculate_health_score()` with proper guard clauses for missing data
+
+#### Complete Chart & Visualization Integration:
+1. **Chart Conversion System**: Implemented Plotly-to-PDF conversion using kaleido library with ImageReader and BytesIO for in-memory image handling, ensuring all charts render correctly during PDF generation
+2. **Performance Overview Charts** (NEW): Stock Performance Distribution (profitable vs loss-making), Investment vs Current Value comparison charts
+3. **Sector Analysis Charts** (ENHANCED): Sector Allocation Pie Chart, Sector Performance Bar Chart, Sector Insights table, Diversification Analysis with risk assessment, actionable Sector Recommendations
+4. **Benchmark Comparison Section** (NEW): Portfolio vs Market Indices comparison (NIFTY50, NIFTY Midcap 100, NIFTY Smallcap 100) with real-time data fetching, Benchmark Insights and performance analysis
+5. **Recommendation Distribution Chart** (NEW): Pie chart visualizing BUY/HOLD/SELL recommendation distribution
+6. **Enhanced Rebalancing** (CHARTS ADDED): Current vs Target Allocation comparison chart, Detailed Action Plan table with specific BUY/SELL actions and rationale, Implementation Tips cards with best practices
+7. **Enhanced Customer Profile** (CHARTS ADDED): Investment Style Analysis pie chart (Value/Growth/Balanced), Sector Allocation Preferences pie chart, Market Cap Distribution pie chart, Personalized Strategy Recommendations
+8. **Historical Performance Charts** (ENHANCED): Portfolio Value Over Time line chart, Cumulative Returns bar chart, Drawdown Analysis chart showing decline from peak
+
+#### Comprehensive Data Sections:
+9. **Comprehensive PDF Report**: PDF now includes ALL web dashboard sections - truly complete mirror of online analysis with tables, charts, graphs, and detailed insights
+10. **Historical Performance Section**: Portfolio value tracking over time with cumulative returns, peak value analysis, current drawdown calculations, and annualized volatility metrics
+11. **Rebalancing Suggestions**: Integrated portfolio rebalancing recommendations with current vs target allocation analysis (Balanced strategy: 50% Large Cap, 30% Mid Cap, 20% Small Cap), specific rebalancing actions by category
+12. **Customer Investment Profile**: Comprehensive investor profiling including portfolio size categorization (Emerging/Moderate/Affluent/High Net Worth), experience level assessment, investment style analysis (Value/Growth/Balanced), and portfolio health score (0-100 scale)
+13. **Value/Growth Perspective Fix**: Fixed critical bug where Value and Growth investing perspectives were empty in PDF - corrected data key access from `value_perspective/growth_perspective` to `value_analysis/growth_analysis`
+14. **Ultra-Compact Layout**: Reduced all spacing throughout PDF to 3px for extremely compact, professional presentation while maintaining readability through proper table padding
+15. **Helper Methods**: Implemented robust calculation methods: `_calculate_portfolio_history()`, `_calculate_current_allocation()`, `_generate_rebalancing_actions()`, `_calculate_health_score()` with proper guard clauses for missing data
 
 ### Bug Fixes Completed (October 2025):
 1. **Double Suffix Bug** (CRITICAL): Fixed data_fetcher.py to prevent duplicate .NS/.BO suffixes when stock names already include exchange identifiers (e.g., TCS.NS was becoming TCS.NS.NS)
