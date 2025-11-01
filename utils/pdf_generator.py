@@ -6,6 +6,11 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 import pandas as pd
 from datetime import datetime
+import plotly.graph_objects as go
+import plotly.express as px
+import io
+import tempfile
+import os
 
 class PDFReportGenerator:
     def __init__(self):
@@ -92,6 +97,37 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ]))
         return table
+    
+    def convert_plotly_to_image(self, fig, width=6*inch, height=3.5*inch):
+        """Convert a Plotly figure to a ReportLab Image object"""
+        from reportlab.lib.utils import ImageReader
+        
+        try:
+            # Create a temporary file to store the image
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
+                tmp_filename = tmp_file.name
+            
+            # Export the figure to PNG using kaleido
+            fig.write_image(tmp_filename, width=800, height=450, scale=2)
+            
+            # Read the image file into memory immediately
+            with open(tmp_filename, 'rb') as f:
+                img_bytes = io.BytesIO(f.read())
+            
+            # Clean up the temporary file NOW (we have the bytes in memory)
+            try:
+                os.unlink(tmp_filename)
+            except:
+                pass
+            
+            # Create a ReportLab Image object from the in-memory bytes
+            img = Image(ImageReader(img_bytes), width=width, height=height)
+            
+            return img
+        except Exception as e:
+            # If chart conversion fails, return a placeholder
+            print(f"Warning: Could not convert chart to image: {e}")
+            return None
 
     def generate_report(self, analysis_results, portfolio_data, recommendations, filename="portfolio_report.pdf", historical_data=None, current_data=None):
         """Generate comprehensive PDF report with all web data including historical performance, rebalancing, and customer profile"""
@@ -159,6 +195,12 @@ class PDFReportGenerator:
         elements.append(Spacer(1, 3))
         
         # ====================
+        # PERFORMANCE OVERVIEW with CHARTS
+        # ====================
+        elements.append(PageBreak())
+        self._create_performance_charts(analysis_results, elements)
+        
+        # ====================
         # DETAILED PORTFOLIO HOLDINGS
         # ====================
         elements.append(PageBreak())
@@ -220,10 +262,13 @@ class PDFReportGenerator:
         elements.append(metrics_table)
         
         # ====================
-        # SECTOR ANALYSIS
+        # SECTOR ANALYSIS with CHARTS
         # ====================
         elements.append(PageBreak())
-        elements.append(Paragraph("🏭 Sector Analysis", self.heading_style))
+        self._create_sector_charts(analysis_results, elements)
+        
+        # Detailed Sector Table
+        elements.append(Paragraph("📋 Detailed Sector Breakdown", self.subheading_style))
         elements.append(Spacer(1, 3))
         
         sector_analysis = pd.DataFrame(analysis_results['sector_analysis'])
@@ -311,10 +356,19 @@ class PDFReportGenerator:
             elements.append(Spacer(1, 3))
         
         # ====================
+        # BENCHMARK COMPARISON
+        # ====================
+        elements.append(PageBreak())
+        self._create_benchmark_section(analysis_results, portfolio_data, elements)
+        
+        # ====================
         # INVESTMENT RECOMMENDATIONS
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("💡 Investment Recommendations", self.heading_style))
+        
+        # Add Recommendation Distribution Chart
+        self._create_recommendation_charts(recommendations, elements)
         elements.append(Spacer(1, 3))
         
         # Summary count
@@ -455,11 +509,14 @@ class PDFReportGenerator:
         elements.append(worst_table)
         
         # ====================
-        # HISTORICAL PERFORMANCE
+        # HISTORICAL PERFORMANCE with CHARTS
         # ====================
         if historical_data:
             elements.append(PageBreak())
-            elements.append(Paragraph("📅 Historical Portfolio Performance", self.heading_style))
+            self._create_historical_performance_charts(historical_data, portfolio_data, elements)
+            
+            # Additional textual summary
+            elements.append(Paragraph("📋 Performance Summary Table", self.subheading_style))
             elements.append(Spacer(1, 3))
             
             # Calculate historical metrics
@@ -492,13 +549,16 @@ class PDFReportGenerator:
                 elements.append(hist_table)
         
         # ====================
-        # REBALANCING SUGGESTIONS
+        # REBALANCING SUGGESTIONS with CHARTS
         # ====================
         elements.append(PageBreak())
-        elements.append(Paragraph("⚖️ Portfolio Rebalancing Suggestions", self.heading_style))
+        self._create_enhanced_rebalancing_section(analysis_results, current_data, elements)
+        
+        # Additional Sector Rebalancing if needed
+        elements.append(Paragraph("📊 Sector Rebalancing Analysis", self.subheading_style))
         elements.append(Spacer(1, 3))
         
-        # Recommended allocation strategy (Balanced)
+        # Keep minimal sector rebalancing table
         strategy = 'Balanced'
         target_allocation = {
             'Large Cap': 50,
@@ -563,14 +623,13 @@ class PDFReportGenerator:
             elements.append(actions_table)
         
         # ====================
-        # CUSTOMER PROFILE
+        # CUSTOMER PROFILE with CHARTS
         # ====================
         elements.append(PageBreak())
-        elements.append(Paragraph("👤 Customer Investment Profile", self.heading_style))
-        elements.append(Spacer(1, 3))
+        self._create_enhanced_customer_profile_section(analysis_results, recommendations, elements)
         
-        # Portfolio Overview
-        elements.append(Paragraph("📊 Portfolio Overview", self.subheading_style))
+        # Additional Portfolio Details
+        elements.append(Paragraph("📊 Additional Portfolio Details", self.subheading_style))
         elements.append(Spacer(1, 3))
         
         summary = analysis_results['portfolio_summary']
@@ -745,6 +804,585 @@ class PDFReportGenerator:
         doc.build(elements)
         
         return filename
+    
+    def _create_performance_charts(self, analysis_results, elements):
+        """Add Performance Overview charts to PDF"""
+        elements.append(Paragraph("📈 Performance Overview", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        summary = analysis_results['portfolio_summary']
+        
+        # Stock Performance Distribution Chart
+        profit_stocks = summary['profitable_stocks']
+        loss_stocks = summary['loss_making_stocks']
+        
+        fig_performance = go.Figure(data=[
+            go.Bar(
+                x=['Profitable', 'Loss-making'],
+                y=[profit_stocks, loss_stocks],
+                marker_color=['green', 'red'],
+                text=[profit_stocks, loss_stocks],
+                textposition='auto'
+            )
+        ])
+        
+        fig_performance.update_layout(
+            title="Stock Performance Distribution",
+            xaxis_title="Performance Category",
+            yaxis_title="Number of Stocks",
+            height=350,
+            showlegend=False
+        )
+        
+        chart_img = self.convert_plotly_to_image(fig_performance, width=5.5*inch, height=3*inch)
+        if chart_img:
+            elements.append(chart_img)
+            elements.append(Spacer(1, 3))
+        
+        # Investment vs Current Value Chart
+        fig_value = go.Figure(data=[
+            go.Bar(
+                x=['Total Investment', 'Current Value'],
+                y=[summary['total_investment'], summary['current_value']],
+                marker_color=['lightblue', 'green' if summary['total_gain_loss'] >= 0 else 'red'],
+                text=[f"₹{summary['total_investment']:,.0f}", f"₹{summary['current_value']:,.0f}"],
+                textposition='auto'
+            )
+        ])
+        
+        fig_value.update_layout(
+            title="Investment vs Current Portfolio Value",
+            yaxis_title="Value (₹)",
+            height=350,
+            showlegend=False
+        )
+        
+        chart_img2 = self.convert_plotly_to_image(fig_value, width=5.5*inch, height=3*inch)
+        if chart_img2:
+            elements.append(chart_img2)
+        
+        elements.append(Spacer(1, 3))
+    
+    def _create_sector_charts(self, analysis_results, elements):
+        """Add Sector Analysis charts and insights to PDF"""
+        sector_data = pd.DataFrame(analysis_results['sector_analysis'])
+        
+        if sector_data.empty:
+            return
+        
+        elements.append(Paragraph("🏭 Sector Analysis", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Sector Allocation Pie Chart
+        fig_pie = px.pie(
+            sector_data,
+            values='Current Value',
+            names='Sector',
+            title="Sector Allocation by Value",
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        
+        fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+        fig_pie.update_layout(height=350)
+        
+        chart_img = self.convert_plotly_to_image(fig_pie, width=5.5*inch, height=3.5*inch)
+        if chart_img:
+            elements.append(chart_img)
+            elements.append(Spacer(1, 3))
+        
+        # Sector Performance Bar Chart
+        colors_bar = ['green' if x >= 0 else 'red' for x in sector_data['Sector Return %']]
+        
+        fig_bar = go.Figure(data=[
+            go.Bar(
+                x=sector_data['Sector'],
+                y=sector_data['Sector Return %'],
+                marker_color=colors_bar,
+                text=[f"{x:+.2f}%" for x in sector_data['Sector Return %']],
+                textposition='auto'
+            )
+        ])
+        
+        fig_bar.update_layout(
+            title="Sector-wise Returns (%)",
+            xaxis_title="Sector",
+            yaxis_title="Return %",
+            height=350
+        )
+        
+        chart_img2 = self.convert_plotly_to_image(fig_bar, width=5.5*inch, height=3*inch)
+        if chart_img2:
+            elements.append(chart_img2)
+        
+        elements.append(Spacer(1, 3))
+        
+        # Sector Insights
+        elements.append(Paragraph("💡 Sector Insights", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        best_sector = sector_data.loc[sector_data['Sector Return %'].idxmax()]
+        worst_sector = sector_data.loc[sector_data['Sector Return %'].idxmin()]
+        most_allocated = sector_data.loc[sector_data['Current Value'].idxmax()]
+        
+        insights_data = [
+            ['Insight', 'Details'],
+            ['Best Performing Sector', f"{best_sector['Sector']} ({best_sector['Sector Return %']:+.2f}%)"],
+            ['Worst Performing Sector', f"{worst_sector['Sector']} ({worst_sector['Sector Return %']:+.2f}%)"],
+            ['Most Allocated Sector', f"{most_allocated['Sector']} (₹{most_allocated['Current Value']:,.0f}, {most_allocated['Percentage of Portfolio']:.1f}%)"],
+            ['Total Sectors', f"{len(sector_data)} sectors"]
+        ]
+        
+        insights_table = self.create_card_table(insights_data, col_widths=[2*inch, 4.5*inch])
+        elements.append(insights_table)
+        elements.append(Spacer(1, 3))
+        
+        # Diversification Analysis
+        num_sectors = len(sector_data)
+        max_sector_pct = sector_data['Percentage of Portfolio'].max()
+        
+        elements.append(Paragraph("📊 Diversification Analysis", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        div_data = [
+            ['Metric', 'Value', 'Assessment'],
+            ['Number of Sectors', str(num_sectors), 
+             'Excellent' if num_sectors >= 6 else 'Good' if num_sectors >= 4 else 'Needs Improvement'],
+            ['Max Sector Concentration', f"{max_sector_pct:.1f}%",
+             'Low Risk' if max_sector_pct < 30 else 'Moderate Risk' if max_sector_pct < 50 else 'High Risk']
+        ]
+        
+        div_table = self.create_card_table(div_data, col_widths=[2*inch, 1.5*inch, 2*inch])
+        elements.append(div_table)
+        elements.append(Spacer(1, 3))
+        
+        # Sector Recommendations
+        elements.append(Paragraph("💡 Sector Recommendations", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        rec_text = []
+        if max_sector_pct > 40:
+            rec_text.append(f"• Consider reducing exposure to {most_allocated['Sector']} (currently {max_sector_pct:.1f}%)")
+        if num_sectors < 5:
+            rec_text.append("• Diversify into additional sectors to reduce concentration risk")
+        if worst_sector['Sector Return %'] < -15:
+            rec_text.append(f"• Review holdings in {worst_sector['Sector']} sector (currently {worst_sector['Sector Return %']:+.2f}%)")
+        if best_sector['Sector Return %'] > 20:
+            rec_text.append(f"• Consider booking partial profits in {best_sector['Sector']} sector")
+        
+        if rec_text:
+            for rec in rec_text:
+                elements.append(Paragraph(rec, self.styles['Normal']))
+        else:
+            elements.append(Paragraph("• Your sector allocation is well-balanced", self.styles['Normal']))
+        
+        elements.append(Spacer(1, 3))
+    
+    def _create_recommendation_charts(self, recommendations, elements):
+        """Add Recommendation charts to PDF"""
+        if not recommendations:
+            return
+        
+        # Count recommendations
+        buy_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'BUY')
+        hold_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'HOLD')
+        sell_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'SELL')
+        
+        # Recommendation Distribution Pie Chart
+        if buy_count + hold_count + sell_count > 0:
+            elements.append(Paragraph("📊 Recommendation Distribution", self.subheading_style))
+            elements.append(Spacer(1, 3))
+            
+            fig_rec = px.pie(
+                values=[buy_count, hold_count, sell_count],
+                names=['BUY', 'HOLD', 'SELL'],
+                title="Recommendation Distribution",
+                color_discrete_map={'BUY': 'green', 'HOLD': 'orange', 'SELL': 'red'}
+            )
+            
+            fig_rec.update_traces(textposition='inside', textinfo='percent+label')
+            fig_rec.update_layout(height=300)
+            
+            chart_img = self.convert_plotly_to_image(fig_rec, width=5*inch, height=2.8*inch)
+            if chart_img:
+                elements.append(chart_img)
+            
+            elements.append(Spacer(1, 3))
+    
+    def _create_benchmark_section(self, analysis_results, portfolio_data, elements):
+        """Add comprehensive Benchmark Comparison section to PDF"""
+        from utils.data_fetcher import DataFetcher
+        
+        elements.append(Paragraph("📊 Benchmark Comparison", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        stock_performance = pd.DataFrame(analysis_results['stock_performance'])
+        
+        if stock_performance.empty:
+            return
+        
+        # Portfolio vs Market Indices
+        elements.append(Paragraph("🎯 Portfolio vs Market Indices", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        portfolio_return = analysis_results['portfolio_summary']['total_gain_loss_percentage']
+        
+        # Get benchmark returns
+        data_fetcher = DataFetcher()
+        benchmark_mapping = {
+            'Large Cap': 'NIFTY50',
+            'Mid Cap': 'NIFTY_MIDCAP_100',
+            'Small Cap': 'NIFTY_SMALLCAP_100'
+        }
+        
+        # Calculate benchmark returns
+        benchmark_returns = {}
+        for category, benchmark in benchmark_mapping.items():
+            category_stocks = stock_performance[stock_performance['Category'] == category]
+            if not category_stocks.empty:
+                avg_buy_date = pd.to_datetime(portfolio_data[portfolio_data['Stock Name'].isin(category_stocks['Stock Name'])]['Buy Date']).min()
+                if pd.notna(avg_buy_date):
+                    bench_data = data_fetcher.get_benchmark_data(benchmark, avg_buy_date.strftime('%Y-%m-%d'))
+                    if not bench_data.empty:
+                        bench_return = ((bench_data['Close'].iloc[-1] - bench_data['Close'].iloc[0]) / bench_data['Close'].iloc[0]) * 100
+                        benchmark_returns[benchmark] = bench_return
+        
+        # Benchmark comparison table
+        bench_data = [
+            ['Index', 'Return', 'vs Portfolio'],
+            ['Portfolio', f"{portfolio_return:+.2f}%", '-'],
+        ]
+        
+        for index_name, return_val in benchmark_returns.items():
+            diff = portfolio_return - return_val
+            bench_data.append([index_name, f"{return_val:+.2f}%", f"{diff:+.2f}%"])
+        
+        bench_table = self.create_card_table(bench_data, col_widths=[2.5*inch, 1.5*inch, 2*inch])
+        elements.append(bench_table)
+        elements.append(Spacer(1, 3))
+        
+        # Benchmark Insights
+        elements.append(Paragraph("💡 Benchmark Insights", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        insights = []
+        nifty_return = benchmark_returns.get('NIFTY50', 0)
+        if portfolio_return > nifty_return:
+            insights.append(f"• Your portfolio is outperforming NIFTY 50 by {portfolio_return - nifty_return:+.2f}%")
+        else:
+            insights.append(f"• Your portfolio is underperforming NIFTY 50 by {abs(portfolio_return - nifty_return):.2f}%")
+        
+        if portfolio_return > 0:
+            insights.append("• Your portfolio is generating positive returns")
+        else:
+            insights.append("• Consider reviewing your investment strategy to improve returns")
+        
+        for insight in insights:
+            elements.append(Paragraph(insight, self.styles['Normal']))
+        
+        elements.append(Spacer(1, 3))
+    
+    def _create_enhanced_rebalancing_section(self, analysis_results, current_data, elements):
+        """Add enhanced Rebalancing section with charts and detailed actions to PDF"""
+        elements.append(Paragraph("⚖️ Enhanced Portfolio Rebalancing", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Strategy description
+        elements.append(Paragraph("📊 Recommended Strategy: Balanced", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        strategy_text = "The Balanced strategy allocates: 50% Large Cap (stability), 30% Mid Cap (growth), 20% Small Cap (high growth potential)"
+        elements.append(Paragraph(strategy_text, self.styles['Normal']))
+        elements.append(Spacer(1, 3))
+        
+        # Current vs Target Allocation
+        current_allocation = self._calculate_current_allocation(analysis_results)
+        target_allocation = {'Large Cap': 50, 'Mid Cap': 30, 'Small Cap': 20}
+        
+        # Create comparison chart
+        categories = list(target_allocation.keys())
+        current_values = [current_allocation.get(cat, 0) for cat in categories]
+        target_values = [target_allocation[cat] for cat in categories]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name='Current Allocation',
+            x=categories,
+            y=current_values,
+            marker_color='lightblue',
+            text=[f"{v:.1f}%" for v in current_values],
+            textposition='auto'
+        ))
+        fig.add_trace(go.Bar(
+            name='Target Allocation',
+            x=categories,
+            y=target_values,
+            marker_color='green',
+            text=[f"{v:.1f}%" for v in target_values],
+            textposition='auto'
+        ))
+        
+        fig.update_layout(
+            title="Current vs Target Allocation",
+            xaxis_title="Category",
+            yaxis_title="Allocation %",
+            barmode='group',
+            height=350
+        )
+        
+        chart_img = self.convert_plotly_to_image(fig, width=5.5*inch, height=3*inch)
+        if chart_img:
+            elements.append(chart_img)
+        
+        elements.append(Spacer(1, 3))
+        
+        # Detailed Rebalancing Actions
+        elements.append(Paragraph("📋 Detailed Rebalancing Actions", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        portfolio_value = analysis_results['portfolio_summary']['current_value']
+        actions = self._generate_rebalancing_actions(current_allocation, target_allocation, portfolio_value, analysis_results)
+        
+        if actions:
+            actions_data = [['Category', 'Action', 'Amount', 'Description']]
+            for action in actions:
+                actions_data.append([
+                    action['category'],
+                    action['action'],
+                    f"₹{abs(action['amount']):,.0f}",
+                    action['description']
+                ])
+            
+            actions_table = self.create_card_table(actions_data, col_widths=[1.3*inch, 0.8*inch, 1.3*inch, 3.1*inch])
+            elements.append(actions_table)
+        else:
+            elements.append(Paragraph("Your portfolio allocation is well-balanced. No rebalancing needed.", self.styles['Normal']))
+        
+        elements.append(Spacer(1, 3))
+        
+        # Implementation Tips
+        elements.append(Paragraph("💡 Implementation Tips", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        tips = [
+            "• Rebalance gradually over 2-3 months to minimize market timing risk",
+            "• Consider tax implications before selling profitable positions",
+            "• Use SIP (Systematic Investment Plan) for accumulating new positions",
+            "• Review and rebalance quarterly or when allocation drifts by >5%",
+            "• Maintain emergency fund before aggressive rebalancing"
+        ]
+        
+        for tip in tips:
+            elements.append(Paragraph(tip, self.styles['Normal']))
+        
+        elements.append(Spacer(1, 3))
+    
+    def _create_enhanced_customer_profile_section(self, analysis_results, recommendations, elements):
+        """Add enhanced Customer Profile section with charts to PDF"""
+        elements.append(Paragraph("👤 Enhanced Investment Profile", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        summary = analysis_results['portfolio_summary']
+        sector_data = pd.DataFrame(analysis_results['sector_analysis'])
+        category_data = pd.DataFrame(analysis_results['category_analysis'])
+        
+        # Investment Style Analysis
+        elements.append(Paragraph("📊 Investment Style Analysis", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Calculate investment style
+        value_count = sum(1 for rec in recommendations if rec.get('value_analysis', {}).get('action') == 'BUY')
+        growth_count = sum(1 for rec in recommendations if rec.get('growth_analysis', {}).get('action') == 'BUY')
+        
+        total_recs = len(recommendations) if recommendations else 1
+        value_pct = (value_count / total_recs) * 100
+        growth_pct = (growth_count / total_recs) * 100
+        balanced_pct = 100 - value_pct - growth_pct if value_pct + growth_pct < 100 else 0
+        
+        # Investment style pie chart
+        if value_pct + growth_pct > 0:
+            fig_style = px.pie(
+                values=[value_pct, growth_pct, balanced_pct] if balanced_pct > 0 else [value_pct, growth_pct],
+                names=['Value', 'Growth', 'Balanced'] if balanced_pct > 0 else ['Value', 'Growth'],
+                title="Investment Style Distribution",
+                color_discrete_map={'Value': 'blue', 'Growth': 'green', 'Balanced': 'orange'}
+            )
+            
+            fig_style.update_traces(textposition='inside', textinfo='percent+label')
+            fig_style.update_layout(height=300)
+            
+            chart_img = self.convert_plotly_to_image(fig_style, width=5*inch, height=2.8*inch)
+            if chart_img:
+                elements.append(chart_img)
+            
+            elements.append(Spacer(1, 3))
+        
+        # Sector Preference Pie Chart
+        if not sector_data.empty:
+            elements.append(Paragraph("🏭 Sector Allocation Preferences", self.subheading_style))
+            elements.append(Spacer(1, 3))
+            
+            fig_sector = px.pie(
+                sector_data,
+                values='Current Value',
+                names='Sector',
+                title="Sector Allocation",
+                color_discrete_sequence=px.colors.qualitative.Pastel
+            )
+            
+            fig_sector.update_traces(textposition='inside', textinfo='percent+label')
+            fig_sector.update_layout(height=300)
+            
+            chart_img2 = self.convert_plotly_to_image(fig_sector, width=5*inch, height=2.8*inch)
+            if chart_img2:
+                elements.append(chart_img2)
+            
+            elements.append(Spacer(1, 3))
+        
+        # Market Cap Preference Pie Chart
+        if not category_data.empty:
+            elements.append(Paragraph("📈 Market Cap Allocation", self.subheading_style))
+            elements.append(Spacer(1, 3))
+            
+            fig_cap = px.pie(
+                category_data,
+                values='Current Value',
+                names='Category',
+                title="Market Cap Distribution",
+                color_discrete_map={'Large Cap': 'darkblue', 'Mid Cap': 'orange', 'Small Cap': 'lightblue'}
+            )
+            
+            fig_cap.update_traces(textposition='inside', textinfo='percent+label')
+            fig_cap.update_layout(height=300)
+            
+            chart_img3 = self.convert_plotly_to_image(fig_cap, width=5*inch, height=2.8*inch)
+            if chart_img3:
+                elements.append(chart_img3)
+            
+            elements.append(Spacer(1, 3))
+        
+        # Personalized Strategy Recommendations
+        elements.append(Paragraph("💡 Personalized Strategy Recommendations", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        portfolio_size = summary['current_value']
+        num_stocks = summary['number_of_stocks']
+        
+        strategy_recs = []
+        if portfolio_size < 500000:
+            strategy_recs.append("• Focus on building a core portfolio of 8-10 quality large-cap stocks")
+        elif portfolio_size < 2500000:
+            strategy_recs.append("• Diversify into mid-cap stocks for enhanced growth potential")
+        else:
+            strategy_recs.append("• Consider alternative investments and international diversification")
+        
+        if num_stocks < 8:
+            strategy_recs.append("• Increase portfolio diversification to 10-15 stocks across sectors")
+        elif num_stocks > 25:
+            strategy_recs.append("• Consider consolidating holdings to improve portfolio management")
+        
+        for rec in strategy_recs:
+            elements.append(Paragraph(rec, self.styles['Normal']))
+        
+        elements.append(Spacer(1, 3))
+    
+    def _create_historical_performance_charts(self, historical_data, portfolio_data, elements):
+        """Add Historical Performance charts to PDF"""
+        import numpy as np
+        
+        portfolio_history = self._calculate_portfolio_history(portfolio_data, historical_data)
+        
+        if portfolio_history.empty:
+            return
+        
+        elements.append(Paragraph("📈 Historical Performance Charts", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Portfolio Value Over Time Chart
+        fig_value = go.Figure()
+        fig_value.add_trace(go.Scatter(
+            x=portfolio_history['Date'],
+            y=portfolio_history['Portfolio_Value'],
+            mode='lines',
+            name='Portfolio Value',
+            line=dict(color='green', width=2)
+        ))
+        fig_value.add_trace(go.Scatter(
+            x=portfolio_history['Date'],
+            y=portfolio_history['Investment_Value'],
+            mode='lines',
+            name='Investment (Cost Basis)',
+            line=dict(color='blue', width=2, dash='dash')
+        ))
+        
+        fig_value.update_layout(
+            title="Portfolio Value Over Time",
+            xaxis_title="Date",
+            yaxis_title="Value (₹)",
+            height=350,
+            showlegend=True
+        )
+        
+        chart_img = self.convert_plotly_to_image(fig_value, width=5.5*inch, height=3*inch)
+        if chart_img:
+            elements.append(chart_img)
+        
+        elements.append(Spacer(1, 3))
+        
+        # Cumulative Returns Chart
+        portfolio_history_copy = portfolio_history.copy()
+        portfolio_history_copy['Cumulative_Return'] = ((portfolio_history_copy['Portfolio_Value'] - portfolio_history_copy['Investment_Value']) / portfolio_history_copy['Investment_Value']) * 100
+        
+        fig_returns = go.Figure()
+        colors_ret = ['green' if x >= 0 else 'red' for x in portfolio_history_copy['Cumulative_Return']]
+        
+        fig_returns.add_trace(go.Bar(
+            x=portfolio_history_copy['Date'],
+            y=portfolio_history_copy['Cumulative_Return'],
+            marker_color=colors_ret,
+            name='Cumulative Return %'
+        ))
+        
+        fig_returns.update_layout(
+            title="Cumulative Returns Over Time",
+            xaxis_title="Date",
+            yaxis_title="Return %",
+            height=350,
+            showlegend=False
+        )
+        
+        chart_img2 = self.convert_plotly_to_image(fig_returns, width=5.5*inch, height=3*inch)
+        if chart_img2:
+            elements.append(chart_img2)
+        
+        elements.append(Spacer(1, 3))
+        
+        # Drawdown Analysis Chart
+        peak_value = portfolio_history['Portfolio_Value'].expanding().max()
+        drawdown = ((portfolio_history['Portfolio_Value'] - peak_value) / peak_value) * 100
+        
+        fig_drawdown = go.Figure()
+        fig_drawdown.add_trace(go.Scatter(
+            x=portfolio_history['Date'],
+            y=drawdown,
+            mode='lines',
+            fill='tozeroy',
+            name='Drawdown %',
+            line=dict(color='red', width=2)
+        ))
+        
+        fig_drawdown.update_layout(
+            title="Drawdown Analysis (Decline from Peak)",
+            xaxis_title="Date",
+            yaxis_title="Drawdown %",
+            height=350,
+            showlegend=False
+        )
+        
+        chart_img3 = self.convert_plotly_to_image(fig_drawdown, width=5.5*inch, height=3*inch)
+        if chart_img3:
+            elements.append(chart_img3)
+        
+        elements.append(Spacer(1, 3))
     
     def _calculate_portfolio_history(self, portfolio_data, historical_data):
         """Calculate portfolio value over time"""
