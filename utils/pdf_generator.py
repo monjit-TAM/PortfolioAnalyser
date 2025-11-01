@@ -115,17 +115,17 @@ class PDFReportGenerator:
             logo = Image("attached_assets/Alphalens_1760976199318.png", width=4.5*inch, height=1.7*inch)
             logo.hAlign = 'CENTER'
             elements.append(logo)
-            elements.append(Spacer(1, 12))
+            elements.append(Spacer(1, 3))
         except:
             pass
         
         elements.append(Paragraph("Indian Stock Market", self.title_style))
         elements.append(Paragraph("Portfolio Analysis Report", self.title_style))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         report_date = datetime.now().strftime('%d %B %Y, %I:%M %p')
         elements.append(Paragraph(f"Generated on: {report_date}", self.subtitle_style))
-        elements.append(Spacer(1, 18))
+        elements.append(Spacer(1, 3))
         
         # Company footer on cover page
         footer_style = ParagraphStyle('Footer', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=9, textColor=colors.grey)
@@ -139,7 +139,7 @@ class PDFReportGenerator:
         # EXECUTIVE SUMMARY
         # ====================
         elements.append(Paragraph("📊 Executive Summary", self.heading_style))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         summary = analysis_results['portfolio_summary']
         
@@ -156,14 +156,14 @@ class PDFReportGenerator:
         
         summary_table = self.create_card_table(summary_data, col_widths=[3.5*inch, 3*inch])
         elements.append(summary_table)
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         # ====================
         # DETAILED PORTFOLIO HOLDINGS
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("📋 Detailed Portfolio Holdings", self.heading_style))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         stock_performance = pd.DataFrame(analysis_results['stock_performance'])
         
@@ -188,11 +188,11 @@ class PDFReportGenerator:
             col_widths=[1.1*inch, 0.9*inch, 0.5*inch, 0.8*inch, 0.8*inch, 0.9*inch, 0.9*inch, 0.8*inch, 0.8*inch]
         )
         elements.append(holdings_table)
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         # Stock Performance Metrics Table
         elements.append(Paragraph("📈 Stock Performance Metrics", self.subheading_style))
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         metrics_data = [['Stock', 'Category', 'Volatility', 'All-Time High', 'Max Drawdown', 'Potential to ATH']]
         
@@ -224,7 +224,7 @@ class PDFReportGenerator:
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("🏭 Sector Analysis", self.heading_style))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         sector_analysis = pd.DataFrame(analysis_results['sector_analysis'])
         
@@ -247,14 +247,14 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#9b59b6')
         )
         elements.append(sector_table)
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         # ====================
         # CATEGORY ANALYSIS
         # ====================
         if 'category_analysis' in analysis_results and len(analysis_results['category_analysis']) > 0:
             elements.append(Paragraph("📊 Category Analysis (Large/Mid/Small Cap)", self.subheading_style))
-            elements.append(Spacer(1, 8))
+            elements.append(Spacer(1, 3))
             
             category_analysis = pd.DataFrame(analysis_results['category_analysis'])
             
@@ -276,7 +276,7 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#27ae60')
             )
             elements.append(category_table)
-            elements.append(Spacer(1, 8))
+            elements.append(Spacer(1, 3))
         
         # ====================
         # BENCHMARK COMPARISON
@@ -284,7 +284,7 @@ class PDFReportGenerator:
         if 'benchmark_comparison' in analysis_results:
             elements.append(PageBreak())
             elements.append(Paragraph("📊 Benchmark Comparison", self.heading_style))
-            elements.append(Spacer(1, 10))
+            elements.append(Spacer(1, 3))
             
             benchmark = analysis_results['benchmark_comparison']
             
@@ -308,14 +308,14 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#e67e22')
             )
             elements.append(benchmark_table)
-            elements.append(Spacer(1, 8))
+            elements.append(Spacer(1, 3))
         
         # ====================
         # INVESTMENT RECOMMENDATIONS
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("💡 Investment Recommendations", self.heading_style))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         # Summary count
         buy_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'BUY')
@@ -335,71 +335,67 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#f39c12')
         )
         elements.append(rec_summary_table)
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         # Value Perspective Recommendations
         elements.append(Paragraph("📈 Value Investing Perspective", self.subheading_style))
-        elements.append(Spacer(1, 5))
+        elements.append(Spacer(1, 3))
         
-        value_rec_data = [['Stock', 'Action', 'Confidence', 'Key Rationale']]
+        value_rec_data = [['Stock', 'Action', 'Key Rationale']]
         
         for rec in recommendations:
-            # Access the nested structure correctly
-            value_persp = rec.get('value_perspective', {})
+            # Access the correct key: value_analysis
+            value_persp = rec.get('value_analysis', {})
             if value_persp:
                 value_action = value_persp.get('recommendation', 'HOLD')
-                value_conf = value_persp.get('confidence', 'Medium')
                 rationale = value_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = rationale[0][:65] + '...' if len(rationale[0]) > 65 else rationale[0]
+                    rationale_text = rationale[0][:80] + '...' if len(rationale[0]) > 80 else rationale[0]
                 else:
                     rationale_text = 'Analysis based on fundamentals'
                 
                 value_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     value_action,
-                    value_conf,
                     rationale_text
                 ])
         
         if len(value_rec_data) > 1:
             value_rec_table = self.create_card_table(
                 value_rec_data,
-                col_widths=[1.3*inch, 0.9*inch, 1.1*inch, 3.5*inch],
+                col_widths=[1.5*inch, 1*inch, 4.3*inch],
                 header_color=colors.HexColor('#2980b9')
             )
             elements.append(value_rec_table)
-            elements.append(Spacer(1, 8))
+            elements.append(Spacer(1, 3))
         
         # Growth Perspective Recommendations
         elements.append(Paragraph("🚀 Growth Investing Perspective", self.subheading_style))
-        elements.append(Spacer(1, 5))
+        elements.append(Spacer(1, 3))
         
-        growth_rec_data = [['Stock', 'Action', 'Confidence', 'Key Rationale']]
+        growth_rec_data = [['Stock', 'Action', 'Key Rationale']]
         
         for rec in recommendations:
-            # Access the nested structure correctly
-            growth_persp = rec.get('growth_perspective', {})
+            # Access the correct key: growth_analysis
+            growth_persp = rec.get('growth_analysis', {})
             if growth_persp:
                 growth_action = growth_persp.get('recommendation', 'HOLD')
-                growth_conf = growth_persp.get('confidence', 'Medium')
                 rationale = growth_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = rationale[0][:65] + '...' if len(rationale[0]) > 65 else rationale[0]
+                    rationale_text = rationale[0][:80] + '...' if len(rationale[0]) > 80 else rationale[0]
                 else:
                     rationale_text = 'Analysis based on growth metrics'
                 
                 growth_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     growth_action,
-                    growth_conf,
                     rationale_text
                 ])
         
         if len(growth_rec_data) > 1:
             growth_rec_table = self.create_card_table(
                 growth_rec_data,
-                col_widths=[1.3*inch, 0.9*inch, 1.1*inch, 3.5*inch],
+                col_widths=[1.5*inch, 1*inch, 4.3*inch],
                 header_color=colors.HexColor('#16a085')
             )
             elements.append(growth_rec_table)
@@ -409,11 +405,11 @@ class PDFReportGenerator:
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("🏆 Performance Highlights", self.heading_style))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         # Top 5 performers
         elements.append(Paragraph("Top 5 Performers", self.subheading_style))
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         top_performers = stock_performance.nlargest(5, 'Percentage Gain/Loss')
         top_data = [['Stock', 'Investment', 'Current Value', 'Gain/Loss', 'Return %']]
@@ -433,11 +429,11 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#27ae60')
         )
         elements.append(top_table)
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         # Worst 5 performers
         elements.append(Paragraph("Worst 5 Performers", self.subheading_style))
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         worst_performers = stock_performance.nsmallest(5, 'Percentage Gain/Loss')
         worst_data = [['Stock', 'Investment', 'Current Value', 'Gain/Loss', 'Return %']]
@@ -463,7 +459,7 @@ class PDFReportGenerator:
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("⚠️ Disclaimer", self.heading_style))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 3))
         
         disclaimer_text = """
         This portfolio analysis report is generated for informational purposes only and should not be construed as financial, 
@@ -486,11 +482,11 @@ class PDFReportGenerator:
         
         disclaimer_para = Paragraph(disclaimer_text, self.styles['Normal'])
         elements.append(disclaimer_para)
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         # Company footer
         elements.append(Paragraph("About Alphalens", self.subheading_style))
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 3))
         
         company_text = """
         <b>Alphalens</b> is a comprehensive portfolio analysis platform developed by <b>Edhaz Financial Services Private Limited</b>. 
