@@ -115,17 +115,17 @@ class PDFReportGenerator:
             logo = Image("attached_assets/Alphalens_1760976199318.png", width=4.5*inch, height=1.7*inch)
             logo.hAlign = 'CENTER'
             elements.append(logo)
-            elements.append(Spacer(1, 25))
+            elements.append(Spacer(1, 12))
         except:
             pass
         
         elements.append(Paragraph("Indian Stock Market", self.title_style))
         elements.append(Paragraph("Portfolio Analysis Report", self.title_style))
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 10))
         
         report_date = datetime.now().strftime('%d %B %Y, %I:%M %p')
         elements.append(Paragraph(f"Generated on: {report_date}", self.subtitle_style))
-        elements.append(Spacer(1, 40))
+        elements.append(Spacer(1, 18))
         
         # Company footer on cover page
         footer_style = ParagraphStyle('Footer', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=9, textColor=colors.grey)
@@ -156,7 +156,7 @@ class PDFReportGenerator:
         
         summary_table = self.create_card_table(summary_data, col_widths=[3.5*inch, 3*inch])
         elements.append(summary_table)
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 10))
         
         # ====================
         # DETAILED PORTFOLIO HOLDINGS
@@ -188,7 +188,7 @@ class PDFReportGenerator:
             col_widths=[1.1*inch, 0.9*inch, 0.5*inch, 0.8*inch, 0.8*inch, 0.9*inch, 0.9*inch, 0.8*inch, 0.8*inch]
         )
         elements.append(holdings_table)
-        elements.append(Spacer(1, 15))
+        elements.append(Spacer(1, 8))
         
         # Stock Performance Metrics Table
         elements.append(Paragraph("📈 Stock Performance Metrics", self.subheading_style))
@@ -247,7 +247,7 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#9b59b6')
         )
         elements.append(sector_table)
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 10))
         
         # ====================
         # CATEGORY ANALYSIS
@@ -276,7 +276,7 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#27ae60')
             )
             elements.append(category_table)
-            elements.append(Spacer(1, 15))
+            elements.append(Spacer(1, 8))
         
         # ====================
         # BENCHMARK COMPARISON
@@ -308,7 +308,7 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#e67e22')
             )
             elements.append(benchmark_table)
-            elements.append(Spacer(1, 15))
+            elements.append(Spacer(1, 8))
         
         # ====================
         # INVESTMENT RECOMMENDATIONS
@@ -335,23 +335,28 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#f39c12')
         )
         elements.append(rec_summary_table)
-        elements.append(Spacer(1, 15))
+        elements.append(Spacer(1, 8))
         
         # Value Perspective Recommendations
         elements.append(Paragraph("📈 Value Investing Perspective", self.subheading_style))
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 5))
         
         value_rec_data = [['Stock', 'Action', 'Confidence', 'Key Rationale']]
         
         for rec in recommendations:
-            if 'value_perspective' in rec and rec['value_perspective']:
-                value_action = rec['value_perspective'].get('recommendation', 'HOLD')
-                value_conf = rec['value_perspective'].get('confidence', 'Medium')
-                rationale = rec['value_perspective'].get('rationale', ['No rationale'])
-                rationale_text = rationale[0][:60] + '...' if len(rationale) > 0 and len(rationale[0]) > 60 else (rationale[0] if len(rationale) > 0 else 'N/A')
+            # Access the nested structure correctly
+            value_persp = rec.get('value_perspective', {})
+            if value_persp:
+                value_action = value_persp.get('recommendation', 'HOLD')
+                value_conf = value_persp.get('confidence', 'Medium')
+                rationale = value_persp.get('rationale', [])
+                if isinstance(rationale, list) and len(rationale) > 0:
+                    rationale_text = rationale[0][:65] + '...' if len(rationale[0]) > 65 else rationale[0]
+                else:
+                    rationale_text = 'Analysis based on fundamentals'
                 
                 value_rec_data.append([
-                    rec['stock_name'],
+                    rec.get('stock_name', 'N/A'),
                     value_action,
                     value_conf,
                     rationale_text
@@ -364,23 +369,28 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#2980b9')
             )
             elements.append(value_rec_table)
-            elements.append(Spacer(1, 12))
+            elements.append(Spacer(1, 8))
         
         # Growth Perspective Recommendations
         elements.append(Paragraph("🚀 Growth Investing Perspective", self.subheading_style))
-        elements.append(Spacer(1, 8))
+        elements.append(Spacer(1, 5))
         
         growth_rec_data = [['Stock', 'Action', 'Confidence', 'Key Rationale']]
         
         for rec in recommendations:
-            if 'growth_perspective' in rec and rec['growth_perspective']:
-                growth_action = rec['growth_perspective'].get('recommendation', 'HOLD')
-                growth_conf = rec['growth_perspective'].get('confidence', 'Medium')
-                rationale = rec['growth_perspective'].get('rationale', ['No rationale'])
-                rationale_text = rationale[0][:60] + '...' if len(rationale) > 0 and len(rationale[0]) > 60 else (rationale[0] if len(rationale) > 0 else 'N/A')
+            # Access the nested structure correctly
+            growth_persp = rec.get('growth_perspective', {})
+            if growth_persp:
+                growth_action = growth_persp.get('recommendation', 'HOLD')
+                growth_conf = growth_persp.get('confidence', 'Medium')
+                rationale = growth_persp.get('rationale', [])
+                if isinstance(rationale, list) and len(rationale) > 0:
+                    rationale_text = rationale[0][:65] + '...' if len(rationale[0]) > 65 else rationale[0]
+                else:
+                    rationale_text = 'Analysis based on growth metrics'
                 
                 growth_rec_data.append([
-                    rec['stock_name'],
+                    rec.get('stock_name', 'N/A'),
                     growth_action,
                     growth_conf,
                     rationale_text
@@ -423,7 +433,7 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#27ae60')
         )
         elements.append(top_table)
-        elements.append(Spacer(1, 15))
+        elements.append(Spacer(1, 8))
         
         # Worst 5 performers
         elements.append(Paragraph("Worst 5 Performers", self.subheading_style))
@@ -476,7 +486,7 @@ class PDFReportGenerator:
         
         disclaimer_para = Paragraph(disclaimer_text, self.styles['Normal'])
         elements.append(disclaimer_para)
-        elements.append(Spacer(1, 30))
+        elements.append(Spacer(1, 8))
         
         # Company footer
         elements.append(Paragraph("About Alphalens", self.subheading_style))
