@@ -287,7 +287,9 @@ def display_analysis():
                         st.session_state.analysis_results,
                         st.session_state.portfolio_data,
                         st.session_state.recommendations,
-                        filename
+                        filename,
+                        st.session_state.historical_data,
+                        st.session_state.current_data
                     )
                     
                     # Read the generated PDF

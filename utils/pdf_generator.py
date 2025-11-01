@@ -93,8 +93,8 @@ class PDFReportGenerator:
         ]))
         return table
 
-    def generate_report(self, analysis_results, portfolio_data, recommendations, filename="portfolio_report.pdf"):
-        """Generate comprehensive PDF report with all web data"""
+    def generate_report(self, analysis_results, portfolio_data, recommendations, filename="portfolio_report.pdf", historical_data=None, current_data=None):
+        """Generate comprehensive PDF report with all web data including historical performance, rebalancing, and customer profile"""
         
         # Create PDF document
         doc = SimpleDocTemplate(
@@ -455,6 +455,246 @@ class PDFReportGenerator:
         elements.append(worst_table)
         
         # ====================
+        # HISTORICAL PERFORMANCE
+        # ====================
+        if historical_data:
+            elements.append(PageBreak())
+            elements.append(Paragraph("📅 Historical Portfolio Performance", self.heading_style))
+            elements.append(Spacer(1, 3))
+            
+            # Calculate historical metrics
+            portfolio_history = self._calculate_portfolio_history(portfolio_data, historical_data)
+            
+            if not portfolio_history.empty:
+                initial_value = portfolio_history['Portfolio_Value'].iloc[0]
+                current_value = portfolio_history['Portfolio_Value'].iloc[-1]
+                total_return = ((current_value - initial_value) / initial_value) * 100
+                peak_value = portfolio_history['Portfolio_Value'].max()
+                current_drawdown = ((current_value - peak_value) / peak_value) * 100
+                daily_returns = portfolio_history['Portfolio_Value'].pct_change().dropna()
+                volatility = daily_returns.std() * (252 ** 0.5) * 100
+                
+                hist_summary_data = [
+                    ['Metric', 'Value'],
+                    ['Initial Portfolio Value', f"₹{initial_value:,.2f}"],
+                    ['Current Portfolio Value', f"₹{current_value:,.2f}"],
+                    ['Total Return', f"{total_return:+.2f}%"],
+                    ['Peak Portfolio Value', f"₹{peak_value:,.2f}"],
+                    ['Current Drawdown', f"{current_drawdown:.2f}%"],
+                    ['Annualized Volatility', f"{volatility:.2f}%"]
+                ]
+                
+                hist_table = self.create_card_table(
+                    hist_summary_data,
+                    col_widths=[3.5*inch, 3*inch],
+                    header_color=colors.HexColor('#3498db')
+                )
+                elements.append(hist_table)
+        
+        # ====================
+        # REBALANCING SUGGESTIONS
+        # ====================
+        elements.append(PageBreak())
+        elements.append(Paragraph("⚖️ Portfolio Rebalancing Suggestions", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Recommended allocation strategy (Balanced)
+        strategy = 'Balanced'
+        target_allocation = {
+            'Large Cap': 50,
+            'Mid Cap': 30,
+            'Small Cap': 20
+        }
+        
+        elements.append(Paragraph(f"📊 Recommended Strategy: {strategy}", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Current vs Target Allocation
+        current_allocation = self._calculate_current_allocation(analysis_results)
+        
+        allocation_data = [['Category', 'Current %', 'Target %', 'Difference']]
+        
+        for category in target_allocation.keys():
+            current_pct = current_allocation.get(category, 0)
+            target_pct = target_allocation[category]
+            diff = target_pct - current_pct
+            
+            allocation_data.append([
+                category,
+                f"{current_pct:.1f}%",
+                f"{target_pct:.1f}%",
+                f"{diff:+.1f}%"
+            ])
+        
+        allocation_table = self.create_card_table(
+            allocation_data,
+            col_widths=[2*inch, 1.5*inch, 1.5*inch, 1.5*inch],
+            header_color=colors.HexColor('#9b59b6')
+        )
+        elements.append(allocation_table)
+        elements.append(Spacer(1, 3))
+        
+        # Rebalancing Actions
+        elements.append(Paragraph("💡 Recommended Actions", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        rebalancing_actions = self._generate_rebalancing_actions(
+            current_allocation, target_allocation, 
+            analysis_results['portfolio_summary']['current_value'],
+            analysis_results
+        )
+        
+        if rebalancing_actions:
+            actions_data = [['Category', 'Action', 'Amount', 'Description']]
+            
+            for action in rebalancing_actions[:5]:  # Top 5 actions
+                actions_data.append([
+                    action['category'],
+                    action['action'],
+                    f"₹{abs(action['amount']):,.0f}",
+                    action['description']
+                ])
+            
+            actions_table = self.create_card_table(
+                actions_data,
+                col_widths=[1.3*inch, 0.8*inch, 1.2*inch, 3.2*inch],
+                header_color=colors.HexColor('#e67e22')
+            )
+            elements.append(actions_table)
+        
+        # ====================
+        # CUSTOMER PROFILE
+        # ====================
+        elements.append(PageBreak())
+        elements.append(Paragraph("👤 Customer Investment Profile", self.heading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Portfolio Overview
+        elements.append(Paragraph("📊 Portfolio Overview", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        summary = analysis_results['portfolio_summary']
+        portfolio_size = summary['current_value']
+        num_stocks = summary['number_of_stocks']
+        overall_return = summary['total_gain_loss_percentage']
+        
+        # Categorize investor
+        if portfolio_size >= 10000000:
+            size_category = "High Net Worth"
+        elif portfolio_size >= 2500000:
+            size_category = "Affluent Investor"
+        elif portfolio_size >= 500000:
+            size_category = "Moderate Investor"
+        else:
+            size_category = "Emerging Investor"
+        
+        if num_stocks >= 15:
+            experience_level = "Experienced"
+        elif num_stocks >= 8:
+            experience_level = "Intermediate"
+        elif num_stocks >= 4:
+            experience_level = "Beginner+"
+        else:
+            experience_level = "Beginner"
+        
+        if overall_return > 25:
+            perf_category = "Excellent"
+        elif overall_return > 10:
+            perf_category = "Good"
+        elif overall_return > 0:
+            perf_category = "Positive"
+        elif overall_return > -10:
+            perf_category = "Moderate Loss"
+        else:
+            perf_category = "High Loss"
+        
+        profile_data = [
+            ['Aspect', 'Assessment'],
+            ['Portfolio Size', f"₹{portfolio_size:,.2f}"],
+            ['Investor Category', size_category],
+            ['Number of Stocks', f"{num_stocks}"],
+            ['Experience Level', experience_level],
+            ['Overall Return', f"{overall_return:+.2f}%"],
+            ['Performance Status', perf_category]
+        ]
+        
+        profile_table = self.create_card_table(
+            profile_data,
+            col_widths=[2.5*inch, 4*inch],
+            header_color=colors.HexColor('#1abc9c')
+        )
+        elements.append(profile_table)
+        elements.append(Spacer(1, 3))
+        
+        # Investment Style Analysis
+        elements.append(Paragraph("🎯 Investment Style Analysis", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        # Analyze based on recommendations
+        value_oriented = sum(1 for rec in recommendations if rec.get('value_analysis', {}).get('recommendation') == 'BUY')
+        growth_oriented = sum(1 for rec in recommendations if rec.get('growth_analysis', {}).get('recommendation') == 'BUY')
+        
+        if value_oriented > growth_oriented:
+            primary_style = "Value Investor"
+            style_desc = "Focus on undervalued stocks with strong fundamentals"
+        elif growth_oriented > value_oriented:
+            primary_style = "Growth Investor"
+            style_desc = "Focus on high-growth potential stocks"
+        else:
+            primary_style = "Balanced Investor"
+            style_desc = "Balanced approach between value and growth"
+        
+        style_data = [
+            ['Style Aspect', 'Analysis'],
+            ['Primary Style', primary_style],
+            ['Style Description', style_desc],
+            ['Value-oriented Picks', f"{value_oriented} stocks"],
+            ['Growth-oriented Picks', f"{growth_oriented} stocks"]
+        ]
+        
+        style_table = self.create_card_table(
+            style_data,
+            col_widths=[2.5*inch, 4*inch],
+            header_color=colors.HexColor('#34495e')
+        )
+        elements.append(style_table)
+        elements.append(Spacer(1, 3))
+        
+        # Portfolio Health Score
+        elements.append(Paragraph("💯 Portfolio Health Score", self.subheading_style))
+        elements.append(Spacer(1, 3))
+        
+        health_score = self._calculate_health_score(analysis_results, recommendations)
+        
+        if health_score >= 80:
+            health_status = "Excellent"
+            health_color_hex = '#27ae60'
+        elif health_score >= 60:
+            health_status = "Good"
+            health_color_hex = '#3498db'
+        elif health_score >= 40:
+            health_status = "Fair"
+            health_color_hex = '#f39c12'
+        else:
+            health_status = "Needs Improvement"
+            health_color_hex = '#e74c3c'
+        
+        health_data = [
+            ['Metric', 'Score/Status'],
+            ['Overall Health Score', f"{health_score}/100"],
+            ['Health Status', health_status],
+            ['Diversification', f"{len(analysis_results['sector_analysis'])} sectors"],
+            ['Profitable Holdings', f"{summary['profitable_stocks']}/{num_stocks} stocks"]
+        ]
+        
+        health_table = self.create_card_table(
+            health_data,
+            col_widths=[2.5*inch, 4*inch],
+            header_color=colors.HexColor(health_color_hex)
+        )
+        elements.append(health_table)
+        
+        # ====================
         # DISCLAIMER & FOOTER
         # ====================
         elements.append(PageBreak())
@@ -505,3 +745,154 @@ class PDFReportGenerator:
         doc.build(elements)
         
         return filename
+    
+    def _calculate_portfolio_history(self, portfolio_data, historical_data):
+        """Calculate portfolio value over time"""
+        import pandas as pd
+        import numpy as np
+        
+        if not historical_data:
+            return pd.DataFrame()
+        
+        # Get earliest buy date
+        portfolio_data['Buy Date'] = pd.to_datetime(portfolio_data['Buy Date'])
+        start_date = portfolio_data['Buy Date'].min()
+        
+        # Create date range
+        date_range = pd.date_range(start=start_date, end=pd.Timestamp.now(), freq='D')
+        
+        portfolio_history = pd.DataFrame({'Date': date_range})
+        portfolio_history['Portfolio_Value'] = 0.0
+        portfolio_history['Investment_Value'] = 0.0
+        
+        for _, stock in portfolio_data.iterrows():
+            stock_name = stock['Stock Name']
+            quantity = stock['Quantity']
+            buy_price = stock['Buy Price']
+            buy_date = stock['Buy Date']
+            
+            # Get historical data for this stock
+            stock_history = historical_data.get(stock_name, pd.DataFrame())
+            
+            if not stock_history.empty and 'Close' in stock_history.columns:
+                # Add stock value for dates after purchase
+                for date in portfolio_history['Date']:
+                    if date >= buy_date:
+                        # Find closest price
+                        available_dates = stock_history.index[stock_history.index <= date]
+                        if len(available_dates) > 0:
+                            closest_date = available_dates[-1]
+                            price = stock_history.loc[closest_date, 'Close']
+                            
+                            idx = portfolio_history[portfolio_history['Date'] == date].index[0]
+                            portfolio_history.loc[idx, 'Portfolio_Value'] += quantity * float(price)
+                            portfolio_history.loc[idx, 'Investment_Value'] += quantity * buy_price
+        
+        # Remove rows with zero portfolio value
+        portfolio_history = portfolio_history[portfolio_history['Portfolio_Value'] > 0]
+        
+        return portfolio_history
+    
+    def _calculate_current_allocation(self, analysis_results):
+        """Calculate current allocation by category"""
+        category_analysis = pd.DataFrame(analysis_results['category_analysis'])
+        
+        if category_analysis.empty:
+            return {}
+        
+        allocation = {}
+        for _, cat in category_analysis.iterrows():
+            allocation[cat['Category']] = cat['Percentage of Portfolio']
+        
+        return allocation
+    
+    def _generate_rebalancing_actions(self, current_allocation, target_allocation, portfolio_value, analysis_results):
+        """Generate rebalancing actions"""
+        actions = []
+        
+        for category, target_pct in target_allocation.items():
+            current_pct = current_allocation.get(category, 0)
+            diff_pct = target_pct - current_pct
+            
+            if abs(diff_pct) > 2:  # Only suggest if difference > 2%
+                amount = (diff_pct / 100) * portfolio_value
+                
+                if diff_pct > 0:
+                    action = {
+                        'category': category,
+                        'action': 'BUY',
+                        'amount': amount,
+                        'description': f"Increase {category} allocation by {diff_pct:.1f}%"
+                    }
+                else:
+                    action = {
+                        'category': category,
+                        'action': 'SELL',
+                        'amount': amount,
+                        'description': f"Reduce {category} allocation by {abs(diff_pct):.1f}%"
+                    }
+                
+                actions.append(action)
+        
+        # Sort by absolute amount (largest first)
+        actions.sort(key=lambda x: abs(x['amount']), reverse=True)
+        
+        return actions
+    
+    def _calculate_health_score(self, analysis_results, recommendations):
+        """Calculate portfolio health score (0-100)"""
+        score = 0
+        
+        # Performance (25 points)
+        portfolio_return = analysis_results['portfolio_summary']['total_gain_loss_percentage']
+        if portfolio_return > 25:
+            score += 25
+        elif portfolio_return > 10:
+            score += 20
+        elif portfolio_return > 0:
+            score += 15
+        elif portfolio_return > -10:
+            score += 10
+        else:
+            score += 5
+        
+        # Diversification (25 points)
+        num_stocks = analysis_results['portfolio_summary']['number_of_stocks']
+        sector_count = len(analysis_results['sector_analysis'])
+        
+        if num_stocks >= 15 and sector_count >= 5:
+            score += 25
+        elif num_stocks >= 10 and sector_count >= 4:
+            score += 20
+        elif num_stocks >= 6 and sector_count >= 3:
+            score += 15
+        else:
+            score += 10
+        
+        # Profitable Holdings (25 points)
+        profitable_pct = (analysis_results['portfolio_summary']['profitable_stocks'] / 
+                         analysis_results['portfolio_summary']['number_of_stocks'] * 100)
+        
+        if profitable_pct >= 80:
+            score += 25
+        elif profitable_pct >= 60:
+            score += 20
+        elif profitable_pct >= 40:
+            score += 15
+        else:
+            score += 10
+        
+        # Investment Strategy Alignment (25 points)
+        buy_recs = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'BUY')
+        sell_recs = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'SELL')
+        
+        if sell_recs == 0 and buy_recs > 0:
+            score += 25
+        elif sell_recs <= 2:
+            score += 20
+        elif sell_recs <= 4:
+            score += 15
+        else:
+            score += 10
+        
+        return min(score, 100)
