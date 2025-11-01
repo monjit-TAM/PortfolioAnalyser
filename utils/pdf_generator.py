@@ -1041,7 +1041,7 @@ class PDFReportGenerator:
             if not category_stocks.empty:
                 avg_buy_date = pd.to_datetime(portfolio_data[portfolio_data['Stock Name'].isin(category_stocks['Stock Name'])]['Buy Date']).min()
                 if pd.notna(avg_buy_date):
-                    bench_data = data_fetcher.get_benchmark_data(benchmark, avg_buy_date.strftime('%Y-%m-%d'))
+                    bench_data = data_fetcher.get_index_data(benchmark, avg_buy_date.strftime('%Y-%m-%d'))
                     if not bench_data.empty:
                         bench_return = ((bench_data['Close'].iloc[-1] - bench_data['Close'].iloc[0]) / bench_data['Close'].iloc[0]) * 100
                         benchmark_returns[benchmark] = bench_return

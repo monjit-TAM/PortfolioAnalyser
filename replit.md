@@ -8,6 +8,9 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 
 ### PDF Report Enhancements (November 1, 2025):
 
+#### Bug Fixes:
+0. **DataFetcher Method Error** (CRITICAL): Fixed PDF generation crash - corrected method call from `get_benchmark_data()` to `get_index_data()` in benchmark comparison section
+
 #### Complete Chart & Visualization Integration:
 1. **Chart Conversion System**: Implemented Plotly-to-PDF conversion using kaleido library with ImageReader and BytesIO for in-memory image handling, ensuring all charts render correctly during PDF generation
 2. **Performance Overview Charts** (NEW): Stock Performance Distribution (profitable vs loss-making), Investment vs Current Value comparison charts
