@@ -236,7 +236,7 @@ class PDFReportGenerator:
                 f"{sector['Number of Stocks']:.0f}",
                 f"₹{sector['Investment Value']:,.0f}",
                 f"₹{sector['Current Value']:,.0f}",
-                f"₹{sector['Sector Gain/Loss']:+,.0f}",
+                f"₹{sector['Absolute Gain/Loss']:+,.0f}",
                 f"{sector['Sector Return %']:+.2f}%",
                 f"{sector['Percentage of Portfolio']:.1f}%"
             ])
