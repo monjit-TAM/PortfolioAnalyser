@@ -812,7 +812,7 @@ class PDFReportGenerator:
             plt.close()
             
             # Add to PDF
-            img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+            img = Image(img_bytes, width=5.5*inch, height=2.8*inch)
             elements.append(img)
             elements.append(Spacer(1, 8))
         
@@ -849,7 +849,7 @@ class PDFReportGenerator:
             plt.close()
             
             # Add to PDF
-            img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+            img = Image(img_bytes, width=5.5*inch, height=2.8*inch)
             elements.append(img)
             elements.append(Spacer(1, 5))
     
@@ -896,7 +896,7 @@ class PDFReportGenerator:
         img_bytes.seek(0)
         plt.close()
         
-        img = Image(ImageReader(img_bytes), width=5.5*inch, height=3.2*inch)
+        img = Image(img_bytes, width=5.5*inch, height=3.2*inch)
         elements.append(img)
         elements.append(Spacer(1, 8))
         
@@ -929,7 +929,7 @@ class PDFReportGenerator:
         img_bytes.seek(0)
         plt.close()
         
-        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        img = Image(img_bytes, width=5.5*inch, height=2.8*inch)
         elements.append(img)
         elements.append(Spacer(1, 5))
         
@@ -1040,7 +1040,7 @@ class PDFReportGenerator:
             img_bytes.seek(0)
             plt.close()
             
-            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            img = Image(img_bytes, width=5*inch, height=2.6*inch)
             elements.append(img)
             elements.append(Spacer(1, 5))
     
@@ -1175,7 +1175,7 @@ class PDFReportGenerator:
         img_bytes.seek(0)
         plt.close()
         
-        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        img = Image(img_bytes, width=5.5*inch, height=2.8*inch)
         elements.append(img)
         elements.append(Spacer(1, 5))
         
@@ -1275,7 +1275,7 @@ class PDFReportGenerator:
             img_bytes.seek(0)
             plt.close()
             
-            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            img = Image(img_bytes, width=5*inch, height=2.6*inch)
             elements.append(img)
             elements.append(Spacer(1, 5))
         
@@ -1314,7 +1314,7 @@ class PDFReportGenerator:
             img_bytes.seek(0)
             plt.close()
             
-            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            img = Image(img_bytes, width=5*inch, height=2.6*inch)
             elements.append(img)
             elements.append(Spacer(1, 5))
         
@@ -1355,7 +1355,7 @@ class PDFReportGenerator:
             img_bytes.seek(0)
             plt.close()
             
-            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            img = Image(img_bytes, width=5*inch, height=2.6*inch)
             elements.append(img)
             elements.append(Spacer(1, 5))
         
@@ -1422,7 +1422,7 @@ class PDFReportGenerator:
         img_bytes.seek(0)
         plt.close()
         
-        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        img = Image(img_bytes, width=5.5*inch, height=2.8*inch)
         elements.append(img)
         elements.append(Spacer(1, 8))
         
@@ -1450,7 +1450,7 @@ class PDFReportGenerator:
         img_bytes.seek(0)
         plt.close()
         
-        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        img = Image(img_bytes, width=5.5*inch, height=2.8*inch)
         elements.append(img)
         elements.append(Spacer(1, 8))
         
@@ -1476,7 +1476,7 @@ class PDFReportGenerator:
         img_bytes.seek(0)
         plt.close()
         
-        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        img = Image(img_bytes, width=5.5*inch, height=2.8*inch)
         elements.append(img)
         elements.append(Spacer(1, 5))
     
