@@ -10,6 +10,7 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 
 #### Bug Fixes:
 0. **DataFetcher Method Error** (CRITICAL): Fixed PDF generation crash - corrected method call from `get_benchmark_data()` to `get_index_data()` in benchmark comparison section
+1. **Advanced Risk Metrics Removed**: Removed the Stock Performance Metrics table (Volatility, All-Time High, Max Drawdown, Potential to ATH) from PDF report as these metrics were showing "N/A" for all stocks - data not available in the analysis pipeline
 
 #### Complete Chart & Visualization Integration:
 1. **Chart Conversion System**: Implemented Plotly-to-PDF conversion using kaleido library with ImageReader and BytesIO for in-memory image handling, ensuring all charts render correctly during PDF generation

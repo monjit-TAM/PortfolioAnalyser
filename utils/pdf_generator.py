@@ -230,36 +230,6 @@ class PDFReportGenerator:
             col_widths=[1.1*inch, 0.9*inch, 0.5*inch, 0.8*inch, 0.8*inch, 0.9*inch, 0.9*inch, 0.8*inch, 0.8*inch]
         )
         elements.append(holdings_table)
-        elements.append(Spacer(1, 3))
-        
-        # Stock Performance Metrics Table
-        elements.append(Paragraph("📈 Stock Performance Metrics", self.subheading_style))
-        elements.append(Spacer(1, 3))
-        
-        metrics_data = [['Stock', 'Category', 'Volatility', 'All-Time High', 'Max Drawdown', 'Potential to ATH']]
-        
-        for _, stock in stock_performance.iterrows():
-            # Get metrics with safe defaults
-            volatility = stock.get('Volatility (%)', 'N/A')
-            ath = stock.get('All-Time High (₹)', 'N/A')
-            max_dd = stock.get('Max Drawdown (%)', 'N/A')
-            potential = stock.get('Potential to ATH (%)', 'N/A')
-            
-            metrics_data.append([
-                stock['Stock Name'],
-                stock.get('Category', 'N/A'),
-                f"{volatility:.2f}%" if isinstance(volatility, (int, float)) else str(volatility),
-                f"₹{ath:,.2f}" if isinstance(ath, (int, float)) else str(ath),
-                f"{max_dd:.2f}%" if isinstance(max_dd, (int, float)) else str(max_dd),
-                f"{potential:.2f}%" if isinstance(potential, (int, float)) else str(potential)
-            ])
-        
-        metrics_table = self.create_card_table(
-            metrics_data,
-            col_widths=[1.5*inch, 1.2*inch, 1.2*inch, 1.3*inch, 1.3*inch, 1.3*inch],
-            header_color=colors.HexColor('#3498db')
-        )
-        elements.append(metrics_table)
         
         # ====================
         # SECTOR ANALYSIS with CHARTS
