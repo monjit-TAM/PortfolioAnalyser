@@ -783,55 +783,62 @@ class PDFReportGenerator:
         summary = analysis_results['portfolio_summary']
         
         # Stock Performance Distribution Chart
-        profit_stocks = summary['profitable_stocks']
-        loss_stocks = summary['loss_making_stocks']
+        profit_stocks = summary.get('profitable_stocks', 0)
+        loss_stocks = summary.get('loss_making_stocks', 0)
         
-        fig_performance = go.Figure(data=[
-            go.Bar(
+        # Only add charts if there's data
+        if profit_stocks + loss_stocks > 0:
+            fig_performance = go.Figure()
+            fig_performance.add_trace(go.Bar(
                 x=['Profitable', 'Loss-making'],
                 y=[profit_stocks, loss_stocks],
-                marker_color=['green', 'red'],
-                text=[profit_stocks, loss_stocks],
-                textposition='auto'
+                marker_color=['#27ae60', '#e74c3c'],  # Green and Red
+                text=[str(profit_stocks), str(loss_stocks)],
+                textposition='auto',
+                textfont=dict(size=14, color='white')
+            ))
+            
+            fig_performance.update_layout(
+                title="Stock Performance Distribution",
+                xaxis_title="Performance Category",
+                yaxis_title="Number of Stocks",
+                height=400,
+                showlegend=False,
+                font=dict(size=12)
             )
-        ])
+            
+            chart_img = self.convert_plotly_to_image(fig_performance, width=5.5*inch, height=3.2*inch)
+            if chart_img:
+                elements.append(chart_img)
+                elements.append(Spacer(1, 5))
         
-        fig_performance.update_layout(
-            title="Stock Performance Distribution",
-            xaxis_title="Performance Category",
-            yaxis_title="Number of Stocks",
-            height=350,
-            showlegend=False
-        )
+        # Investment vs Current Value Chart - matching web version exactly
+        total_investment = summary.get('total_investment', 0)
+        current_value = summary.get('current_value', 0)
         
-        chart_img = self.convert_plotly_to_image(fig_performance, width=5.5*inch, height=3*inch)
-        if chart_img:
-            elements.append(chart_img)
-            elements.append(Spacer(1, 3))
-        
-        # Investment vs Current Value Chart
-        fig_value = go.Figure(data=[
-            go.Bar(
-                x=['Total Investment', 'Current Value'],
-                y=[summary['total_investment'], summary['current_value']],
-                marker_color=['lightblue', 'green' if summary['total_gain_loss'] >= 0 else 'red'],
-                text=[f"₹{summary['total_investment']:,.0f}", f"₹{summary['current_value']:,.0f}"],
-                textposition='auto'
+        if total_investment > 0 or current_value > 0:
+            fig_value = go.Figure()
+            fig_value.add_trace(go.Bar(
+                x=['Investment', 'Current Value'],
+                y=[total_investment, current_value],
+                marker_color=['#3498db', '#2c3e50'],  # Light blue and dark blue - matching web version
+                text=[f"₹{total_investment:,.0f}", f"₹{current_value:,.0f}"],
+                textposition='auto',
+                textfont=dict(size=14, color='white')
+            ))
+            
+            fig_value.update_layout(
+                title="Investment vs Current Portfolio Value",
+                yaxis_title="Amount (₹)",
+                height=400,
+                showlegend=False,
+                font=dict(size=12)
             )
-        ])
-        
-        fig_value.update_layout(
-            title="Investment vs Current Portfolio Value",
-            yaxis_title="Value (₹)",
-            height=350,
-            showlegend=False
-        )
-        
-        chart_img2 = self.convert_plotly_to_image(fig_value, width=5.5*inch, height=3*inch)
-        if chart_img2:
-            elements.append(chart_img2)
-        
-        elements.append(Spacer(1, 3))
+            
+            chart_img2 = self.convert_plotly_to_image(fig_value, width=5.5*inch, height=3.2*inch)
+            if chart_img2:
+                elements.append(chart_img2)
+                elements.append(Spacer(1, 5))
     
     def _create_sector_charts(self, analysis_results, elements):
         """Add Sector Analysis charts and insights to PDF"""

@@ -14,7 +14,7 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 
 #### Complete Chart & Visualization Integration:
 1. **Chart Conversion System**: Implemented Plotly-to-PDF conversion using kaleido library with ImageReader and BytesIO for in-memory image handling, ensuring all charts render correctly during PDF generation
-2. **Performance Overview Charts** (NEW): Stock Performance Distribution (profitable vs loss-making), Investment vs Current Value comparison charts
+2. **Performance Overview Charts** (ENHANCED): Stock Performance Distribution (profitable vs loss-making) with green/red bars, Investment vs Current Value comparison using light blue/dark blue colors matching web version exactly, improved chart rendering with better error handling and data validation
 3. **Sector Analysis Charts** (ENHANCED): Sector Allocation Pie Chart, Sector Performance Bar Chart, Sector Insights table, Diversification Analysis with risk assessment, actionable Sector Recommendations
 4. **Benchmark Comparison Section** (NEW): Portfolio vs Market Indices comparison (NIFTY50, NIFTY Midcap 100, NIFTY Smallcap 100) with real-time data fetching, Benchmark Insights and performance analysis
 5. **Recommendation Distribution Chart** (NEW): Pie chart visualizing BUY/HOLD/SELL recommendation distribution
