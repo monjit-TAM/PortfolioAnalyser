@@ -99,33 +99,25 @@ class PDFReportGenerator:
         return table
     
     def convert_plotly_to_image(self, fig, width=6*inch, height=3.5*inch):
-        """Convert a Plotly figure to a ReportLab Image object"""
+        """Convert a Plotly figure to a ReportLab Image object using matplotlib"""
         from reportlab.lib.utils import ImageReader
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-GUI backend
+        import matplotlib.pyplot as plt
         
         try:
-            # Create a temporary file to store the image
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
-                tmp_filename = tmp_file.name
+            # Create matplotlib figure instead of using kaleido (which needs Chrome)
+            plt.figure(figsize=(8, 4.5))
             
-            # Export the figure to PNG using kaleido
-            fig.write_image(tmp_filename, width=800, height=450, scale=2)
+            # Extract data from Plotly figure and create matplotlib chart
+            # This is a workaround since kaleido requires Chrome which isn't available
+            # We'll recreate the chart using matplotlib
             
-            # Read the image file into memory immediately
-            with open(tmp_filename, 'rb') as f:
-                img_bytes = io.BytesIO(f.read())
+            # For now, return None to skip chart - we'll create matplotlib charts directly
+            plt.close()
+            return None
             
-            # Clean up the temporary file NOW (we have the bytes in memory)
-            try:
-                os.unlink(tmp_filename)
-            except:
-                pass
-            
-            # Create a ReportLab Image object from the in-memory bytes
-            img = Image(ImageReader(img_bytes), width=width, height=height)
-            
-            return img
         except Exception as e:
-            # If chart conversion fails, return a placeholder
             print(f"Warning: Could not convert chart to image: {e}")
             return None
 
@@ -776,72 +768,98 @@ class PDFReportGenerator:
         return filename
     
     def _create_performance_charts(self, analysis_results, elements):
-        """Add Performance Overview charts to PDF"""
+        """Add Performance Overview charts to PDF using matplotlib"""
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-GUI backend
+        import matplotlib.pyplot as plt
+        from reportlab.lib.utils import ImageReader
+        
         elements.append(Paragraph("📈 Performance Overview", self.heading_style))
         elements.append(Spacer(1, 3))
         
         summary = analysis_results['portfolio_summary']
         
-        # Stock Performance Distribution Chart
+        # Chart 1: Stock Performance Distribution
         profit_stocks = summary.get('profitable_stocks', 0)
         loss_stocks = summary.get('loss_making_stocks', 0)
         
-        # Only add charts if there's data
         if profit_stocks + loss_stocks > 0:
-            fig_performance = go.Figure()
-            fig_performance.add_trace(go.Bar(
-                x=['Profitable', 'Loss-making'],
-                y=[profit_stocks, loss_stocks],
-                marker_color=['#27ae60', '#e74c3c'],  # Green and Red
-                text=[str(profit_stocks), str(loss_stocks)],
-                textposition='auto',
-                textfont=dict(size=14, color='white')
-            ))
+            fig, ax = plt.subplots(figsize=(7, 3.5))
+            categories = ['Profitable', 'Loss-making']
+            values = [profit_stocks, loss_stocks]
+            colors = ['#27ae60', '#e74c3c']
             
-            fig_performance.update_layout(
-                title="Stock Performance Distribution",
-                xaxis_title="Performance Category",
-                yaxis_title="Number of Stocks",
-                height=400,
-                showlegend=False,
-                font=dict(size=12)
-            )
+            bars = ax.bar(categories, values, color=colors, width=0.5)
             
-            chart_img = self.convert_plotly_to_image(fig_performance, width=5.5*inch, height=3.2*inch)
-            if chart_img:
-                elements.append(chart_img)
-                elements.append(Spacer(1, 5))
+            # Add value labels on bars
+            for bar in bars:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height,
+                       f'{int(height)}',
+                       ha='center', va='bottom', fontsize=12, fontweight='bold')
+            
+            ax.set_title('Stock Performance Distribution', fontsize=14, fontweight='bold', pad=15)
+            ax.set_ylabel('Number of Stocks', fontsize=11)
+            ax.set_xlabel('Performance Category', fontsize=11)
+            ax.grid(axis='y', alpha=0.3, linestyle='--')
+            ax.set_axisbelow(True)
+            plt.tight_layout()
+            
+            # Save to BytesIO
+            img_bytes = io.BytesIO()
+            plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+            img_bytes.seek(0)
+            plt.close()
+            
+            # Add to PDF
+            img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+            elements.append(img)
+            elements.append(Spacer(1, 8))
         
-        # Investment vs Current Value Chart - matching web version exactly
+        # Chart 2: Investment vs Current Value
         total_investment = summary.get('total_investment', 0)
         current_value = summary.get('current_value', 0)
         
         if total_investment > 0 or current_value > 0:
-            fig_value = go.Figure()
-            fig_value.add_trace(go.Bar(
-                x=['Investment', 'Current Value'],
-                y=[total_investment, current_value],
-                marker_color=['#3498db', '#2c3e50'],  # Light blue and dark blue - matching web version
-                text=[f"₹{total_investment:,.0f}", f"₹{current_value:,.0f}"],
-                textposition='auto',
-                textfont=dict(size=14, color='white')
-            ))
+            fig, ax = plt.subplots(figsize=(7, 3.5))
+            categories = ['Investment', 'Current Value']
+            values = [total_investment, current_value]
+            colors = ['#3498db', '#2c3e50']
             
-            fig_value.update_layout(
-                title="Investment vs Current Portfolio Value",
-                yaxis_title="Amount (₹)",
-                height=400,
-                showlegend=False,
-                font=dict(size=12)
-            )
+            bars = ax.bar(categories, values, color=colors, width=0.5)
             
-            chart_img2 = self.convert_plotly_to_image(fig_value, width=5.5*inch, height=3.2*inch)
-            if chart_img2:
-                elements.append(chart_img2)
-                elements.append(Spacer(1, 5))
+            # Add value labels on bars
+            for bar in bars:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height,
+                       f'₹{height:,.0f}',
+                       ha='center', va='bottom', fontsize=11, fontweight='bold')
+            
+            ax.set_title('Investment vs Current Portfolio Value', fontsize=14, fontweight='bold', pad=15)
+            ax.set_ylabel('Amount (₹)', fontsize=11)
+            ax.ticklabel_format(style='plain', axis='y')
+            ax.grid(axis='y', alpha=0.3, linestyle='--')
+            ax.set_axisbelow(True)
+            plt.tight_layout()
+            
+            # Save to BytesIO
+            img_bytes = io.BytesIO()
+            plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+            img_bytes.seek(0)
+            plt.close()
+            
+            # Add to PDF
+            img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+            elements.append(img)
+            elements.append(Spacer(1, 5))
     
     def _create_sector_charts(self, analysis_results, elements):
-        """Add Sector Analysis charts and insights to PDF"""
+        """Add Sector Analysis charts and insights to PDF using matplotlib"""
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        from reportlab.lib.utils import ImageReader
+        
         sector_data = pd.DataFrame(analysis_results['sector_analysis'])
         
         if sector_data.empty:
@@ -851,47 +869,69 @@ class PDFReportGenerator:
         elements.append(Spacer(1, 3))
         
         # Sector Allocation Pie Chart
-        fig_pie = px.pie(
-            sector_data,
-            values='Current Value',
-            names='Sector',
-            title="Sector Allocation by Value",
-            color_discrete_sequence=px.colors.qualitative.Set3
+        fig, ax = plt.subplots(figsize=(7, 4))
+        colors = plt.cm.Set3(range(len(sector_data)))
+        
+        wedges, texts, autotexts = ax.pie(
+            sector_data['Current Value'],
+            labels=sector_data['Sector'],
+            autopct='%1.1f%%',
+            colors=colors,
+            startangle=90,
+            textprops={'fontsize': 10}
         )
         
-        fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-        fig_pie.update_layout(height=350)
+        # Make percentage text bold
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontweight('bold')
+            autotext.set_fontsize(9)
         
-        chart_img = self.convert_plotly_to_image(fig_pie, width=5.5*inch, height=3.5*inch)
-        if chart_img:
-            elements.append(chart_img)
-            elements.append(Spacer(1, 3))
+        ax.set_title('Sector Allocation by Value', fontsize=14, fontweight='bold', pad=15)
+        plt.tight_layout()
+        
+        # Save to BytesIO
+        img_bytes = io.BytesIO()
+        plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+        img_bytes.seek(0)
+        plt.close()
+        
+        img = Image(ImageReader(img_bytes), width=5.5*inch, height=3.2*inch)
+        elements.append(img)
+        elements.append(Spacer(1, 8))
         
         # Sector Performance Bar Chart
-        colors_bar = ['green' if x >= 0 else 'red' for x in sector_data['Sector Return %']]
+        fig, ax = plt.subplots(figsize=(7, 3.5))
+        colors_bar = ['#27ae60' if x >= 0 else '#e74c3c' for x in sector_data['Sector Return %']]
         
-        fig_bar = go.Figure(data=[
-            go.Bar(
-                x=sector_data['Sector'],
-                y=sector_data['Sector Return %'],
-                marker_color=colors_bar,
-                text=[f"{x:+.2f}%" for x in sector_data['Sector Return %']],
-                textposition='auto'
-            )
-        ])
+        bars = ax.bar(sector_data['Sector'], sector_data['Sector Return %'], color=colors_bar, width=0.6)
         
-        fig_bar.update_layout(
-            title="Sector-wise Returns (%)",
-            xaxis_title="Sector",
-            yaxis_title="Return %",
-            height=350
-        )
+        # Add value labels on bars
+        for bar, value in zip(bars, sector_data['Sector Return %']):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                   f'{value:+.2f}%',
+                   ha='center', va='bottom' if height >= 0 else 'top',
+                   fontsize=10, fontweight='bold')
         
-        chart_img2 = self.convert_plotly_to_image(fig_bar, width=5.5*inch, height=3*inch)
-        if chart_img2:
-            elements.append(chart_img2)
+        ax.set_title('Sector-wise Returns (%)', fontsize=14, fontweight='bold', pad=15)
+        ax.set_xlabel('Sector', fontsize=11)
+        ax.set_ylabel('Return %', fontsize=11)
+        ax.grid(axis='y', alpha=0.3, linestyle='--')
+        ax.set_axisbelow(True)
+        ax.axhline(y=0, color='black', linestyle='-', linewidth=0.8)
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
         
-        elements.append(Spacer(1, 3))
+        # Save to BytesIO
+        img_bytes = io.BytesIO()
+        plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+        img_bytes.seek(0)
+        plt.close()
+        
+        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        elements.append(img)
+        elements.append(Spacer(1, 5))
         
         # Sector Insights
         elements.append(Paragraph("💡 Sector Insights", self.subheading_style))
@@ -955,7 +995,12 @@ class PDFReportGenerator:
         elements.append(Spacer(1, 3))
     
     def _create_recommendation_charts(self, recommendations, elements):
-        """Add Recommendation charts to PDF"""
+        """Add Recommendation charts to PDF using matplotlib"""
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        from reportlab.lib.utils import ImageReader
+        
         if not recommendations:
             return
         
@@ -969,21 +1014,35 @@ class PDFReportGenerator:
             elements.append(Paragraph("📊 Recommendation Distribution", self.subheading_style))
             elements.append(Spacer(1, 3))
             
-            fig_rec = px.pie(
-                values=[buy_count, hold_count, sell_count],
-                names=['BUY', 'HOLD', 'SELL'],
-                title="Recommendation Distribution",
-                color_discrete_map={'BUY': 'green', 'HOLD': 'orange', 'SELL': 'red'}
+            fig, ax = plt.subplots(figsize=(6, 3.5))
+            values = [buy_count, hold_count, sell_count]
+            labels = ['BUY', 'HOLD', 'SELL']
+            colors = ['#27ae60', '#f39c12', '#e74c3c']
+            
+            wedges, texts, autotexts = ax.pie(
+                values,
+                labels=labels,
+                autopct='%1.1f%%',
+                colors=colors,
+                startangle=90,
+                textprops={'fontsize': 10}
             )
             
-            fig_rec.update_traces(textposition='inside', textinfo='percent+label')
-            fig_rec.update_layout(height=300)
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_fontweight('bold')
             
-            chart_img = self.convert_plotly_to_image(fig_rec, width=5*inch, height=2.8*inch)
-            if chart_img:
-                elements.append(chart_img)
+            ax.set_title('Recommendation Distribution', fontsize=14, fontweight='bold', pad=15)
+            plt.tight_layout()
             
-            elements.append(Spacer(1, 3))
+            img_bytes = io.BytesIO()
+            plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+            img_bytes.seek(0)
+            plt.close()
+            
+            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            elements.append(img)
+            elements.append(Spacer(1, 5))
     
     def _create_benchmark_section(self, analysis_results, portfolio_data, elements):
         """Add comprehensive Benchmark Comparison section to PDF"""
@@ -1075,42 +1134,50 @@ class PDFReportGenerator:
         current_allocation = self._calculate_current_allocation(analysis_results)
         target_allocation = {'Large Cap': 50, 'Mid Cap': 30, 'Small Cap': 20}
         
-        # Create comparison chart
+        # Create comparison chart using matplotlib
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        from reportlab.lib.utils import ImageReader
+        import numpy as np
+        
         categories = list(target_allocation.keys())
         current_values = [current_allocation.get(cat, 0) for cat in categories]
         target_values = [target_allocation[cat] for cat in categories]
         
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            name='Current Allocation',
-            x=categories,
-            y=current_values,
-            marker_color='lightblue',
-            text=[f"{v:.1f}%" for v in current_values],
-            textposition='auto'
-        ))
-        fig.add_trace(go.Bar(
-            name='Target Allocation',
-            x=categories,
-            y=target_values,
-            marker_color='green',
-            text=[f"{v:.1f}%" for v in target_values],
-            textposition='auto'
-        ))
+        fig, ax = plt.subplots(figsize=(7, 3.5))
+        x = np.arange(len(categories))
+        width = 0.35
         
-        fig.update_layout(
-            title="Current vs Target Allocation",
-            xaxis_title="Category",
-            yaxis_title="Allocation %",
-            barmode='group',
-            height=350
-        )
+        bars1 = ax.bar(x - width/2, current_values, width, label='Current Allocation', color='#3498db')
+        bars2 = ax.bar(x + width/2, target_values, width, label='Target Allocation', color='#27ae60')
         
-        chart_img = self.convert_plotly_to_image(fig, width=5.5*inch, height=3*inch)
-        if chart_img:
-            elements.append(chart_img)
+        # Add value labels
+        for bars in [bars1, bars2]:
+            for bar in bars:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height,
+                       f'{height:.1f}%',
+                       ha='center', va='bottom', fontsize=9, fontweight='bold')
         
-        elements.append(Spacer(1, 3))
+        ax.set_title('Current vs Target Allocation', fontsize=14, fontweight='bold', pad=15)
+        ax.set_xlabel('Category', fontsize=11)
+        ax.set_ylabel('Allocation %', fontsize=11)
+        ax.set_xticks(x)
+        ax.set_xticklabels(categories)
+        ax.legend()
+        ax.grid(axis='y', alpha=0.3, linestyle='--')
+        ax.set_axisbelow(True)
+        plt.tight_layout()
+        
+        img_bytes = io.BytesIO()
+        plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+        img_bytes.seek(0)
+        plt.close()
+        
+        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        elements.append(img)
+        elements.append(Spacer(1, 5))
         
         # Detailed Rebalancing Actions
         elements.append(Paragraph("📋 Detailed Rebalancing Actions", self.subheading_style))
@@ -1175,67 +1242,122 @@ class PDFReportGenerator:
         growth_pct = (growth_count / total_recs) * 100
         balanced_pct = 100 - value_pct - growth_pct if value_pct + growth_pct < 100 else 0
         
-        # Investment style pie chart
+        # Investment style pie chart using matplotlib
         if value_pct + growth_pct > 0:
-            fig_style = px.pie(
-                values=[value_pct, growth_pct, balanced_pct] if balanced_pct > 0 else [value_pct, growth_pct],
-                names=['Value', 'Growth', 'Balanced'] if balanced_pct > 0 else ['Value', 'Growth'],
-                title="Investment Style Distribution",
-                color_discrete_map={'Value': 'blue', 'Growth': 'green', 'Balanced': 'orange'}
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            from reportlab.lib.utils import ImageReader
+            
+            fig, ax = plt.subplots(figsize=(6, 3.5))
+            values = [value_pct, growth_pct, balanced_pct] if balanced_pct > 0 else [value_pct, growth_pct]
+            labels = ['Value', 'Growth', 'Balanced'] if balanced_pct > 0 else ['Value', 'Growth']
+            colors = ['#3498db', '#27ae60', '#f39c12'] if balanced_pct > 0 else ['#3498db', '#27ae60']
+            
+            wedges, texts, autotexts = ax.pie(
+                values,
+                labels=labels,
+                autopct='%1.1f%%',
+                colors=colors,
+                startangle=90,
+                textprops={'fontsize': 10}
             )
             
-            fig_style.update_traces(textposition='inside', textinfo='percent+label')
-            fig_style.update_layout(height=300)
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_fontweight('bold')
             
-            chart_img = self.convert_plotly_to_image(fig_style, width=5*inch, height=2.8*inch)
-            if chart_img:
-                elements.append(chart_img)
+            ax.set_title('Investment Style Distribution', fontsize=14, fontweight='bold', pad=15)
+            plt.tight_layout()
             
-            elements.append(Spacer(1, 3))
+            img_bytes = io.BytesIO()
+            plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+            img_bytes.seek(0)
+            plt.close()
+            
+            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            elements.append(img)
+            elements.append(Spacer(1, 5))
         
-        # Sector Preference Pie Chart
+        # Sector Preference Pie Chart using matplotlib
         if not sector_data.empty:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            from reportlab.lib.utils import ImageReader
+            
             elements.append(Paragraph("🏭 Sector Allocation Preferences", self.subheading_style))
             elements.append(Spacer(1, 3))
             
-            fig_sector = px.pie(
-                sector_data,
-                values='Current Value',
-                names='Sector',
-                title="Sector Allocation",
-                color_discrete_sequence=px.colors.qualitative.Pastel
+            fig, ax = plt.subplots(figsize=(6, 3.5))
+            colors = plt.cm.Pastel1(range(len(sector_data)))
+            
+            wedges, texts, autotexts = ax.pie(
+                sector_data['Current Value'],
+                labels=sector_data['Sector'],
+                autopct='%1.1f%%',
+                colors=colors,
+                startangle=90,
+                textprops={'fontsize': 10}
             )
             
-            fig_sector.update_traces(textposition='inside', textinfo='percent+label')
-            fig_sector.update_layout(height=300)
+            for autotext in autotexts:
+                autotext.set_color('black')
+                autotext.set_fontweight('bold')
+                autotext.set_fontsize(9)
             
-            chart_img2 = self.convert_plotly_to_image(fig_sector, width=5*inch, height=2.8*inch)
-            if chart_img2:
-                elements.append(chart_img2)
+            ax.set_title('Sector Allocation', fontsize=14, fontweight='bold', pad=15)
+            plt.tight_layout()
             
-            elements.append(Spacer(1, 3))
+            img_bytes = io.BytesIO()
+            plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+            img_bytes.seek(0)
+            plt.close()
+            
+            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            elements.append(img)
+            elements.append(Spacer(1, 5))
         
-        # Market Cap Preference Pie Chart
+        # Market Cap Preference Pie Chart using matplotlib
         if not category_data.empty:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            from reportlab.lib.utils import ImageReader
+            
             elements.append(Paragraph("📈 Market Cap Allocation", self.subheading_style))
             elements.append(Spacer(1, 3))
             
-            fig_cap = px.pie(
-                category_data,
-                values='Current Value',
-                names='Category',
-                title="Market Cap Distribution",
-                color_discrete_map={'Large Cap': 'darkblue', 'Mid Cap': 'orange', 'Small Cap': 'lightblue'}
+            fig, ax = plt.subplots(figsize=(6, 3.5))
+            
+            # Define colors for market caps
+            color_map = {'Large Cap': '#2c3e50', 'Mid Cap': '#e67e22', 'Small Cap': '#3498db'}
+            colors = [color_map.get(cat, '#95a5a6') for cat in category_data['Category']]
+            
+            wedges, texts, autotexts = ax.pie(
+                category_data['Current Value'],
+                labels=category_data['Category'],
+                autopct='%1.1f%%',
+                colors=colors,
+                startangle=90,
+                textprops={'fontsize': 10}
             )
             
-            fig_cap.update_traces(textposition='inside', textinfo='percent+label')
-            fig_cap.update_layout(height=300)
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_fontweight('bold')
             
-            chart_img3 = self.convert_plotly_to_image(fig_cap, width=5*inch, height=2.8*inch)
-            if chart_img3:
-                elements.append(chart_img3)
+            ax.set_title('Market Cap Distribution', fontsize=14, fontweight='bold', pad=15)
+            plt.tight_layout()
             
-            elements.append(Spacer(1, 3))
+            img_bytes = io.BytesIO()
+            plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+            img_bytes.seek(0)
+            plt.close()
+            
+            img = Image(ImageReader(img_bytes), width=5*inch, height=2.6*inch)
+            elements.append(img)
+            elements.append(Spacer(1, 5))
         
         # Personalized Strategy Recommendations
         elements.append(Paragraph("💡 Personalized Strategy Recommendations", self.subheading_style))
@@ -1263,7 +1385,11 @@ class PDFReportGenerator:
         elements.append(Spacer(1, 3))
     
     def _create_historical_performance_charts(self, historical_data, portfolio_data, elements):
-        """Add Historical Performance charts to PDF"""
+        """Add Historical Performance charts to PDF using matplotlib"""
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        from reportlab.lib.utils import ImageReader
         import numpy as np
         
         portfolio_history = self._calculate_portfolio_history(portfolio_data, historical_data)
@@ -1274,92 +1400,85 @@ class PDFReportGenerator:
         elements.append(Paragraph("📈 Historical Performance Charts", self.heading_style))
         elements.append(Spacer(1, 3))
         
-        # Portfolio Value Over Time Chart
-        fig_value = go.Figure()
-        fig_value.add_trace(go.Scatter(
-            x=portfolio_history['Date'],
-            y=portfolio_history['Portfolio_Value'],
-            mode='lines',
-            name='Portfolio Value',
-            line=dict(color='green', width=2)
-        ))
-        fig_value.add_trace(go.Scatter(
-            x=portfolio_history['Date'],
-            y=portfolio_history['Investment_Value'],
-            mode='lines',
-            name='Investment (Cost Basis)',
-            line=dict(color='blue', width=2, dash='dash')
-        ))
+        # Chart 1: Portfolio Value Over Time
+        fig, ax = plt.subplots(figsize=(7, 3.5))
         
-        fig_value.update_layout(
-            title="Portfolio Value Over Time",
-            xaxis_title="Date",
-            yaxis_title="Value (₹)",
-            height=350,
-            showlegend=True
-        )
+        ax.plot(portfolio_history['Date'], portfolio_history['Portfolio_Value'], 
+               color='#27ae60', linewidth=2, label='Portfolio Value')
+        ax.plot(portfolio_history['Date'], portfolio_history['Investment_Value'], 
+               color='#3498db', linewidth=2, linestyle='--', label='Investment (Cost Basis)')
         
-        chart_img = self.convert_plotly_to_image(fig_value, width=5.5*inch, height=3*inch)
-        if chart_img:
-            elements.append(chart_img)
+        ax.set_title('Portfolio Value Over Time', fontsize=14, fontweight='bold', pad=15)
+        ax.set_xlabel('Date', fontsize=11)
+        ax.set_ylabel('Value (₹)', fontsize=11)
+        ax.legend()
+        ax.grid(alpha=0.3, linestyle='--')
+        ax.ticklabel_format(style='plain', axis='y')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
         
-        elements.append(Spacer(1, 3))
+        img_bytes = io.BytesIO()
+        plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+        img_bytes.seek(0)
+        plt.close()
         
-        # Cumulative Returns Chart
+        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        elements.append(img)
+        elements.append(Spacer(1, 8))
+        
+        # Chart 2: Cumulative Returns
         portfolio_history_copy = portfolio_history.copy()
         portfolio_history_copy['Cumulative_Return'] = ((portfolio_history_copy['Portfolio_Value'] - portfolio_history_copy['Investment_Value']) / portfolio_history_copy['Investment_Value']) * 100
         
-        fig_returns = go.Figure()
-        colors_ret = ['green' if x >= 0 else 'red' for x in portfolio_history_copy['Cumulative_Return']]
+        fig, ax = plt.subplots(figsize=(7, 3.5))
+        colors_ret = ['#27ae60' if x >= 0 else '#e74c3c' for x in portfolio_history_copy['Cumulative_Return']]
         
-        fig_returns.add_trace(go.Bar(
-            x=portfolio_history_copy['Date'],
-            y=portfolio_history_copy['Cumulative_Return'],
-            marker_color=colors_ret,
-            name='Cumulative Return %'
-        ))
+        ax.bar(portfolio_history_copy['Date'], portfolio_history_copy['Cumulative_Return'], 
+              color=colors_ret, width=2)
         
-        fig_returns.update_layout(
-            title="Cumulative Returns Over Time",
-            xaxis_title="Date",
-            yaxis_title="Return %",
-            height=350,
-            showlegend=False
-        )
+        ax.set_title('Cumulative Returns Over Time', fontsize=14, fontweight='bold', pad=15)
+        ax.set_xlabel('Date', fontsize=11)
+        ax.set_ylabel('Return %', fontsize=11)
+        ax.grid(axis='y', alpha=0.3, linestyle='--')
+        ax.set_axisbelow(True)
+        ax.axhline(y=0, color='black', linestyle='-', linewidth=0.8)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
         
-        chart_img2 = self.convert_plotly_to_image(fig_returns, width=5.5*inch, height=3*inch)
-        if chart_img2:
-            elements.append(chart_img2)
+        img_bytes = io.BytesIO()
+        plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+        img_bytes.seek(0)
+        plt.close()
         
-        elements.append(Spacer(1, 3))
+        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        elements.append(img)
+        elements.append(Spacer(1, 8))
         
-        # Drawdown Analysis Chart
+        # Chart 3: Drawdown Analysis
         peak_value = portfolio_history['Portfolio_Value'].expanding().max()
         drawdown = ((portfolio_history['Portfolio_Value'] - peak_value) / peak_value) * 100
         
-        fig_drawdown = go.Figure()
-        fig_drawdown.add_trace(go.Scatter(
-            x=portfolio_history['Date'],
-            y=drawdown,
-            mode='lines',
-            fill='tozeroy',
-            name='Drawdown %',
-            line=dict(color='red', width=2)
-        ))
+        fig, ax = plt.subplots(figsize=(7, 3.5))
         
-        fig_drawdown.update_layout(
-            title="Drawdown Analysis (Decline from Peak)",
-            xaxis_title="Date",
-            yaxis_title="Drawdown %",
-            height=350,
-            showlegend=False
-        )
+        ax.fill_between(portfolio_history['Date'], drawdown, 0, color='#e74c3c', alpha=0.3)
+        ax.plot(portfolio_history['Date'], drawdown, color='#c0392b', linewidth=2)
         
-        chart_img3 = self.convert_plotly_to_image(fig_drawdown, width=5.5*inch, height=3*inch)
-        if chart_img3:
-            elements.append(chart_img3)
+        ax.set_title('Drawdown Analysis (Decline from Peak)', fontsize=14, fontweight='bold', pad=15)
+        ax.set_xlabel('Date', fontsize=11)
+        ax.set_ylabel('Drawdown %', fontsize=11)
+        ax.grid(alpha=0.3, linestyle='--')
+        ax.axhline(y=0, color='black', linestyle='-', linewidth=0.8)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
         
-        elements.append(Spacer(1, 3))
+        img_bytes = io.BytesIO()
+        plt.savefig(img_bytes, format='png', dpi=150, bbox_inches='tight')
+        img_bytes.seek(0)
+        plt.close()
+        
+        img = Image(ImageReader(img_bytes), width=5.5*inch, height=2.8*inch)
+        elements.append(img)
+        elements.append(Spacer(1, 5))
     
     def _calculate_portfolio_history(self, portfolio_data, historical_data):
         """Calculate portfolio value over time"""
