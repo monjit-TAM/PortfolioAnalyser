@@ -6,6 +6,31 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 
 ## Recent Changes (November 2025)
 
+### PDF Chart Rendering Fix (November 11, 2025):
+
+#### Critical Infrastructure Change:
+**Matplotlib Chart Migration** (PRODUCTION-READY): Converted all 12 PDF charts from Plotly/Kaleido to matplotlib due to Kaleido requiring Chrome (unavailable in Replit environment). This complete architectural change ensures reliable chart rendering in generated PDFs without external dependencies.
+
+**Technical Implementation**:
+- Removed Plotly dependencies from PDF generation (plotly.graph_objects, plotly.express)
+- Implemented matplotlib-based chart generation with Agg backend (non-GUI)
+- Standardized pattern: `matplotlib → BytesIO → ReportLab Image()`
+- Fixed ImageReader bug: Changed from `Image(ImageReader(BytesIO))` to `Image(BytesIO)` directly
+- All 12 charts now render successfully in PDF reports
+
+**Affected Chart Sections** (All converted to matplotlib):
+1. Performance Overview: 2 bar charts (stock distribution, investment vs current value)
+2. Sector Analysis: 2 charts (allocation pie chart, returns bar chart)
+3. Recommendation Distribution: 1 pie chart (BUY/HOLD/SELL)
+4. Rebalancing: 1 grouped bar chart (current vs target allocation)
+5. Customer Profile: 3 pie charts (investment style, sector preferences, market cap)
+6. Historical Performance: 3 charts (portfolio value line, cumulative returns bar, drawdown line)
+
+**Code Cleanup**:
+- Removed obsolete `convert_plotly_to_image()` method
+- Removed unused Plotly imports from pdf_generator.py
+- Maintained consistent chart styling across all matplotlib conversions
+
 ### PDF Report Enhancements (November 1, 2025):
 
 #### Bug Fixes:
@@ -13,7 +38,7 @@ This Streamlit application offers comprehensive Indian stock market portfolio an
 1. **Advanced Risk Metrics Removed**: Removed the Stock Performance Metrics table (Volatility, All-Time High, Max Drawdown, Potential to ATH) from PDF report as these metrics were showing "N/A" for all stocks - data not available in the analysis pipeline
 
 #### Complete Chart & Visualization Integration:
-1. **Chart Conversion System**: Implemented Plotly-to-PDF conversion using kaleido library with ImageReader and BytesIO for in-memory image handling, ensuring all charts render correctly during PDF generation
+1. **Chart Rendering System**: All PDF charts now use matplotlib with BytesIO pattern for reliable in-memory image handling and embedding in ReportLab PDFs
 2. **Performance Overview Charts** (ENHANCED): Stock Performance Distribution (profitable vs loss-making) with green/red bars, Investment vs Current Value comparison using light blue/dark blue colors matching web version exactly, improved chart rendering with better error handling and data validation
 3. **Sector Analysis Charts** (ENHANCED): Sector Allocation Pie Chart, Sector Performance Bar Chart, Sector Insights table, Diversification Analysis with risk assessment, actionable Sector Recommendations
 4. **Benchmark Comparison Section** (NEW): Portfolio vs Market Indices comparison (NIFTY50, NIFTY Midcap 100, NIFTY Smallcap 100) with real-time data fetching, Benchmark Insights and performance analysis

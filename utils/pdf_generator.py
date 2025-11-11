@@ -6,8 +6,6 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 import pandas as pd
 from datetime import datetime
-import plotly.graph_objects as go
-import plotly.express as px
 import io
 import tempfile
 import os
@@ -97,29 +95,6 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ]))
         return table
-    
-    def convert_plotly_to_image(self, fig, width=6*inch, height=3.5*inch):
-        """Convert a Plotly figure to a ReportLab Image object using matplotlib"""
-        from reportlab.lib.utils import ImageReader
-        import matplotlib
-        matplotlib.use('Agg')  # Use non-GUI backend
-        import matplotlib.pyplot as plt
-        
-        try:
-            # Create matplotlib figure instead of using kaleido (which needs Chrome)
-            plt.figure(figsize=(8, 4.5))
-            
-            # Extract data from Plotly figure and create matplotlib chart
-            # This is a workaround since kaleido requires Chrome which isn't available
-            # We'll recreate the chart using matplotlib
-            
-            # For now, return None to skip chart - we'll create matplotlib charts directly
-            plt.close()
-            return None
-            
-        except Exception as e:
-            print(f"Warning: Could not convert chart to image: {e}")
-            return None
 
     def generate_report(self, analysis_results, portfolio_data, recommendations, filename="portfolio_report.pdf", historical_data=None, current_data=None):
         """Generate comprehensive PDF report with all web data including historical performance, rebalancing, and customer profile"""
