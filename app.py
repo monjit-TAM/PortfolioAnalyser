@@ -128,6 +128,51 @@ def main():
     
     add_footer()
 
+def render_top_header():
+    """Render top header with logo left and auth buttons right"""
+    col_logo, col_spacer, col_auth = st.columns([1, 2, 1])
+    
+    with col_logo:
+        st.image("attached_assets/Alphalens_1760976199318.png", width=180)
+    
+    with col_auth:
+        if st.session_state.authenticated:
+            user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
+            col_user, col_actions = st.columns([1, 1])
+            with col_user:
+                st.markdown(f"""
+                <div style='text-align: right; padding-top: 15px;'>
+                    <span style='color: #28a745; font-weight: 500;'>✅ {user_name[:15]}</span>
+                </div>
+                """, unsafe_allow_html=True)
+            with col_actions:
+                btn_col1, btn_col2 = st.columns(2)
+                with btn_col1:
+                    if st.session_state.user.get('is_admin'):
+                        if st.button("📊 Admin", key="admin_top"):
+                            st.session_state.show_admin = True
+                            st.rerun()
+                with btn_col2:
+                    if st.button("Logout", key="logout_top"):
+                        st.session_state.authenticated = False
+                        st.session_state.user = None
+                        st.session_state.portfolio_data = None
+                        st.session_state.analysis_complete = False
+                        st.session_state.show_admin = False
+                        st.rerun()
+        else:
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                if st.button("🔐 Login", key="login_top", type="primary"):
+                    st.session_state.show_login = True
+                    st.rerun()
+            with col_btn2:
+                if st.button("📝 Register", key="register_top"):
+                    st.session_state.show_signup = True
+                    st.rerun()
+    
+    st.markdown("<hr style='margin: 10px 0; border: none; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
+
 def render_auth_header():
     with st.sidebar:
         st.image("attached_assets/Alphalens_1760976199318.png", width=200)
@@ -667,78 +712,82 @@ def display_analysis():
         )
 
 def display_welcome_screen():
-    """Display clean welcome screen with integrated file upload"""
-    
-    render_auth_header()
+    """Display sleek welcome screen with top-right auth and rich content"""
     
     if st.session_state.show_login:
+        render_top_header()
         display_login_modal()
         return
     
     if st.session_state.show_signup:
+        render_top_header()
         display_signup_modal()
         return
     
-    # Heading section - minimal spacing
+    # Top header with logo left and auth buttons right
+    render_top_header()
+    
+    # Hero section with gradient background
     st.markdown("""
-    <div class="content-section" style='text-align: center; margin-top: -40px; padding-top: 0px; margin-bottom: 8px;'>
-        <h2 style='color: #FF6B35; margin-bottom: 5px; margin-top: 0px; font-size: 26px; font-weight: 600;'>
-            Portfolio Analysis
-        </h2>
-        <p style='font-size: 15px; color: #666; margin-bottom: 0px;'>
-            Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
+    <div style='background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 60px 40px; margin: -20px -100px 30px -100px; text-align: center;'>
+        <h1 style='color: #FF6B35; font-size: 48px; font-weight: 700; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>
+            Alphalens Portfolio Analyzer
+        </h1>
+        <p style='color: #e8e8e8; font-size: 20px; max-width: 700px; margin: 0 auto 25px auto; line-height: 1.6;'>
+            Unlock the full potential of your Indian stock portfolio with AI-powered analysis, 
+            dual investment perspectives, and actionable recommendations.
+        </p>
+        <p style='color: #FF6B35; font-size: 16px; font-weight: 500;'>
+            Powered by Edhaz Financial Services
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero banner image with height reduction and center alignment
+    # Stats bar
     st.markdown("""
-    <style>
-    /* Reduce banner height and center align */
-    div[data-testid="stImage"]:nth-of-type(2) {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-    div[data-testid="stImage"]:nth-of-type(2) img {
-        max-height: 320px !important;
-        object-fit: contain !important;
-        margin: 0 auto !important;
-        display: block !important;
-    }
-    </style>
+    <div style='display: flex; justify-content: center; gap: 60px; padding: 25px 0; margin-bottom: 30px; background: #f8f9fa; border-radius: 10px;'>
+        <div style='text-align: center;'>
+            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>500+</div>
+            <div style='font-size: 14px; color: #666;'>NSE Stocks Covered</div>
+        </div>
+        <div style='text-align: center;'>
+            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>Real-time</div>
+            <div style='font-size: 14px; color: #666;'>Market Data</div>
+        </div>
+        <div style='text-align: center;'>
+            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>8+</div>
+            <div style='font-size: 14px; color: #666;'>Analysis Reports</div>
+        </div>
+        <div style='text-align: center;'>
+            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>Free</div>
+            <div style='font-size: 14px; color: #666;'>To Get Started</div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
     
-    try:
-        hero_image = Image.open("attached_assets/Portfolio Analysis Banner_1761113674623.png")
-        st.image(hero_image, use_container_width=True)
-    except:
-        # Fallback to old banner if new one fails
-        st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
-    
-    # Upload section - clean and integrated into main page (with padding)
-    st.markdown('<div class="content-section">', unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([0.5, 2, 0.5])
+    # Upload section
+    col1, col2, col3 = st.columns([0.3, 2, 0.3])
     with col2:
         st.markdown("""
-        <h3 style='color: #FF6B35; text-align: center; margin-bottom: 10px; margin-top: 10px; font-size: 20px;'>
-            📁 Upload Your Portfolio
-        </h3>
+        <h2 style='color: #1a1a2e; text-align: center; margin-bottom: 20px; font-size: 28px;'>
+            Get Started in Seconds
+        </h2>
         """, unsafe_allow_html=True)
         
         if not st.session_state.authenticated:
             st.markdown("""
-            <div style='background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%); padding: 30px; border-radius: 15px; border: 2px solid #FF6B35; text-align: center; margin: 20px 0;'>
-                <h3 style='color: #FF6B35; margin-bottom: 15px;'>🔐 Please Sign In to Continue</h3>
-                <p style='color: #666; font-size: 16px; margin-bottom: 20px;'>
-                    Create a free account or login to upload and analyze your portfolio
+            <div style='background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%); padding: 40px; border-radius: 20px; border: 2px solid #FF6B35; text-align: center; margin: 20px 0; box-shadow: 0 10px 40px rgba(255, 107, 53, 0.15);'>
+                <div style='font-size: 50px; margin-bottom: 15px;'>🔐</div>
+                <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 24px;'>Sign In to Analyze Your Portfolio</h3>
+                <p style='color: #666; font-size: 16px; margin-bottom: 25px; max-width: 400px; margin-left: auto; margin-right: auto;'>
+                    Create a free account or login to upload your portfolio and get comprehensive analysis with actionable insights.
                 </p>
             </div>
             """, unsafe_allow_html=True)
             
-            col_btn1, col_btn2 = st.columns(2)
+            col_btn1, col_space, col_btn2 = st.columns([1, 0.2, 1])
             with col_btn1:
-                if st.button("🔐 LOGIN NOW", key="login_cta", type="primary", use_container_width=True):
+                if st.button("🔐 LOGIN", key="login_cta", type="primary", use_container_width=True):
                     st.session_state.show_login = True
                     st.rerun()
             with col_btn2:
@@ -746,8 +795,14 @@ def display_welcome_screen():
                     st.session_state.show_signup = True
                     st.rerun()
         else:
+            st.markdown("""
+            <div style='background: #f0f8f0; padding: 15px 20px; border-radius: 10px; border-left: 4px solid #28a745; margin-bottom: 20px;'>
+                <p style='color: #155724; margin: 0; font-size: 16px;'>✅ You're logged in! Upload your portfolio CSV to begin analysis.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
             uploaded_file = st.file_uploader(
-                "Drag and drop your CSV file here or browse",
+                "Drag and drop your CSV file here or click to browse",
                 type=['csv'],
                 help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity"
             )
@@ -773,7 +828,7 @@ def display_welcome_screen():
                             st.session_state.portfolio_data = portfolio_df
                             st.session_state.uploaded_file_name = uploaded_file.name
                             
-                            if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
+                            if st.button("🚀 Analyze My Portfolio", type="primary", use_container_width=True):
                                 st.session_state.analysis_complete = False
                                 with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
                                     analyze_portfolio()
@@ -782,7 +837,8 @@ def display_welcome_screen():
                     st.error(f"❌ Error reading file: {str(e)}")
         
         # Sample CSV download
-        col_a, col_b, col_c = st.columns([1, 2, 1])
+        st.markdown("<br>", unsafe_allow_html=True)
+        col_a, col_b, col_c = st.columns([1, 1, 1])
         with col_b:
             sample_data = {
                 'Stock Name': ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK'],
@@ -800,58 +856,157 @@ def display_welcome_screen():
                 use_container_width=True
             )
     
-    # Key features - clean and concise
-    col1, col2, col3 = st.columns(3)
+    # Feature cards section
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+    <h2 style='text-align: center; color: #1a1a2e; margin-bottom: 30px; font-size: 28px;'>
+        Comprehensive Portfolio Analysis
+    </h2>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.markdown("""
-        <div style='text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 8px; font-size: 16px;'>📊 Dual Perspectives</h3>
-            <p style='color: #666; font-size: 13px; margin: 0;'>
-                Get insights from both <strong>Value</strong> and <strong>Growth</strong> investing viewpoints
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>📊</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>Dual Perspectives</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Get insights from both Value and Growth investing viewpoints for balanced decisions
             </p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style='text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 8px; font-size: 16px;'>📈 Advanced Analytics</h3>
-            <p style='color: #666; font-size: 13px; margin: 0;'>
-                Sector analysis, benchmark comparison, and performance tracking
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>📈</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>Sector Analysis</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Understand your portfolio allocation across different sectors and industries
             </p>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
-        <div style='text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px; height: 100%;'>
-            <h3 style='color: #FF6B35; margin-bottom: 8px; font-size: 16px;'>💡 Smart Recommendations</h3>
-            <p style='color: #666; font-size: 13px; margin: 0;'>
-                Actionable insights with rebalancing suggestions and alternative stock picks
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>🎯</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>NIFTY Benchmark</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Compare your portfolio performance against NIFTY 50 and sectoral indices
             </p>
         </div>
         """, unsafe_allow_html=True)
     
-    # CSV Format info - minimal
+    with col4:
+        st.markdown("""
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>💡</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>Smart Recommendations</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Get BUY/HOLD/SELL signals with rebalancing suggestions
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Second row of features
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.markdown("""
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>📋</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>PDF Reports</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Download comprehensive PDF reports with charts and recommendations
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>🔄</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>Rebalancing</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Get personalized rebalancing strategies based on your risk profile
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>📉</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>Historical Tracking</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Track your portfolio performance over time with detailed charts
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style='text-align: center; padding: 25px 15px; background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); height: 200px;'>
+            <div style='font-size: 40px; margin-bottom: 12px;'>🔍</div>
+            <h4 style='color: #FF6B35; margin-bottom: 10px; font-size: 16px;'>Alternative Stocks</h4>
+            <p style='color: #666; font-size: 13px; line-height: 1.5;'>
+                Discover better alternatives for underperforming stocks in your portfolio
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # How it works section
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='background: #1a1a2e; padding: 40px; border-radius: 20px; margin: 20px 0;'>
+        <h2 style='text-align: center; color: #FF6B35; margin-bottom: 30px; font-size: 28px;'>
+            How It Works
+        </h2>
+        <div style='display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;'>
+            <div style='text-align: center; flex: 1; min-width: 200px;'>
+                <div style='background: #FF6B35; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 24px; font-weight: bold;'>1</div>
+                <h4 style='color: white; margin-bottom: 8px;'>Create Account</h4>
+                <p style='color: #aaa; font-size: 14px;'>Sign up for free in seconds</p>
+            </div>
+            <div style='text-align: center; flex: 1; min-width: 200px;'>
+                <div style='background: #FF6B35; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 24px; font-weight: bold;'>2</div>
+                <h4 style='color: white; margin-bottom: 8px;'>Upload Portfolio</h4>
+                <p style='color: #aaa; font-size: 14px;'>Upload your holdings as CSV</p>
+            </div>
+            <div style='text-align: center; flex: 1; min-width: 200px;'>
+                <div style='background: #FF6B35; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 24px; font-weight: bold;'>3</div>
+                <h4 style='color: white; margin-bottom: 8px;'>Get Analysis</h4>
+                <p style='color: #aaa; font-size: 14px;'>Receive comprehensive insights</p>
+            </div>
+            <div style='text-align: center; flex: 1; min-width: 200px;'>
+                <div style='background: #FF6B35; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 24px; font-weight: bold;'>4</div>
+                <h4 style='color: white; margin-bottom: 8px;'>Take Action</h4>
+                <p style='color: #aaa; font-size: 14px;'>Make informed investment decisions</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # CSV Format info
+    st.markdown("<br>", unsafe_allow_html=True)
     with st.expander("📋 CSV Format & Requirements"):
         col_x, col_y = st.columns(2)
         with col_x:
             st.markdown("""
             **Required Columns:**
-            - Stock Name (e.g., RELIANCE, TCS)
+            - Stock Name (e.g., RELIANCE, TCS, INFY)
             - Buy Price (in ₹)
-            - Buy Date (YYYY-MM-DD)
+            - Buy Date (YYYY-MM-DD format)
             - Quantity (number of shares)
             """)
         with col_y:
             st.markdown("""
-            **Analysis Features:**
-            - Portfolio Dashboard & Performance
-            - Sector & Category Breakdown
-            - Benchmark Comparison (NIFTY)
-            - Stock Recommendations & Rebalancing
+            **Supported Stock Names:**
+            - NSE symbols (e.g., RELIANCE, TCS)
+            - Common abbreviations (e.g., HDFC for HDFCBANK)
+            - Full names mapped automatically
             """)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 def display_portfolio_preview():
     """Display portfolio preview after upload"""
