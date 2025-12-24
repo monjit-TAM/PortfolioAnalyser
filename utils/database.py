@@ -4,13 +4,30 @@ from psycopg2.extras import RealDictCursor
 from datetime import datetime
 import hashlib
 import secrets
+import time
 
 class Database:
     def __init__(self):
         self.database_url = os.environ.get('DATABASE_URL')
+        self.max_retries = 3
+        self.retry_delay = 1
     
     def get_connection(self):
-        return psycopg2.connect(self.database_url)
+        last_error = None
+        for attempt in range(self.max_retries):
+            try:
+                conn = psycopg2.connect(
+                    self.database_url,
+                    connect_timeout=10,
+                    options='-c statement_timeout=30000'
+                )
+                return conn
+            except psycopg2.OperationalError as e:
+                last_error = e
+                if attempt < self.max_retries - 1:
+                    time.sleep(self.retry_delay * (attempt + 1))
+                continue
+        raise last_error if last_error else Exception("Failed to connect to database")
     
     def init_tables(self):
         conn = self.get_connection()
