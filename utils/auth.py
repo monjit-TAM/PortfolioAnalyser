@@ -67,7 +67,7 @@ class AuthManager:
             cur = conn.cursor()
             
             cur.execute('''
-                SELECT id, email, password_hash, full_name, phone 
+                SELECT id, email, password_hash, full_name, phone, is_admin 
                 FROM users WHERE email = %s
             ''', (email.lower(),))
             
@@ -78,7 +78,7 @@ class AuthManager:
                 conn.close()
                 return {'success': False, 'message': 'Invalid email or password'}
             
-            user_id, user_email, password_hash, full_name, phone = user
+            user_id, user_email, password_hash, full_name, phone, is_admin = user
             
             if not self._verify_password(password, password_hash):
                 cur.close()
@@ -95,7 +95,8 @@ class AuthManager:
                 'message': 'Login successful',
                 'user_id': user_id,
                 'email': user_email,
-                'full_name': full_name
+                'full_name': full_name,
+                'is_admin': is_admin or False
             }
         except Exception as e:
             return {'success': False, 'message': f'Login failed: {str(e)}'}

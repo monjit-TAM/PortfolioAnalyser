@@ -23,8 +23,37 @@ class Database:
                 password_hash VARCHAR(255) NOT NULL,
                 full_name VARCHAR(255),
                 phone VARCHAR(20),
+                is_admin BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP
+            )
+        ''')
+        
+        cur.execute('''
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE
+        ''')
+        
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS portfolio_history (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                file_name VARCHAR(255),
+                stock_count INTEGER,
+                total_investment DECIMAL(15,2),
+                current_value DECIMAL(15,2),
+                total_gain_loss DECIMAL(15,2),
+                stocks_data JSONB,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS user_activity (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                activity_type VARCHAR(50),
+                details VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
         
@@ -313,3 +342,107 @@ class Database:
             'Mid Cap': float(row['mid_cap_target']),
             'Small Cap': float(row['small_cap_target'])
         } for row in results}
+    
+    def save_portfolio_history(self, user_id, file_name, stock_count, total_investment, current_value, total_gain_loss, stocks_data):
+        try:
+            import json
+            conn = self.get_connection()
+            cur = conn.cursor()
+            cur.execute('''
+                INSERT INTO portfolio_history (user_id, file_name, stock_count, total_investment, current_value, total_gain_loss, stocks_data)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ''', (user_id, file_name, stock_count, total_investment, current_value, total_gain_loss, json.dumps(stocks_data)))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error saving portfolio history: {e}")
+            return False
+    
+    def log_activity(self, user_id, activity_type, details=None):
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor()
+            cur.execute('''
+                INSERT INTO user_activity (user_id, activity_type, details)
+                VALUES (%s, %s, %s)
+            ''', (user_id, activity_type, details))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error logging activity: {e}")
+            return False
+    
+    def get_all_users(self):
+        conn = self.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT id, email, full_name, phone, is_admin, created_at, last_login 
+            FROM users ORDER BY created_at DESC
+        ''')
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+        return results
+    
+    def get_all_portfolio_history(self):
+        conn = self.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT ph.*, u.email, u.full_name 
+            FROM portfolio_history ph
+            JOIN users u ON ph.user_id = u.id
+            ORDER BY ph.created_at DESC
+            LIMIT 100
+        ''')
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+        return results
+    
+    def get_user_activity(self, limit=100):
+        conn = self.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT ua.*, u.email, u.full_name 
+            FROM user_activity ua
+            JOIN users u ON ua.user_id = u.id
+            ORDER BY ua.created_at DESC
+            LIMIT %s
+        ''', (limit,))
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+        return results
+    
+    def get_admin_stats(self):
+        conn = self.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT COUNT(*) as count FROM users")
+        total_users = cur.fetchone()['count']
+        cur.execute("SELECT COUNT(*) as count FROM portfolio_history")
+        total_analyses = cur.fetchone()['count']
+        cur.execute("SELECT COUNT(DISTINCT user_id) as count FROM portfolio_history")
+        active_users = cur.fetchone()['count']
+        cur.close()
+        conn.close()
+        return {
+            'total_users': total_users,
+            'total_analyses': total_analyses,
+            'active_users': active_users
+        }
+    
+    def make_admin(self, email):
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET is_admin = TRUE WHERE email = %s", (email.lower(),))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except:
+            return False

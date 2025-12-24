@@ -108,9 +108,17 @@ def main():
         st.session_state.portfolio_data = None
     if 'analysis_complete' not in st.session_state:
         st.session_state.analysis_complete = False
+    if 'show_login' not in st.session_state:
+        st.session_state.show_login = False
+    if 'show_signup' not in st.session_state:
+        st.session_state.show_signup = False
+    if 'show_admin' not in st.session_state:
+        st.session_state.show_admin = False
+    if 'uploaded_file_name' not in st.session_state:
+        st.session_state.uploaded_file_name = None
     
-    if not st.session_state.authenticated:
-        display_auth_screen()
+    if st.session_state.show_admin and st.session_state.authenticated and st.session_state.user.get('is_admin'):
+        display_admin_panel()
     elif st.session_state.portfolio_data is not None and st.session_state.analysis_complete:
         display_analysis()
     elif st.session_state.portfolio_data is not None:
@@ -120,101 +128,211 @@ def main():
     
     add_footer()
 
-def display_auth_screen():
-    col1, col2, col3 = st.columns([1, 2, 1])
+def render_auth_header():
+    col1, col2, col3, col4 = st.columns([2, 1, 0.5, 0.5])
     
     with col2:
-        st.image("attached_assets/Alphalens_1760976199318.png", width=300)
-        
+        st.image("attached_assets/Alphalens_1760976199318.png", width=200)
+    
+    with col3:
+        if st.session_state.authenticated:
+            user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
+            st.markdown(f"<span style='color:#666; font-size:12px;'>Hi, {user_name[:15]}</span>", unsafe_allow_html=True)
+            if st.session_state.user.get('is_admin'):
+                if st.button("Admin", key="admin_btn", type="secondary"):
+                    st.session_state.show_admin = True
+                    st.rerun()
+        else:
+            if st.button("Login", key="login_btn", type="secondary"):
+                st.session_state.show_login = True
+                st.rerun()
+    
+    with col4:
+        if st.session_state.authenticated:
+            if st.button("Logout", key="logout_btn"):
+                st.session_state.authenticated = False
+                st.session_state.user = None
+                st.session_state.portfolio_data = None
+                st.session_state.analysis_complete = False
+                st.session_state.show_admin = False
+                st.rerun()
+        else:
+            if st.button("Register", key="register_btn", type="primary"):
+                st.session_state.show_signup = True
+                st.rerun()
+
+def display_login_modal():
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
         st.markdown("""
-        <div style='text-align: center; margin-bottom: 20px;'>
-            <h2 style='color: #FF6B35;'>Welcome to Alphalens</h2>
-            <p style='color: #666;'>Your Comprehensive Portfolio Analysis Platform</p>
+        <div style='background: #fff5f2; padding: 20px; border-radius: 10px; border: 2px solid #FF6B35;'>
+        <h3 style='color: #FF6B35; text-align: center;'>Login to Your Account</h3>
         </div>
         """, unsafe_allow_html=True)
         
-        tab1, tab2 = st.tabs(["Login", "Sign Up"])
+        with st.form("login_form"):
+            login_email = st.text_input("Email", placeholder="Enter your email")
+            login_password = st.text_input("Password", type="password", placeholder="Enter your password")
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                login_submitted = st.form_submit_button("Login", type="primary", use_container_width=True)
+            with col_b:
+                cancel = st.form_submit_button("Cancel", use_container_width=True)
+            
+            if cancel:
+                st.session_state.show_login = False
+                st.rerun()
+            
+            if login_submitted:
+                if login_email and login_password:
+                    try:
+                        from utils.auth import AuthManager
+                        auth = AuthManager()
+                        result = auth.login(login_email, login_password)
+                        
+                        if result['success']:
+                            st.session_state.authenticated = True
+                            st.session_state.user = {
+                                'id': result['user_id'],
+                                'email': result['email'],
+                                'full_name': result.get('full_name', ''),
+                                'is_admin': result.get('is_admin', False)
+                            }
+                            st.session_state.show_login = False
+                            st.success("Login successful!")
+                            st.rerun()
+                        else:
+                            st.error(result['message'])
+                    except Exception as e:
+                        st.error(f"Login error: {str(e)}")
+                else:
+                    st.warning("Please enter both email and password")
+
+def display_signup_modal():
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div style='background: #fff5f2; padding: 20px; border-radius: 10px; border: 2px solid #FF6B35;'>
+        <h3 style='color: #FF6B35; text-align: center;'>Create Your Account</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("signup_form"):
+            signup_name = st.text_input("Full Name", placeholder="Enter your full name")
+            signup_email = st.text_input("Email", placeholder="Enter your email")
+            signup_phone = st.text_input("Phone (optional)", placeholder="Enter your phone number")
+            signup_password = st.text_input("Password", type="password", placeholder="Create a password (min 6 characters)")
+            signup_confirm = st.text_input("Confirm Password", type="password", placeholder="Confirm your password")
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                signup_submitted = st.form_submit_button("Create Account", type="primary", use_container_width=True)
+            with col_b:
+                cancel = st.form_submit_button("Cancel", use_container_width=True)
+            
+            if cancel:
+                st.session_state.show_signup = False
+                st.rerun()
+            
+            if signup_submitted:
+                if not signup_email or not signup_password:
+                    st.warning("Please enter email and password")
+                elif len(signup_password) < 6:
+                    st.warning("Password must be at least 6 characters")
+                elif signup_password != signup_confirm:
+                    st.error("Passwords do not match")
+                else:
+                    try:
+                        from utils.auth import AuthManager
+                        auth = AuthManager()
+                        result = auth.signup(signup_email, signup_password, signup_name, signup_phone)
+                        
+                        if result['success']:
+                            st.session_state.authenticated = True
+                            st.session_state.user = {
+                                'id': result['user_id'],
+                                'email': result['email'],
+                                'full_name': result.get('full_name', ''),
+                                'is_admin': False
+                            }
+                            st.session_state.show_signup = False
+                            st.success("Account created successfully!")
+                            st.rerun()
+                        else:
+                            st.error(result['message'])
+                    except Exception as e:
+                        st.error(f"Registration error: {str(e)}")
+
+def display_admin_panel():
+    render_auth_header()
+    
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%); padding: 20px; border-radius: 10px; margin: 20px 0;'>
+        <h2 style='color: white; text-align: center; margin: 0;'>Admin Dashboard</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        if st.button("← Back to Home", use_container_width=True):
+            st.session_state.show_admin = False
+            st.rerun()
+    
+    try:
+        from utils.database import Database
+        db = Database()
+        
+        stats = db.get_admin_stats()
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Users", stats['total_users'])
+        with col2:
+            st.metric("Total Analyses", stats['total_analyses'])
+        with col3:
+            st.metric("Active Users", stats['active_users'])
+        
+        st.markdown("---")
+        
+        tab1, tab2, tab3 = st.tabs(["Users", "Portfolio History", "Activity Log"])
         
         with tab1:
-            with st.form("login_form"):
-                st.markdown("### Login to Your Account")
-                login_email = st.text_input("Email", key="login_email", placeholder="Enter your email")
-                login_password = st.text_input("Password", type="password", key="login_password", placeholder="Enter your password")
-                
-                login_submitted = st.form_submit_button("Login", type="primary", use_container_width=True)
-                
-                if login_submitted:
-                    if login_email and login_password:
-                        try:
-                            from utils.auth import AuthManager
-                            auth = AuthManager()
-                            result = auth.login(login_email, login_password)
-                            
-                            if result['success']:
-                                st.session_state.authenticated = True
-                                st.session_state.user = {
-                                    'id': result['user_id'],
-                                    'email': result['email'],
-                                    'full_name': result.get('full_name', '')
-                                }
-                                st.success("Login successful!")
-                                st.rerun()
-                            else:
-                                st.error(result['message'])
-                        except Exception as e:
-                            st.error(f"Login error: {str(e)}")
-                    else:
-                        st.warning("Please enter both email and password")
+            st.subheader("Registered Users")
+            users = db.get_all_users()
+            if users:
+                users_df = pd.DataFrame(users)
+                users_df['created_at'] = pd.to_datetime(users_df['created_at']).dt.strftime('%Y-%m-%d %H:%M')
+                users_df['last_login'] = pd.to_datetime(users_df['last_login']).dt.strftime('%Y-%m-%d %H:%M')
+                st.dataframe(users_df[['email', 'full_name', 'phone', 'is_admin', 'created_at', 'last_login']], use_container_width=True)
+            else:
+                st.info("No users registered yet")
         
         with tab2:
-            with st.form("signup_form"):
-                st.markdown("### Create Your Account")
-                signup_name = st.text_input("Full Name", key="signup_name", placeholder="Enter your full name")
-                signup_email = st.text_input("Email", key="signup_email", placeholder="Enter your email")
-                signup_phone = st.text_input("Phone (optional)", key="signup_phone", placeholder="Enter your phone number")
-                signup_password = st.text_input("Password", type="password", key="signup_password", placeholder="Create a password (min 6 characters)")
-                signup_confirm = st.text_input("Confirm Password", type="password", key="signup_confirm", placeholder="Confirm your password")
-                
-                signup_submitted = st.form_submit_button("Create Account", type="primary", use_container_width=True)
-                
-                if signup_submitted:
-                    if not signup_email or not signup_password:
-                        st.warning("Please enter email and password")
-                    elif len(signup_password) < 6:
-                        st.warning("Password must be at least 6 characters")
-                    elif signup_password != signup_confirm:
-                        st.error("Passwords do not match")
-                    else:
-                        try:
-                            from utils.auth import AuthManager
-                            auth = AuthManager()
-                            result = auth.signup(signup_email, signup_password, signup_name, signup_phone)
-                            
-                            if result['success']:
-                                st.session_state.authenticated = True
-                                st.session_state.user = {
-                                    'id': result['user_id'],
-                                    'email': result['email'],
-                                    'full_name': result.get('full_name', '')
-                                }
-                                st.success("Account created successfully!")
-                                st.rerun()
-                            else:
-                                st.error(result['message'])
-                        except Exception as e:
-                            st.error(f"Registration error: {str(e)}")
+            st.subheader("Portfolio Evaluations")
+            portfolios = db.get_all_portfolio_history()
+            if portfolios:
+                portfolios_df = pd.DataFrame(portfolios)
+                portfolios_df['created_at'] = pd.to_datetime(portfolios_df['created_at']).dt.strftime('%Y-%m-%d %H:%M')
+                portfolios_df['total_investment'] = portfolios_df['total_investment'].apply(lambda x: f"₹{float(x):,.2f}" if x else "N/A")
+                portfolios_df['current_value'] = portfolios_df['current_value'].apply(lambda x: f"₹{float(x):,.2f}" if x else "N/A")
+                portfolios_df['total_gain_loss'] = portfolios_df['total_gain_loss'].apply(lambda x: f"₹{float(x):,.2f}" if x else "N/A")
+                st.dataframe(portfolios_df[['email', 'full_name', 'file_name', 'stock_count', 'total_investment', 'current_value', 'total_gain_loss', 'created_at']], use_container_width=True)
+            else:
+                st.info("No portfolio analyses recorded yet")
         
-        st.markdown("""
-        <div style='text-align: center; margin-top: 30px; padding: 20px; background: #fff5f2; border-radius: 10px;'>
-            <h4 style='color: #FF6B35;'>Why Create an Account?</h4>
-            <ul style='text-align: left; color: #666;'>
-                <li>Get personalized portfolio insights</li>
-                <li>Save your analysis history</li>
-                <li>Access detailed stock recommendations</li>
-                <li>Download comprehensive PDF reports</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        with tab3:
+            st.subheader("User Activity Log")
+            activities = db.get_user_activity(50)
+            if activities:
+                activities_df = pd.DataFrame(activities)
+                activities_df['created_at'] = pd.to_datetime(activities_df['created_at']).dt.strftime('%Y-%m-%d %H:%M')
+                st.dataframe(activities_df[['email', 'activity_type', 'details', 'created_at']], use_container_width=True)
+            else:
+                st.info("No activity recorded yet")
+    except Exception as e:
+        st.error(f"Error loading admin data: {str(e)}")
 
 def analyze_portfolio():
     """Perform comprehensive portfolio analysis"""
@@ -274,6 +392,28 @@ def analyze_portfolio():
         progress_bar.progress(1.0)
         st.success("Analysis complete!")
         
+        try:
+            from utils.database import Database
+            db = Database()
+            user_id = st.session_state.user.get('id') if st.session_state.user else None
+            if user_id:
+                file_name = st.session_state.get('uploaded_file_name', 'Unknown')
+                stock_count = len(portfolio_df)
+                total_investment = analysis_results.get('total_investment', 0)
+                current_value = analysis_results.get('current_value', 0)
+                total_gain_loss = analysis_results.get('total_gain_loss', 0)
+                
+                stocks_list = [{'name': stock['Stock Name'], 'qty': int(stock['Quantity'])} 
+                              for _, stock in portfolio_df.iterrows()]
+                
+                db.save_portfolio_history(
+                    user_id, file_name, stock_count, total_investment,
+                    current_value, total_gain_loss, stocks_list
+                )
+                db.log_activity(user_id, 'portfolio_analysis', f'Analyzed {stock_count} stocks')
+        except Exception as e:
+            pass
+        
         # Auto-rerun to display results
         st.rerun()
         
@@ -329,6 +469,8 @@ def refresh_prices():
 
 def display_analysis():
     """Display comprehensive portfolio analysis"""
+    
+    render_auth_header()
     
     # Apply global styling for margins and card-based sections
     st.markdown("""
@@ -521,25 +663,15 @@ def display_analysis():
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
     
-    col1, col2, col3 = st.columns([2, 1.5, 0.5])
-    with col1:
-        if st.session_state.user:
-            user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-            st.markdown(f"""
-            <div style='padding: 10px 0;'>
-                <span style='color: #666;'>Welcome back,</span> 
-                <span style='color: #FF6B35; font-weight: 600;'>{user_name}</span>
-            </div>
-            """, unsafe_allow_html=True)
-    with col2:
-        st.image("attached_assets/Alphalens_1760976199318.png", width=250)
-    with col3:
-        if st.button("Logout", key="logout_welcome"):
-            st.session_state.authenticated = False
-            st.session_state.user = None
-            st.session_state.portfolio_data = None
-            st.session_state.analysis_complete = False
-            st.rerun()
+    render_auth_header()
+    
+    if st.session_state.show_login:
+        display_login_modal()
+        return
+    
+    if st.session_state.show_signup:
+        display_signup_modal()
+        return
     
     # Heading section - minimal spacing
     st.markdown("""
@@ -614,11 +746,17 @@ def display_welcome_screen():
                     else:
                         st.success(f"✅ Successfully loaded {len(portfolio_df)} stocks")
                         st.session_state.portfolio_data = portfolio_df
+                        st.session_state.uploaded_file_name = uploaded_file.name
                         
                         if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
-                            st.session_state.analysis_complete = False
-                            with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
-                                analyze_portfolio()
+                            if not st.session_state.authenticated:
+                                st.warning("Please login or register to analyze your portfolio")
+                                st.session_state.show_login = True
+                                st.rerun()
+                            else:
+                                st.session_state.analysis_complete = False
+                                with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
+                                    analyze_portfolio()
                             
             except Exception as e:
                 st.error(f"❌ Error reading file: {str(e)}")
@@ -697,6 +835,17 @@ def display_welcome_screen():
 
 def display_portfolio_preview():
     """Display portfolio preview after upload"""
+    
+    render_auth_header()
+    
+    if st.session_state.show_login:
+        display_login_modal()
+        return
+    
+    if st.session_state.show_signup:
+        display_signup_modal()
+        return
+    
     st.markdown('<div class="content-section">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([0.5, 2, 0.5])
     with col2:
@@ -720,9 +869,14 @@ def display_portfolio_preview():
         st.dataframe(st.session_state.portfolio_data, use_container_width=True)
         
         if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
-            st.session_state.analysis_complete = False
-            with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
-                analyze_portfolio()
+            if not st.session_state.authenticated:
+                st.warning("Please login or register to analyze your portfolio")
+                st.session_state.show_login = True
+                st.rerun()
+            else:
+                st.session_state.analysis_complete = False
+                with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
+                    analyze_portfolio()
     st.markdown('</div>', unsafe_allow_html=True)
 
 def add_footer():
