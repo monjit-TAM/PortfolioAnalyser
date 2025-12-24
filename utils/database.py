@@ -16,11 +16,28 @@ class Database:
         last_error = None
         for attempt in range(self.max_retries):
             try:
-                conn = psycopg2.connect(
-                    self.database_url,
-                    connect_timeout=10,
-                    options='-c statement_timeout=30000'
-                )
+                pghost = os.environ.get('PGHOST')
+                pgport = os.environ.get('PGPORT', '5432')
+                pguser = os.environ.get('PGUSER')
+                pgpassword = os.environ.get('PGPASSWORD')
+                pgdatabase = os.environ.get('PGDATABASE')
+                
+                if pghost and pguser and pgpassword and pgdatabase:
+                    conn = psycopg2.connect(
+                        host=pghost,
+                        port=pgport,
+                        user=pguser,
+                        password=pgpassword,
+                        dbname=pgdatabase,
+                        connect_timeout=10,
+                        options='-c statement_timeout=30000'
+                    )
+                else:
+                    conn = psycopg2.connect(
+                        self.database_url,
+                        connect_timeout=10,
+                        options='-c statement_timeout=30000'
+                    )
                 return conn
             except psycopg2.OperationalError as e:
                 last_error = e
