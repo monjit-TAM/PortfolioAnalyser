@@ -129,26 +129,19 @@ def main():
     add_footer()
 
 def render_auth_header():
-    col1, col2, col3 = st.columns([3, 1, 1])
-    
-    with col1:
+    with st.sidebar:
         st.image("attached_assets/Alphalens_1760976199318.png", width=200)
-    
-    with col2:
+        st.markdown("---")
+        
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-            st.markdown(f"<div style='text-align:right; padding-top:10px;'><span style='color:#666;'>Welcome, <strong>{user_name[:20]}</strong></span></div>", unsafe_allow_html=True)
+            st.markdown(f"**Welcome, {user_name[:20]}**")
+            
             if st.session_state.user.get('is_admin'):
                 if st.button("📊 Admin Panel", key="admin_btn", use_container_width=True):
                     st.session_state.show_admin = True
                     st.rerun()
-        else:
-            if st.button("🔐 Login", key="login_btn", use_container_width=True):
-                st.session_state.show_login = True
-                st.rerun()
-    
-    with col3:
-        if st.session_state.authenticated:
+            
             if st.button("🚪 Logout", key="logout_btn", use_container_width=True):
                 st.session_state.authenticated = False
                 st.session_state.user = None
@@ -157,11 +150,16 @@ def render_auth_header():
                 st.session_state.show_admin = False
                 st.rerun()
         else:
+            st.markdown("### Account")
+            if st.button("🔐 Login", key="login_btn", use_container_width=True):
+                st.session_state.show_login = True
+                st.rerun()
+            
             if st.button("📝 Register", key="register_btn", type="primary", use_container_width=True):
                 st.session_state.show_signup = True
                 st.rerun()
-    
-    st.markdown("---")
+        
+        st.markdown("---")
 
 def display_login_modal():
     st.markdown("---")
