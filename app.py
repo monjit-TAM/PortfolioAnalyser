@@ -129,49 +129,80 @@ def main():
     add_footer()
 
 def render_top_header():
-    """Render top header with logo left and auth buttons right"""
-    col_logo, col_spacer, col_auth = st.columns([1, 2, 1])
+    """Render compact top header with logo left and auth buttons far right"""
+    st.markdown("""
+    <style>
+    .top-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 20px;
+        background: white;
+        border-bottom: 1px solid #eee;
+        margin: -20px -100px 15px -100px;
+    }
+    .auth-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .login-btn {
+        padding: 8px 24px;
+        border: 2px solid #1a1a2e;
+        background: white;
+        color: #1a1a2e;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .signup-btn {
+        padding: 8px 24px;
+        border: none;
+        background: #1a1a2e;
+        color: white;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    col_logo, col_spacer, col_auth = st.columns([1.5, 4, 1.5])
     
     with col_logo:
-        st.image("attached_assets/Alphalens_1760976199318.png", width=180)
+        st.image("attached_assets/Alphalens_1760976199318.png", width=150)
     
     with col_auth:
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-            col_user, col_actions = st.columns([1, 1])
-            with col_user:
-                st.markdown(f"""
-                <div style='text-align: right; padding-top: 15px;'>
-                    <span style='color: #28a745; font-weight: 500;'>✅ {user_name[:15]}</span>
-                </div>
-                """, unsafe_allow_html=True)
-            with col_actions:
-                btn_col1, btn_col2 = st.columns(2)
-                with btn_col1:
-                    if st.session_state.user.get('is_admin'):
-                        if st.button("📊 Admin", key="admin_top"):
-                            st.session_state.show_admin = True
-                            st.rerun()
-                with btn_col2:
-                    if st.button("Logout", key="logout_top"):
-                        st.session_state.authenticated = False
-                        st.session_state.user = None
-                        st.session_state.portfolio_data = None
-                        st.session_state.analysis_complete = False
-                        st.session_state.show_admin = False
+            c1, c2, c3 = st.columns([2, 1, 1])
+            with c1:
+                st.markdown(f"<div style='text-align: right; padding-top: 8px; color: #28a745;'>✅ {user_name[:12]}</div>", unsafe_allow_html=True)
+            with c2:
+                if st.session_state.user.get('is_admin'):
+                    if st.button("Admin", key="admin_top"):
+                        st.session_state.show_admin = True
                         st.rerun()
+            with c3:
+                if st.button("Logout", key="logout_top"):
+                    st.session_state.authenticated = False
+                    st.session_state.user = None
+                    st.session_state.portfolio_data = None
+                    st.session_state.analysis_complete = False
+                    st.session_state.show_admin = False
+                    st.rerun()
         else:
-            col_btn1, col_btn2 = st.columns(2)
-            with col_btn1:
-                if st.button("🔐 Login", key="login_top", type="primary"):
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("Login", key="login_top"):
                     st.session_state.show_login = True
                     st.rerun()
-            with col_btn2:
-                if st.button("📝 Register", key="register_top"):
+            with c2:
+                if st.button("SignUp", key="register_top", type="primary"):
                     st.session_state.show_signup = True
                     st.rerun()
-    
-    st.markdown("<hr style='margin: 10px 0; border: none; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
 
 def render_auth_header():
     with st.sidebar:
@@ -747,19 +778,19 @@ def display_welcome_screen():
     st.markdown("""
     <div style='display: flex; justify-content: center; gap: 60px; padding: 25px 0; margin-bottom: 30px; background: #f8f9fa; border-radius: 10px;'>
         <div style='text-align: center;'>
-            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>500+</div>
-            <div style='font-size: 14px; color: #666;'>NSE Stocks Covered</div>
+            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>All NSE</div>
+            <div style='font-size: 14px; color: #666;'>Stocks Covered</div>
         </div>
         <div style='text-align: center;'>
-            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>Real-time</div>
+            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>Real-time</div>
             <div style='font-size: 14px; color: #666;'>Market Data</div>
         </div>
         <div style='text-align: center;'>
-            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>8+</div>
+            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>8+</div>
             <div style='font-size: 14px; color: #666;'>Analysis Reports</div>
         </div>
         <div style='text-align: center;'>
-            <div style='font-size: 32px; font-weight: 700; color: #FF6B35;'>Free</div>
+            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>Free</div>
             <div style='font-size: 14px; color: #666;'>To Get Started</div>
         </div>
     </div>
