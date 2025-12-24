@@ -135,7 +135,7 @@ def render_auth_header():
         
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-            st.markdown(f"**Welcome, {user_name[:20]}**")
+            st.success(f"✅ Logged in as **{user_name[:20]}**")
             
             if st.session_state.user.get('is_admin'):
                 if st.button("📊 Admin Panel", key="admin_btn", use_container_width=True):
@@ -150,12 +150,18 @@ def render_auth_header():
                 st.session_state.show_admin = False
                 st.rerun()
         else:
-            st.markdown("### Account")
-            if st.button("🔐 Login", key="login_btn", use_container_width=True):
+            st.markdown("""
+            <div style='background: linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px;'>
+                <h3 style='color: white; margin: 0 0 10px 0;'>🔐 Sign In Required</h3>
+                <p style='color: white; font-size: 13px; margin: 0;'>Login or Register to analyze your portfolio</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button("🔐 LOGIN", key="login_btn", use_container_width=True, type="primary"):
                 st.session_state.show_login = True
                 st.rerun()
             
-            if st.button("📝 Register", key="register_btn", type="primary", use_container_width=True):
+            if st.button("📝 CREATE ACCOUNT", key="register_btn", use_container_width=True):
                 st.session_state.show_signup = True
                 st.rerun()
         
@@ -720,46 +726,60 @@ def display_welcome_screen():
         </h3>
         """, unsafe_allow_html=True)
         
-        # File uploader integrated
-        uploaded_file = st.file_uploader(
-            "Drag and drop your CSV file here or browse",
-            type=['csv'],
-            help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity"
-        )
-        
-        if uploaded_file is not None:
-            try:
-                portfolio_df = pd.read_csv(uploaded_file)
-                required_columns = ['Stock Name', 'Buy Price', 'Buy Date', 'Quantity']
-                missing_columns = [col for col in required_columns if col not in portfolio_df.columns]
-                
-                if missing_columns:
-                    st.error(f"❌ Missing required columns: {', '.join(missing_columns)}")
-                else:
-                    portfolio_df['Buy Date'] = pd.to_datetime(portfolio_df['Buy Date'])
-                    portfolio_df['Buy Price'] = pd.to_numeric(portfolio_df['Buy Price'], errors='coerce')
-                    portfolio_df['Quantity'] = pd.to_numeric(portfolio_df['Quantity'], errors='coerce')
-                    portfolio_df = portfolio_df.dropna()
+        if not st.session_state.authenticated:
+            st.markdown("""
+            <div style='background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%); padding: 30px; border-radius: 15px; border: 2px solid #FF6B35; text-align: center; margin: 20px 0;'>
+                <h3 style='color: #FF6B35; margin-bottom: 15px;'>🔐 Please Sign In to Continue</h3>
+                <p style='color: #666; font-size: 16px; margin-bottom: 20px;'>
+                    Create a free account or login to upload and analyze your portfolio
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                if st.button("🔐 LOGIN NOW", key="login_cta", type="primary", use_container_width=True):
+                    st.session_state.show_login = True
+                    st.rerun()
+            with col_btn2:
+                if st.button("📝 CREATE FREE ACCOUNT", key="register_cta", use_container_width=True):
+                    st.session_state.show_signup = True
+                    st.rerun()
+        else:
+            uploaded_file = st.file_uploader(
+                "Drag and drop your CSV file here or browse",
+                type=['csv'],
+                help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity"
+            )
+            
+            if uploaded_file is not None:
+                try:
+                    portfolio_df = pd.read_csv(uploaded_file)
+                    required_columns = ['Stock Name', 'Buy Price', 'Buy Date', 'Quantity']
+                    missing_columns = [col for col in required_columns if col not in portfolio_df.columns]
                     
-                    if len(portfolio_df) == 0:
-                        st.error("❌ No valid data found in the uploaded file.")
+                    if missing_columns:
+                        st.error(f"❌ Missing required columns: {', '.join(missing_columns)}")
                     else:
-                        st.success(f"✅ Successfully loaded {len(portfolio_df)} stocks")
-                        st.session_state.portfolio_data = portfolio_df
-                        st.session_state.uploaded_file_name = uploaded_file.name
+                        portfolio_df['Buy Date'] = pd.to_datetime(portfolio_df['Buy Date'])
+                        portfolio_df['Buy Price'] = pd.to_numeric(portfolio_df['Buy Price'], errors='coerce')
+                        portfolio_df['Quantity'] = pd.to_numeric(portfolio_df['Quantity'], errors='coerce')
+                        portfolio_df = portfolio_df.dropna()
                         
-                        if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
-                            if not st.session_state.authenticated:
-                                st.warning("Please login or register to analyze your portfolio")
-                                st.session_state.show_login = True
-                                st.rerun()
-                            else:
+                        if len(portfolio_df) == 0:
+                            st.error("❌ No valid data found in the uploaded file.")
+                        else:
+                            st.success(f"✅ Successfully loaded {len(portfolio_df)} stocks")
+                            st.session_state.portfolio_data = portfolio_df
+                            st.session_state.uploaded_file_name = uploaded_file.name
+                            
+                            if st.button("🔍 Analyze Portfolio", type="primary", use_container_width=True):
                                 st.session_state.analysis_complete = False
                                 with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
                                     analyze_portfolio()
-                            
-            except Exception as e:
-                st.error(f"❌ Error reading file: {str(e)}")
+                                
+                except Exception as e:
+                    st.error(f"❌ Error reading file: {str(e)}")
         
         # Sample CSV download
         col_a, col_b, col_c = st.columns([1, 2, 1])
