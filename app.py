@@ -130,17 +130,18 @@ def main():
 
 def render_top_header():
     """Render compact top header with logo left and auth buttons far right"""
-    col_logo, col_spacer, col_auth = st.columns([1, 3, 1])
+    col_logo, col_spacer, col_auth = st.columns([1.2, 2.5, 1.3])
     
     with col_logo:
         st.image("attached_assets/Alphalens_1760976199318.png", width=220)
     
     with col_auth:
+        st.markdown("<div style='height: 25px;'></div>", unsafe_allow_html=True)
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
             c1, c2, c3 = st.columns([2, 1, 1])
             with c1:
-                st.markdown(f"<div style='text-align: right; padding-top: 8px; color: #28a745; font-weight: 600;'>✅ {user_name[:12]}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align: right; padding-top: 5px; color: #28a745; font-weight: 600;'>✅ {user_name[:12]}</div>", unsafe_allow_html=True)
             with c2:
                 if st.session_state.user.get('is_admin'):
                     if st.button("📊 Admin", key="admin_top", use_container_width=True):
@@ -157,11 +158,11 @@ def render_top_header():
         else:
             c1, c2 = st.columns(2)
             with c1:
-                if st.button("🔐 Login", key="login_top", use_container_width=True):
+                if st.button("Login", key="login_top", use_container_width=True):
                     st.session_state.show_login = True
                     st.rerun()
             with c2:
-                if st.button("📝 SignUp", key="register_top", type="primary", use_container_width=True):
+                if st.button("SignUp", key="register_top", type="primary", use_container_width=True):
                     st.session_state.show_signup = True
                     st.rerun()
     
