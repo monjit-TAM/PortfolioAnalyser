@@ -6,8 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from PIL import Image
+import os
 
-# Import custom modules
 from utils.data_fetcher import DataFetcher
 from utils.portfolio_analyzer import PortfolioAnalyzer
 from utils.recommendation_engine import RecommendationEngine
@@ -21,6 +21,18 @@ from components.rebalancing import PortfolioRebalancing
 from components.historical_performance import HistoricalPerformance
 from utils.pdf_generator import PDFReportGenerator
 
+def init_database():
+    if os.environ.get('DATABASE_URL'):
+        try:
+            from utils.database import Database
+            db = Database()
+            db.init_tables()
+            db.seed_initial_data()
+            return True
+        except Exception as e:
+            print(f"Database initialization failed: {e}")
+    return False
+
 def main():
     st.set_page_config(
         page_title="Alphalens Portfolio Analyzer",
@@ -29,7 +41,9 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
-    # Custom CSS for compact layout and full-width banner
+    if 'db_initialized' not in st.session_state:
+        st.session_state.db_initialized = init_database()
+    
     st.markdown("""
     <style>
         .block-container {
@@ -43,17 +57,14 @@ def main():
             margin-top: 0.5rem !important;
             margin-bottom: 0.5rem !important;
         }
-        /* Full width image container */
         .stImage {
             margin-left: 0 !important;
             margin-right: 0 !important;
         }
-        /* Add padding back for content sections */
         .content-section {
             padding-left: 5rem;
             padding-right: 5rem;
         }
-        /* Hero header flexbox container for tight logo+heading layout */
         .hero-header {
             display: flex;
             flex-direction: column;
@@ -73,27 +84,137 @@ def main():
             text-align: center;
             width: 100%;
         }
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .auth-header {
+            text-align: center;
+            color: #FF6B35;
+            margin-bottom: 1.5rem;
+        }
     </style>
     """, unsafe_allow_html=True)
     
-    
-    # Initialize session state
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+    if 'user' not in st.session_state:
+        st.session_state.user = None
     if 'portfolio_data' not in st.session_state:
         st.session_state.portfolio_data = None
     if 'analysis_complete' not in st.session_state:
         st.session_state.analysis_complete = False
     
-    # Main content area
-    if st.session_state.portfolio_data is not None and st.session_state.analysis_complete:
+    if not st.session_state.authenticated:
+        display_auth_screen()
+    elif st.session_state.portfolio_data is not None and st.session_state.analysis_complete:
         display_analysis()
     elif st.session_state.portfolio_data is not None:
         display_portfolio_preview()
     else:
-        # Welcome screen with integrated upload
         display_welcome_screen()
     
-    # Footer with disclaimer and company details
     add_footer()
+
+def display_auth_screen():
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.image("attached_assets/Alphalens_1760976199318.png", width=300)
+        
+        st.markdown("""
+        <div style='text-align: center; margin-bottom: 20px;'>
+            <h2 style='color: #FF6B35;'>Welcome to Alphalens</h2>
+            <p style='color: #666;'>Your Comprehensive Portfolio Analysis Platform</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        tab1, tab2 = st.tabs(["Login", "Sign Up"])
+        
+        with tab1:
+            with st.form("login_form"):
+                st.markdown("### Login to Your Account")
+                login_email = st.text_input("Email", key="login_email", placeholder="Enter your email")
+                login_password = st.text_input("Password", type="password", key="login_password", placeholder="Enter your password")
+                
+                login_submitted = st.form_submit_button("Login", type="primary", use_container_width=True)
+                
+                if login_submitted:
+                    if login_email and login_password:
+                        try:
+                            from utils.auth import AuthManager
+                            auth = AuthManager()
+                            result = auth.login(login_email, login_password)
+                            
+                            if result['success']:
+                                st.session_state.authenticated = True
+                                st.session_state.user = {
+                                    'id': result['user_id'],
+                                    'email': result['email'],
+                                    'full_name': result.get('full_name', '')
+                                }
+                                st.success("Login successful!")
+                                st.rerun()
+                            else:
+                                st.error(result['message'])
+                        except Exception as e:
+                            st.error(f"Login error: {str(e)}")
+                    else:
+                        st.warning("Please enter both email and password")
+        
+        with tab2:
+            with st.form("signup_form"):
+                st.markdown("### Create Your Account")
+                signup_name = st.text_input("Full Name", key="signup_name", placeholder="Enter your full name")
+                signup_email = st.text_input("Email", key="signup_email", placeholder="Enter your email")
+                signup_phone = st.text_input("Phone (optional)", key="signup_phone", placeholder="Enter your phone number")
+                signup_password = st.text_input("Password", type="password", key="signup_password", placeholder="Create a password (min 6 characters)")
+                signup_confirm = st.text_input("Confirm Password", type="password", key="signup_confirm", placeholder="Confirm your password")
+                
+                signup_submitted = st.form_submit_button("Create Account", type="primary", use_container_width=True)
+                
+                if signup_submitted:
+                    if not signup_email or not signup_password:
+                        st.warning("Please enter email and password")
+                    elif len(signup_password) < 6:
+                        st.warning("Password must be at least 6 characters")
+                    elif signup_password != signup_confirm:
+                        st.error("Passwords do not match")
+                    else:
+                        try:
+                            from utils.auth import AuthManager
+                            auth = AuthManager()
+                            result = auth.signup(signup_email, signup_password, signup_name, signup_phone)
+                            
+                            if result['success']:
+                                st.session_state.authenticated = True
+                                st.session_state.user = {
+                                    'id': result['user_id'],
+                                    'email': result['email'],
+                                    'full_name': result.get('full_name', '')
+                                }
+                                st.success("Account created successfully!")
+                                st.rerun()
+                            else:
+                                st.error(result['message'])
+                        except Exception as e:
+                            st.error(f"Registration error: {str(e)}")
+        
+        st.markdown("""
+        <div style='text-align: center; margin-top: 30px; padding: 20px; background: #fff5f2; border-radius: 10px;'>
+            <h4 style='color: #FF6B35;'>Why Create an Account?</h4>
+            <ul style='text-align: left; color: #666;'>
+                <li>Get personalized portfolio insights</li>
+                <li>Save your analysis history</li>
+                <li>Access detailed stock recommendations</li>
+                <li>Download comprehensive PDF reports</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
 def analyze_portfolio():
     """Perform comprehensive portfolio analysis"""
@@ -262,14 +383,15 @@ def display_analysis():
     </div>
     """, unsafe_allow_html=True)
     
-    # Action buttons in a card
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     
-    # Add controls for refresh and PDF download - aligned in a professional row
-    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 0.5])
     
     with col1:
-        st.markdown(f"**📅 Analysis Date:** {datetime.now().strftime('%B %d, %Y at %I:%M %p')}")
+        user_name = ""
+        if st.session_state.user:
+            user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', '')
+        st.markdown(f"**📅 Analysis Date:** {datetime.now().strftime('%B %d, %Y at %I:%M %p')} | **User:** {user_name}")
     
     with col2:
         if st.button("🔄 Refresh Prices", type="secondary", help="Update with latest stock prices", use_container_width=True):
@@ -307,14 +429,20 @@ def display_analysis():
                     st.error(f"Error generating PDF: {str(e)}")
     
     with col4:
-        # Auto-refresh toggle
-        auto_refresh = st.checkbox("Auto-refresh", value=False, help="Auto-refresh every 5 minutes")
-        if auto_refresh:
-            import time
-            time.sleep(300)  # 5 minutes
+        if st.button("🏠 New Analysis", type="secondary", help="Start a new portfolio analysis", use_container_width=True):
+            st.session_state.portfolio_data = None
+            st.session_state.analysis_complete = False
             st.rerun()
     
-    st.markdown('</div>', unsafe_allow_html=True)  # Close action buttons card
+    with col5:
+        if st.button("Logout", key="logout_analysis"):
+            st.session_state.authenticated = False
+            st.session_state.user = None
+            st.session_state.portfolio_data = None
+            st.session_state.analysis_complete = False
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Create tabs for different analysis sections
     tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
@@ -393,10 +521,25 @@ def display_analysis():
 def display_welcome_screen():
     """Display clean welcome screen with integrated file upload"""
     
-    # Logo in top-right with reduced spacing
-    col1, col2 = st.columns([2.5, 1])
+    col1, col2, col3 = st.columns([2, 1.5, 0.5])
+    with col1:
+        if st.session_state.user:
+            user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
+            st.markdown(f"""
+            <div style='padding: 10px 0;'>
+                <span style='color: #666;'>Welcome back,</span> 
+                <span style='color: #FF6B35; font-weight: 600;'>{user_name}</span>
+            </div>
+            """, unsafe_allow_html=True)
     with col2:
         st.image("attached_assets/Alphalens_1760976199318.png", width=250)
+    with col3:
+        if st.button("Logout", key="logout_welcome"):
+            st.session_state.authenticated = False
+            st.session_state.user = None
+            st.session_state.portfolio_data = None
+            st.session_state.analysis_complete = False
+            st.rerun()
     
     # Heading section - minimal spacing
     st.markdown("""

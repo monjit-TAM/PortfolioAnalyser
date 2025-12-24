@@ -4,11 +4,39 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
+import os
 
 class PortfolioRebalancing:
     def __init__(self):
-        # Target allocation strategies
-        self.strategies = {
+        self._strategies = None
+        self._sector_targets = None
+    
+    @property
+    def strategies(self):
+        if self._strategies is None:
+            self._load_data()
+        return self._strategies
+    
+    @property
+    def sector_targets(self):
+        if self._sector_targets is None:
+            self._load_data()
+        return self._sector_targets
+    
+    def _load_data(self):
+        if os.environ.get('DATABASE_URL'):
+            try:
+                from utils.database import Database
+                db = Database()
+                self._strategies = db.get_rebalancing_strategies()
+                self._sector_targets = db.get_sectors()
+                
+                if self._strategies and self._sector_targets:
+                    return
+            except Exception as e:
+                print(f"Database load failed for rebalancing: {e}")
+        
+        self._strategies = {
             'Conservative': {
                 'Large Cap': 70,
                 'Mid Cap': 20,
@@ -26,8 +54,7 @@ class PortfolioRebalancing:
             }
         }
         
-        # Sector allocation targets (ideal diversification)
-        self.sector_targets = {
+        self._sector_targets = {
             'Banking': 15,
             'Technology': 15,
             'Energy': 10,

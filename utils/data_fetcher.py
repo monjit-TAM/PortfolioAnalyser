@@ -3,14 +3,69 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import streamlit as st
+import os
 
 class DataFetcher:
-    def __init__(self):
+    def __init__(self, use_database=True):
         self.nse_suffix = ".NS"
         self.bse_suffix = ".BO"
+        self.use_database = use_database and os.environ.get('DATABASE_URL') is not None
         
-        # Symbol aliases - maps common abbreviations to correct Yahoo Finance symbols
-        self.symbol_aliases = {
+        self._symbol_aliases = None
+        self._indices = None
+        self._stock_categories = None
+        self._sector_mapping = None
+        self._stock_info = None
+        
+        self._truedata_client = None
+        self._truedata_initialized = False
+    
+    @property
+    def symbol_aliases(self):
+        if self._symbol_aliases is None:
+            self._load_data()
+        return self._symbol_aliases
+    
+    @property
+    def indices(self):
+        if self._indices is None:
+            self._load_data()
+        return self._indices
+    
+    @property
+    def stock_categories(self):
+        if self._stock_categories is None:
+            self._load_data()
+        return self._stock_categories
+    
+    @property
+    def sector_mapping(self):
+        if self._sector_mapping is None:
+            self._load_data()
+        return self._sector_mapping
+    
+    def _load_data(self):
+        if self.use_database:
+            try:
+                from utils.database import Database
+                db = Database()
+                
+                self._symbol_aliases = db.get_symbol_aliases()
+                self._indices = db.get_market_indices()
+                stock_info = db.get_stock_symbols()
+                
+                self._stock_categories = {}
+                self._sector_mapping = {}
+                for symbol, info in stock_info.items():
+                    self._stock_categories[symbol] = info.get('category', 'Mid Cap')
+                    self._sector_mapping[symbol] = info.get('sector', 'Others')
+                
+                self._stock_info = stock_info
+                return
+            except Exception as e:
+                print(f"Database load failed, using defaults: {e}")
+        
+        self._symbol_aliases = {
             'RIL': 'RELIANCE',
             'ICICI': 'ICICIBANK',
             'HDFC': 'HDFCBANK',
@@ -31,15 +86,13 @@ class DataFetcher:
             'TATASTEEL': 'TATASTEEL',
         }
         
-        # Indian market indices
-        self.indices = {
+        self._indices = {
             'NIFTY50': '^NSEI',
             'NIFTY_MIDCAP_100': '^NSEMDCP50',
             'NIFTY_SMALLCAP_100': '^NSESMLCAP'
         }
         
-        # Stock categorization (simplified - in production, use a comprehensive database)
-        self.stock_categories = {
+        self._stock_categories = {
             'RELIANCE': 'Large Cap',
             'TCS': 'Large Cap',
             'HDFCBANK': 'Large Cap',
@@ -60,11 +113,9 @@ class DataFetcher:
             'NESTLEIND': 'Large Cap',
             'WIPRO': 'Large Cap',
             'HCLTECH': 'Large Cap',
-            # Add more stocks as needed
         }
         
-        # Sector mapping
-        self.sector_mapping = {
+        self._sector_mapping = {
             'RELIANCE': 'Energy',
             'TCS': 'Technology',
             'HDFCBANK': 'Banking',
@@ -87,22 +138,42 @@ class DataFetcher:
             'HCLTECH': 'Technology',
         }
     
+    def init_truedata(self, symbols=None):
+        if self._truedata_initialized:
+            return True
+        
+        try:
+            from utils.truedata_client import TrueDataPriceFetcher
+            self._truedata_client = TrueDataPriceFetcher()
+            
+            if self._truedata_client.is_available():
+                if symbols:
+                    self._truedata_client.initialize(symbols)
+                self._truedata_initialized = True
+                return True
+        except Exception as e:
+            print(f"TrueData initialization failed: {e}")
+        
+        return False
+    
+    def get_live_price(self, symbol):
+        if self._truedata_client and self._truedata_initialized:
+            price = self._truedata_client.get_price(symbol)
+            if price:
+                return price
+        return None
+    
     def get_stock_symbol(self, stock_name):
-        """Convert stock name to Yahoo Finance symbol"""
         stock_name = stock_name.upper().strip()
         
-        # If stock_name already has a suffix (.NS or .BO), return it as-is
         if stock_name.endswith(self.nse_suffix) or stock_name.endswith(self.bse_suffix):
             return stock_name
         
-        # Check if this is a common abbreviation and convert to correct symbol
         if stock_name in self.symbol_aliases:
             original_name = stock_name
             stock_name = self.symbol_aliases[stock_name]
-            # Quiet logging - avoid UI clutter for large portfolios
             print(f"Symbol alias: {original_name} → {stock_name}")
         
-        # Try NSE first
         nse_symbol = f"{stock_name}{self.nse_suffix}"
         try:
             ticker = yf.Ticker(nse_symbol)
@@ -112,7 +183,6 @@ class DataFetcher:
         except:
             pass
         
-        # Try BSE
         bse_symbol = f"{stock_name}{self.bse_suffix}"
         try:
             ticker = yf.Ticker(bse_symbol)
@@ -122,26 +192,22 @@ class DataFetcher:
         except:
             pass
         
-        # Return NSE symbol as default
         return nse_symbol
     
     def get_stock_data(self, stock_name, start_date):
-        """Fetch stock data including current price and historical data using EOD data"""
         symbol = self.get_stock_symbol(stock_name)
         
+        live_price = self.get_live_price(symbol)
+        
         try:
-            # Use yf.download for more reliable EOD price data
             end_date = datetime.now()
             
-            # Download historical data from start_date to today
             historical_data = yf.download(symbol, start=start_date, end=end_date, progress=False)
             
-            # Normalize index to timezone-naive to prevent comparison issues
             if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                 historical_data.index = historical_data.index.tz_localize(None)
             
             if historical_data.empty:
-                # If no historical data, try to get recent data
                 historical_data = yf.download(symbol, period="1mo", progress=False)
                 if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                     historical_data.index = historical_data.index.tz_localize(None)
@@ -149,50 +215,46 @@ class DataFetcher:
             if historical_data.empty:
                 raise ValueError(f"No data available for {stock_name}")
             
-            # Get current price from the most recent closing price
-            current_price = float(historical_data['Close'].iloc[-1])
+            if live_price:
+                current_price = float(live_price)
+            else:
+                current_price = float(historical_data['Close'].iloc[-1])
             
             return current_price, historical_data
             
         except Exception as e:
-            st.error(f"❌ Could not fetch data for {stock_name} ({symbol}): {str(e)}")
-            # Try fallback with ticker.info and ticker.history
+            st.error(f"Could not fetch data for {stock_name} ({symbol}): {str(e)}")
             try:
                 ticker = yf.Ticker(symbol)
                 info = ticker.info
-                current_price = info.get('regularMarketPrice') or info.get('currentPrice') or info.get('previousClose')
+                current_price = live_price or info.get('regularMarketPrice') or info.get('currentPrice') or info.get('previousClose')
                 
                 if current_price:
-                    st.warning(f"⚠️ Using fallback price for {stock_name}: ₹{current_price}")
+                    st.warning(f"Using fallback price for {stock_name}: ₹{current_price}")
                     
-                    # Try to get historical data using ticker.history() method
                     try:
                         end_date = datetime.now()
                         historical_data = ticker.history(start=start_date, end=end_date)
                         
-                        # Normalize index
                         if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                             historical_data.index = historical_data.index.tz_localize(None)
                         
                         if not historical_data.empty:
                             return float(current_price), historical_data
                         else:
-                            # Try shorter period if full history fails
                             historical_data = ticker.history(period="1y")
                             if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                                 historical_data.index = historical_data.index.tz_localize(None)
                             return float(current_price), historical_data
                     except:
-                        # If historical data fetch fails, return price with empty history
                         return float(current_price), pd.DataFrame()
             except:
                 pass
             
-            st.error(f"❌ Unable to fetch any price data for {stock_name}. Please check the stock symbol.")
+            st.error(f"Unable to fetch any price data for {stock_name}. Please check the stock symbol.")
             return None, pd.DataFrame()
     
     def get_index_data(self, index_name, start_date):
-        """Fetch index data for benchmark comparison"""
         if index_name not in self.indices:
             return pd.DataFrame()
         
@@ -203,7 +265,6 @@ class DataFetcher:
             end_date = datetime.now()
             historical_data = ticker.history(start=start_date, end=end_date)
             
-            # Normalize index to timezone-naive to prevent comparison issues
             if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                 historical_data.index = historical_data.index.tz_localize(None)
             
@@ -213,27 +274,20 @@ class DataFetcher:
             return pd.DataFrame()
     
     def get_stock_category(self, stock_name):
-        """Get stock category (Large Cap, Mid Cap, Small Cap)"""
         stock_name = stock_name.upper().strip()
-        # Remove suffix for lookup
         base_name = stock_name.replace(self.nse_suffix, '').replace(self.bse_suffix, '')
-        # Check if this is an alias
         if base_name in self.symbol_aliases:
             base_name = self.symbol_aliases[base_name]
-        return self.stock_categories.get(base_name, 'Mid Cap')  # Default to Mid Cap
+        return self.stock_categories.get(base_name, 'Mid Cap')
     
     def get_stock_sector(self, stock_name):
-        """Get stock sector"""
         stock_name = stock_name.upper().strip()
-        # Remove suffix for lookup
         base_name = stock_name.replace(self.nse_suffix, '').replace(self.bse_suffix, '')
-        # Check if this is an alias
         if base_name in self.symbol_aliases:
             base_name = self.symbol_aliases[base_name]
-        return self.sector_mapping.get(base_name, 'Others')  # Default to Others
+        return self.sector_mapping.get(base_name, 'Others')
     
     def get_stock_fundamentals(self, stock_name):
-        """Get basic fundamental data for the stock"""
         symbol = self.get_stock_symbol(stock_name)
         
         try:
@@ -258,3 +312,37 @@ class DataFetcher:
         except Exception as e:
             st.warning(f"Could not fetch fundamentals for {stock_name}: {str(e)}")
             return {}
+    
+    def add_stock_to_database(self, symbol, name=None, sector=None, category=None):
+        if not self.use_database:
+            return False
+        
+        try:
+            from utils.database import Database
+            db = Database()
+            conn = db.get_connection()
+            cur = conn.cursor()
+            
+            cur.execute('''
+                INSERT INTO stock_symbols (symbol, name, sector, category) 
+                VALUES (%s, %s, %s, %s) 
+                ON CONFLICT (symbol) DO UPDATE SET 
+                    name = COALESCE(EXCLUDED.name, stock_symbols.name),
+                    sector = COALESCE(EXCLUDED.sector, stock_symbols.sector),
+                    category = COALESCE(EXCLUDED.category, stock_symbols.category),
+                    updated_at = CURRENT_TIMESTAMP
+            ''', (symbol.upper(), name, sector, category))
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            self._symbol_aliases = None
+            self._stock_categories = None
+            self._sector_mapping = None
+            self._stock_info = None
+            
+            return True
+        except Exception as e:
+            print(f"Failed to add stock to database: {e}")
+            return False

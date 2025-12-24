@@ -2,13 +2,33 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from utils.data_fetcher import DataFetcher
+import os
 
 class RecommendationEngine:
     def __init__(self):
         self.data_fetcher = DataFetcher()
+        self._alternative_stocks = None
+    
+    @property
+    def alternative_stocks(self):
+        if self._alternative_stocks is None:
+            self._load_alternatives()
+        return self._alternative_stocks
+    
+    def _load_alternatives(self):
+        if os.environ.get('DATABASE_URL'):
+            try:
+                from utils.database import Database
+                db = Database()
+                self._alternative_stocks = db.get_alternative_stocks()
+                if self._alternative_stocks:
+                    if 'Others' not in self._alternative_stocks:
+                        self._alternative_stocks['Others'] = ['RELIANCE', 'TCS', 'HDFCBANK', 'INFY']
+                    return
+            except Exception as e:
+                print(f"Database load failed for alternatives: {e}")
         
-        # Alternative stock suggestions by sector
-        self.alternative_stocks = {
+        self._alternative_stocks = {
             'Banking': ['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'SBIN', 'AXISBANK'],
             'Technology': ['TCS', 'INFY', 'WIPRO', 'HCLTECH', 'TECHM'],
             'Energy': ['RELIANCE', 'ONGC', 'IOC', 'BPCL'],
