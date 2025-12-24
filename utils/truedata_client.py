@@ -105,8 +105,6 @@ class TrueDataClient:
     
     def stop_streaming(self):
         self._running = False
-        if self.ws:
-            asyncio.get_event_loop().run_until_complete(self.ws.close())
         self.is_connected = False
     
     def get_historical_data(self, symbol: str, start_date: str, end_date: str, timeframe: str = "1D"):
