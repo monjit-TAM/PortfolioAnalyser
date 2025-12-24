@@ -136,7 +136,7 @@ def render_top_header():
         st.image("attached_assets/Alphalens_1760976199318.png", width=220)
     
     with col_auth:
-        st.markdown("<div style='height: 25px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 45px;'></div>", unsafe_allow_html=True)
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
             c1, c2, c3 = st.columns([2, 1, 1])
