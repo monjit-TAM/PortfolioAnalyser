@@ -130,63 +130,24 @@ def main():
 
 def render_top_header():
     """Render compact top header with logo left and auth buttons far right"""
-    st.markdown("""
-    <style>
-    .top-header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 20px;
-        background: white;
-        border-bottom: 1px solid #eee;
-        margin: -20px -100px 15px -100px;
-    }
-    .auth-buttons {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-    .login-btn {
-        padding: 8px 24px;
-        border: 2px solid #1a1a2e;
-        background: white;
-        color: #1a1a2e;
-        border-radius: 5px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-    }
-    .signup-btn {
-        padding: 8px 24px;
-        border: none;
-        background: #1a1a2e;
-        color: white;
-        border-radius: 5px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    col_logo, col_spacer, col_auth = st.columns([1.5, 4, 1.5])
+    col_logo, col_spacer, col_auth = st.columns([1, 3, 1])
     
     with col_logo:
-        st.image("attached_assets/Alphalens_1760976199318.png", width=150)
+        st.image("attached_assets/Alphalens_1760976199318.png", width=220)
     
     with col_auth:
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
             c1, c2, c3 = st.columns([2, 1, 1])
             with c1:
-                st.markdown(f"<div style='text-align: right; padding-top: 8px; color: #28a745;'>✅ {user_name[:12]}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align: right; padding-top: 8px; color: #28a745; font-weight: 600;'>✅ {user_name[:12]}</div>", unsafe_allow_html=True)
             with c2:
                 if st.session_state.user.get('is_admin'):
-                    if st.button("Admin", key="admin_top"):
+                    if st.button("📊 Admin", key="admin_top", use_container_width=True):
                         st.session_state.show_admin = True
                         st.rerun()
             with c3:
-                if st.button("Logout", key="logout_top"):
+                if st.button("🚪 Logout", key="logout_top", use_container_width=True):
                     st.session_state.authenticated = False
                     st.session_state.user = None
                     st.session_state.portfolio_data = None
@@ -196,13 +157,15 @@ def render_top_header():
         else:
             c1, c2 = st.columns(2)
             with c1:
-                if st.button("Login", key="login_top"):
+                if st.button("🔐 Login", key="login_top", use_container_width=True):
                     st.session_state.show_login = True
                     st.rerun()
             with c2:
-                if st.button("SignUp", key="register_top", type="primary"):
+                if st.button("📝 SignUp", key="register_top", type="primary", use_container_width=True):
                     st.session_state.show_signup = True
                     st.rerun()
+    
+    st.markdown("<hr style='margin: 5px 0 15px 0; border: none; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
 
 def render_auth_header():
     with st.sidebar:
@@ -758,73 +721,62 @@ def display_welcome_screen():
     # Top header with logo left and auth buttons right
     render_top_header()
     
-    # Hero section with gradient background
+    # Hero heading section (no dark band)
     st.markdown("""
-    <div style='background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 60px 40px; margin: -20px -100px 30px -100px; text-align: center;'>
-        <h1 style='color: #FF6B35; font-size: 48px; font-weight: 700; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>
-            Alphalens Portfolio Analyzer
+    <div style='text-align: center; padding: 20px 40px 10px 40px;'>
+        <h1 style='color: #FF6B35; font-size: 42px; font-weight: 700; margin-bottom: 15px;'>
+            Portfolio Analysis
         </h1>
-        <p style='color: #e8e8e8; font-size: 20px; max-width: 700px; margin: 0 auto 25px auto; line-height: 1.6;'>
-            Unlock the full potential of your Indian stock portfolio with AI-powered analysis, 
-            dual investment perspectives, and actionable recommendations.
+        <p style='color: #555; font-size: 18px; max-width: 700px; margin: 0 auto 10px auto; line-height: 1.6;'>
+            Comprehensive Analysis of Your Stock Portfolio based on both Value and Growth Investing
         </p>
-        <p style='color: #FF6B35; font-size: 16px; font-weight: 500;'>
+        <p style='color: #FF6B35; font-size: 14px; font-weight: 500;'>
             Powered by Edhaz Financial Services
         </p>
     </div>
     """, unsafe_allow_html=True)
     
+    # Hero banner image
+    try:
+        hero_image = Image.open("attached_assets/Portfolio Analysis Banner_1761113674623.png")
+        st.image(hero_image, use_container_width=True)
+    except:
+        st.image("attached_assets/BzIo2GnlaVnXUEmTRTUqs_1760986532963.png", use_container_width=True)
+    
     # Stats bar
     st.markdown("""
-    <div style='display: flex; justify-content: center; gap: 60px; padding: 25px 0; margin-bottom: 30px; background: #f8f9fa; border-radius: 10px;'>
+    <div style='display: flex; justify-content: center; gap: 60px; padding: 20px 0; margin: 20px 0; background: #f8f9fa; border-radius: 10px;'>
         <div style='text-align: center;'>
-            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>All NSE</div>
-            <div style='font-size: 14px; color: #666;'>Stocks Covered</div>
+            <div style='font-size: 24px; font-weight: 700; color: #FF6B35;'>All NSE</div>
+            <div style='font-size: 13px; color: #666;'>Stocks Covered</div>
         </div>
         <div style='text-align: center;'>
-            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>Real-time</div>
-            <div style='font-size: 14px; color: #666;'>Market Data</div>
+            <div style='font-size: 24px; font-weight: 700; color: #FF6B35;'>Real-time</div>
+            <div style='font-size: 13px; color: #666;'>Market Data</div>
         </div>
         <div style='text-align: center;'>
-            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>8+</div>
-            <div style='font-size: 14px; color: #666;'>Analysis Reports</div>
+            <div style='font-size: 24px; font-weight: 700; color: #FF6B35;'>8+</div>
+            <div style='font-size: 13px; color: #666;'>Analysis Reports</div>
         </div>
         <div style='text-align: center;'>
-            <div style='font-size: 28px; font-weight: 700; color: #FF6B35;'>Free</div>
-            <div style='font-size: 14px; color: #666;'>To Get Started</div>
+            <div style='font-size: 24px; font-weight: 700; color: #FF6B35;'>Free</div>
+            <div style='font-size: 13px; color: #666;'>To Get Started</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Upload section
+    # Upload section - only show if authenticated
     col1, col2, col3 = st.columns([0.3, 2, 0.3])
     with col2:
-        st.markdown("""
-        <h2 style='color: #1a1a2e; text-align: center; margin-bottom: 20px; font-size: 28px;'>
-            Get Started in Seconds
-        </h2>
-        """, unsafe_allow_html=True)
-        
         if not st.session_state.authenticated:
             st.markdown("""
-            <div style='background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%); padding: 40px; border-radius: 20px; border: 2px solid #FF6B35; text-align: center; margin: 20px 0; box-shadow: 0 10px 40px rgba(255, 107, 53, 0.15);'>
-                <div style='font-size: 50px; margin-bottom: 15px;'>🔐</div>
-                <h3 style='color: #FF6B35; margin-bottom: 10px; font-size: 24px;'>Sign In to Analyze Your Portfolio</h3>
-                <p style='color: #666; font-size: 16px; margin-bottom: 25px; max-width: 400px; margin-left: auto; margin-right: auto;'>
-                    Create a free account or login to upload your portfolio and get comprehensive analysis with actionable insights.
-                </p>
-            </div>
+            <h3 style='color: #FF6B35; text-align: center; margin: 20px 0 15px 0; font-size: 22px;'>
+                📁 Upload Your Portfolio
+            </h3>
+            <p style='text-align: center; color: #666; margin-bottom: 20px;'>
+                Please login or create an account using the buttons at the top right to upload and analyze your portfolio.
+            </p>
             """, unsafe_allow_html=True)
-            
-            col_btn1, col_space, col_btn2 = st.columns([1, 0.2, 1])
-            with col_btn1:
-                if st.button("🔐 LOGIN", key="login_cta", type="primary", use_container_width=True):
-                    st.session_state.show_login = True
-                    st.rerun()
-            with col_btn2:
-                if st.button("📝 CREATE FREE ACCOUNT", key="register_cta", use_container_width=True):
-                    st.session_state.show_signup = True
-                    st.rerun()
         else:
             st.markdown("""
             <div style='background: #f0f8f0; padding: 15px 20px; border-radius: 10px; border-left: 4px solid #28a745; margin-bottom: 20px;'>
