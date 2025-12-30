@@ -743,6 +743,8 @@ def display_welcome_screen():
         .cta-section { background: #fafafa; padding: 60px 20px; text-align: center; border-radius: 16px; margin: 40px 0; }
         .cta-title { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 15px; }
         .cta-subtitle { font-size: 16px; color: #666; margin-bottom: 30px; }
+        .stButton > button[kind="primary"] { background-color: #e31837 !important; border-color: #e31837 !important; }
+        .stButton > button[kind="primary"]:hover { background-color: #c41530 !important; border-color: #c41530 !important; }
     </style>
     """, unsafe_allow_html=True)
     
@@ -750,7 +752,7 @@ def display_welcome_screen():
     <div class="hero-section">
         <h1 class="hero-title">Analyze Your Portfolio.<br>Generate Alpha.</h1>
         <p class="hero-subtitle">
-            Upload your Indian stock portfolio and get instant insights on performance, risk analysis, and actionable recommendations to maximize returns.
+            Upload your Stock Portfolio and get instant insight on performance, risk analysis and actionable recommendations to maximize returns.
         </p>
     </div>
     """, unsafe_allow_html=True)
