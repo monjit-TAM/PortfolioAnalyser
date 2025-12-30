@@ -729,7 +729,7 @@ def display_welcome_screen():
     <style>
         .hero-section { text-align: center; padding: 60px 20px 40px 20px; max-width: 800px; margin: 0 auto; }
         .hero-title { font-size: 48px; font-weight: 800; color: #1a1a1a; line-height: 1.2; margin-bottom: 20px; letter-spacing: -1px; }
-        .hero-subtitle { font-size: 18px; color: #666; line-height: 1.6; max-width: 600px; margin: 0 auto 30px auto; text-align: center; }
+        .hero-subtitle { font-size: 18px; color: #666; line-height: 1.6; max-width: 600px; margin-left: auto !important; margin-right: auto !important; margin-bottom: 30px; text-align: center !important; display: block; }
         .section-title { font-size: 32px; font-weight: 700; color: #1a1a1a; text-align: center; margin-bottom: 10px; }
         .section-subtitle { font-size: 16px; color: #888; text-align: center; margin-bottom: 40px; }
         .feature-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 30px 20px; text-align: left; min-height: 200px; }
