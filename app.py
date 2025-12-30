@@ -727,12 +727,12 @@ def display_welcome_screen():
     
     st.markdown("""
     <style>
-        .hero-section { text-align: center; padding: 60px 20px 40px 20px; max-width: 800px; margin: 0 auto; }
+        .hero-section { text-align: center; padding: 20px 20px 20px 20px; max-width: 800px; margin: 0 auto; }
         .hero-title { font-size: 48px; font-weight: 800; color: #1a1a1a; line-height: 1.2; margin-bottom: 20px; letter-spacing: -1px; }
         .hero-subtitle { font-size: 18px; color: #666; line-height: 1.6; max-width: 600px; margin-left: auto !important; margin-right: auto !important; margin-bottom: 30px; text-align: center !important; display: block; }
         .section-title { font-size: 32px; font-weight: 700; color: #1a1a1a; text-align: center; margin-bottom: 10px; }
-        .section-subtitle { font-size: 16px; color: #888; text-align: center; margin-bottom: 40px; }
-        .feature-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 30px 20px; text-align: left; min-height: 200px; }
+        .section-subtitle { font-size: 16px; color: #888; text-align: center; margin-bottom: 20px; }
+        .feature-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 20px 15px; text-align: left; min-height: 160px; }
         .feature-icon { width: 48px; height: 48px; background: #f5f5f5; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px; }
         .feature-title { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 10px; }
         .feature-desc { font-size: 14px; color: #666; line-height: 1.6; }
@@ -740,7 +740,7 @@ def display_welcome_screen():
         .step-icon { font-size: 32px; margin-bottom: 15px; color: #1a1a1a; }
         .step-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
         .step-desc { font-size: 14px; color: #888; line-height: 1.5; }
-        .cta-section { background: #fafafa; padding: 60px 20px; text-align: center; border-radius: 16px; margin: 40px 0; }
+        .cta-section { background: #fafafa; padding: 30px 20px; text-align: center; border-radius: 16px; margin: 20px 0; }
         .cta-title { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 15px; }
         .cta-subtitle { font-size: 16px; color: #666; margin-bottom: 30px; }
         .stButton > button[kind="primary"] { background-color: #e31837 !important; border-color: #e31837 !important; }
@@ -831,7 +831,6 @@ def display_welcome_screen():
                 use_container_width=True
             )
     
-    st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("""
     <h2 class="section-title">Smart Portfolio Intelligence</h2>
     <p class="section-subtitle">Professional-grade analysis tools to help you make informed investment decisions</p>
@@ -871,7 +870,7 @@ def display_welcome_screen():
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
     <h2 class="section-title">How It Works</h2>
     <p class="section-subtitle">Three simple steps to smarter investing</p>
