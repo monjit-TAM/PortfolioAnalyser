@@ -1004,7 +1004,7 @@ def add_footer():
             <strong>Alphalens</strong> is a product of <strong>Edhaz Financial Services Private Limited</strong>
         </p>
         <p style='font-size: 12px; color: #666; margin-bottom: 5px;'>
-            Registered Office: Alpine Eco, Doddenekkundi, K R Puram Hobli, Bangalore 560037
+            Registered Office: Alpine Eco, Doddenekkundi, K R Puram Hobli, Bangalore 560037 | Phone: 9029129102
         </p>
         <p style='font-size: 12px; color: #666;'>
             📧 <a href='mailto:hello@thealphamarket.com' style='color: #FF6B35; text-decoration: none;'>hello@thealphamarket.com</a> | 
