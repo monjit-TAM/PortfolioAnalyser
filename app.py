@@ -133,7 +133,7 @@ def render_top_header():
     col_logo, col_spacer, col_auth = st.columns([1.2, 2.5, 1.3])
     
     with col_logo:
-        st.image("attached_assets/Alphalens_1760976199318.png", width=220)
+        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=280)
     
     with col_auth:
         st.markdown("<div style='height: 45px;'></div>", unsafe_allow_html=True)
@@ -170,7 +170,7 @@ def render_top_header():
 
 def render_auth_header():
     with st.sidebar:
-        st.image("attached_assets/Alphalens_1760976199318.png", width=200)
+        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=250)
         st.markdown("---")
         
         if st.session_state.authenticated:
