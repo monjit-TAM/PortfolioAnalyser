@@ -1170,27 +1170,9 @@ def display_portfolio_preview():
                 st.session_state.show_login = True
                 st.rerun()
             else:
-                from utils.database import Database
-                db = Database()
-                user_id = st.session_state.user.get('id')
-                active_sub = db.get_active_subscription(user_id)
-                is_admin = st.session_state.user.get('is_admin', False)
-                
-                if active_sub or is_admin:
-                    st.session_state.analysis_complete = False
-                    with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
-                        analyze_portfolio()
-                else:
-                    st.warning("⚠️ Premium subscription required to analyze your portfolio.")
-                    st.markdown("""
-                    <div style='background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 20px; margin: 15px 0; text-align: center;'>
-                        <h4 style='color: #856404; margin-bottom: 10px;'>Unlock Portfolio Analysis</h4>
-                        <p style='color: #856404; margin-bottom: 15px;'>Subscribe to Premium at just <strong>₹499/month</strong> (50% off!) to access comprehensive portfolio analysis.</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("💎 Subscribe Now", type="primary", use_container_width=True, key="sub_prompt"):
-                        st.session_state.show_subscription = True
-                        st.rerun()
+                st.session_state.analysis_complete = False
+                with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
+                    analyze_portfolio()
     st.markdown('</div>', unsafe_allow_html=True)
 
 def add_footer():

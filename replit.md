@@ -40,12 +40,21 @@ User authentication details, dynamic stock symbols, aliases, market indices, sec
 -   **Symbol Aliases:** Intelligent mapping system for common stock abbreviations to correct Yahoo Finance symbols.
 -   **CSV Support:** Accepts stock names in base names, full symbols, or common abbreviations.
 
+## Payment Gateway
+
+-   **Status:** Razorpay integration in place but API keys need verification
+-   **Subscription requirement:** Temporarily disabled pending payment gateway fix
+-   **Alternative options:** Cashfree, PayU (both work well in India)
+-   **Price:** ₹499/month (discounted from ₹999)
+-   **Note:** User dismissed Stripe integration (not available in India)
+
 ## External Dependencies
 
 ### Third-Party APIs
 
 1.  **TrueData API:** WebSocket-based for real-time stock price streaming.
 2.  **Yahoo Finance (via `yfinance` library):** Used for historical and end-of-day stock price data, fundamental metrics, and market indices, also serves as a fallback for live prices.
+3.  **Razorpay:** Payment gateway for subscriptions (needs API key verification).
 
 ### Databases
 
