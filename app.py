@@ -120,8 +120,14 @@ def main():
         st.session_state.show_admin = False
     if 'uploaded_file_name' not in st.session_state:
         st.session_state.uploaded_file_name = None
+    if 'show_subscription' not in st.session_state:
+        st.session_state.show_subscription = False
+    if 'razorpay_order' not in st.session_state:
+        st.session_state.razorpay_order = None
     
-    if st.session_state.show_admin and st.session_state.authenticated and st.session_state.user.get('is_admin'):
+    if st.session_state.show_subscription and st.session_state.authenticated:
+        display_subscription_page()
+    elif st.session_state.show_admin and st.session_state.authenticated and st.session_state.user.get('is_admin'):
         display_admin_panel()
     elif st.session_state.portfolio_data is not None and st.session_state.analysis_complete:
         display_analysis()
@@ -143,21 +149,31 @@ def render_top_header():
         st.markdown("<div style='height: 45px;'></div>", unsafe_allow_html=True)
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-            c1, c2, c3 = st.columns([2, 1, 1])
+            if st.session_state.user.get('is_admin'):
+                c1, c2, c3, c4 = st.columns([1.5, 1, 1, 1])
+            else:
+                c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
             with c1:
                 st.markdown(f"<div style='text-align: right; padding-top: 5px; color: #28a745; font-weight: 600;'>✅ {user_name[:12]}</div>", unsafe_allow_html=True)
             with c2:
+                if st.button("💎 Premium", key="premium_top", use_container_width=True):
+                    st.session_state.show_subscription = True
+                    st.session_state.show_admin = False
+                    st.rerun()
+            with c3:
                 if st.session_state.user.get('is_admin'):
                     if st.button("📊 Admin", key="admin_top", use_container_width=True):
                         st.session_state.show_admin = True
+                        st.session_state.show_subscription = False
                         st.rerun()
-            with c3:
+            with c4:
                 if st.button("🚪 Logout", key="logout_top", use_container_width=True):
                     st.session_state.authenticated = False
                     st.session_state.user = None
                     st.session_state.portfolio_data = None
                     st.session_state.analysis_complete = False
                     st.session_state.show_admin = False
+                    st.session_state.show_subscription = False
                     st.rerun()
         else:
             c1, c2 = st.columns(2)
@@ -181,9 +197,15 @@ def render_auth_header():
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
             st.success(f"✅ Logged in as **{user_name[:20]}**")
             
+            if st.button("💎 Premium", key="premium_btn", use_container_width=True):
+                st.session_state.show_subscription = True
+                st.session_state.show_admin = False
+                st.rerun()
+            
             if st.session_state.user.get('is_admin'):
                 if st.button("📊 Admin Panel", key="admin_btn", use_container_width=True):
                     st.session_state.show_admin = True
+                    st.session_state.show_subscription = False
                     st.rerun()
             
             if st.button("🚪 Logout", key="logout_btn", use_container_width=True):
@@ -315,6 +337,142 @@ def display_signup_modal():
                             st.error(result['message'])
                     except Exception as e:
                         st.error(f"Registration error: {str(e)}")
+
+def display_subscription_page():
+    """Display subscription/payment page with Razorpay integration"""
+    render_auth_header()
+    
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #e31837 0%, #ff4d5a 100%); padding: 30px; border-radius: 15px; margin: 20px 5rem; text-align: center;'>
+        <h1 style='color: white; margin: 0; font-size: 36px;'>Upgrade to Premium</h1>
+        <p style='color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 18px;'>Unlock unlimited portfolio analysis and advanced features</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        if st.button("← Back to Home", use_container_width=True):
+            st.session_state.show_subscription = False
+            st.rerun()
+    
+    from utils.database import Database
+    db = Database()
+    
+    user_id = st.session_state.user.get('id')
+    active_sub = db.get_active_subscription(user_id)
+    
+    if active_sub:
+        st.markdown("""
+        <div style='background: #d4edda; border: 1px solid #28a745; border-radius: 10px; padding: 30px; margin: 20px 5rem; text-align: center;'>
+            <h2 style='color: #155724; margin-bottom: 10px;'>✅ You have an active subscription!</h2>
+            <p style='color: #155724; font-size: 16px; margin: 0;'>Your premium access is valid until <strong>{}</strong></p>
+        </div>
+        """.format(active_sub['end_date'].strftime('%B %d, %Y') if active_sub['end_date'] else 'N/A'), unsafe_allow_html=True)
+        return
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div style='background: white; border: 2px solid #e31837; border-radius: 15px; padding: 40px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);'>
+            <div style='background: #e31837; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 20px; font-size: 14px; font-weight: 600;'>MOST POPULAR</div>
+            <h2 style='color: #1a1a1a; font-size: 28px; margin-bottom: 10px;'>Monthly Premium</h2>
+            <div style='margin: 20px 0;'>
+                <span style='color: #888; font-size: 18px; text-decoration: line-through;'>₹999/month</span>
+                <div style='color: #e31837; font-size: 48px; font-weight: 800; margin: 10px 0;'>₹499<span style='font-size: 18px; font-weight: 400;'>/month</span></div>
+                <span style='background: #fff3cd; color: #856404; padding: 5px 15px; border-radius: 15px; font-size: 14px;'>Save ₹500!</span>
+            </div>
+            <hr style='margin: 25px 0; border: 0; border-top: 1px solid #eee;'>
+            <div style='text-align: left; padding: 0 20px;'>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Unlimited portfolio analyses</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Advanced AI recommendations</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Sector-wise allocation insights</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Benchmark comparisons (NIFTY 50, Sensex)</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ PDF report downloads</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Portfolio rebalancing suggestions</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Historical performance tracking</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Priority customer support</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        import os
+        razorpay_key_id = os.environ.get('RAZORPAY_KEY_ID')
+        
+        if razorpay_key_id:
+            if st.button("💳 Subscribe Now - ₹499/month", type="primary", use_container_width=True):
+                from utils.razorpay_client import create_order
+                order = create_order(amount=49900, receipt=f"user_{user_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}")
+                
+                if order:
+                    st.session_state.razorpay_order = order
+                    db.create_subscription(user_id, order['id'], 49900, 'monthly')
+                    
+                    checkout_html = f"""
+                    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                    <script>
+                    var options = {{
+                        "key": "{razorpay_key_id}",
+                        "amount": "49900",
+                        "currency": "INR",
+                        "name": "Alphalens",
+                        "description": "Monthly Premium Subscription",
+                        "order_id": "{order['id']}",
+                        "prefill": {{
+                            "name": "{st.session_state.user.get('full_name', '')}",
+                            "email": "{st.session_state.user.get('email', '')}",
+                            "contact": ""
+                        }},
+                        "theme": {{
+                            "color": "#e31837"
+                        }},
+                        "handler": function (response){{
+                            window.parent.postMessage({{
+                                type: 'razorpay_success',
+                                payment_id: response.razorpay_payment_id,
+                                order_id: response.razorpay_order_id,
+                                signature: response.razorpay_signature
+                            }}, '*');
+                            alert('Payment Successful! Your subscription is now active. Please refresh the page.');
+                        }}
+                    }};
+                    var rzp1 = new Razorpay(options);
+                    rzp1.on('payment.failed', function (response){{
+                        alert('Payment failed. Please try again.');
+                    }});
+                    rzp1.open();
+                    </script>
+                    """
+                    st.components.v1.html(checkout_html, height=0)
+                else:
+                    st.error("Failed to create payment order. Please try again.")
+            
+            payment_id = st.text_input("Enter Payment ID (after successful payment):", key="payment_verification")
+            if payment_id and st.button("Verify Payment", use_container_width=True):
+                if st.session_state.razorpay_order:
+                    from utils.razorpay_client import get_payment_details
+                    payment = get_payment_details(payment_id)
+                    if payment and payment.get('status') == 'captured':
+                        db.update_subscription_payment(
+                            st.session_state.razorpay_order['id'],
+                            payment_id,
+                            ''
+                        )
+                        st.success("Payment verified! Your subscription is now active.")
+                        st.session_state.razorpay_order = None
+                        st.rerun()
+                    else:
+                        st.error("Payment verification failed. Please contact support.")
+        else:
+            st.warning("Payment gateway is being configured. Please check back later.")
+        
+        st.markdown("""
+        <div style='text-align: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;'>
+            <p style='color: #666; font-size: 13px; margin: 0;'>🔒 Secure payment powered by Razorpay</p>
+            <p style='color: #888; font-size: 12px; margin-top: 5px;'>Cancel anytime. No questions asked.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 def display_admin_panel():
     render_auth_header()

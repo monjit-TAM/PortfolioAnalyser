@@ -466,3 +466,80 @@ class Database:
             return True
         except:
             return False
+    
+    def create_subscription(self, user_id, order_id, amount, plan_type='monthly'):
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor()
+            cur.execute('''
+                INSERT INTO subscriptions (user_id, razorpay_order_id, amount, plan_type, status)
+                VALUES (%s, %s, %s, %s, 'pending')
+                RETURNING id
+            ''', (user_id, order_id, amount, plan_type))
+            sub_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+            conn.close()
+            return sub_id
+        except Exception as e:
+            print(f"Error creating subscription: {e}")
+            return None
+    
+    def update_subscription_payment(self, order_id, payment_id, signature):
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor()
+            from datetime import datetime, timedelta
+            start_date = datetime.now()
+            end_date = start_date + timedelta(days=30)
+            cur.execute('''
+                UPDATE subscriptions 
+                SET razorpay_payment_id = %s, 
+                    razorpay_signature = %s, 
+                    status = 'active',
+                    start_date = %s,
+                    end_date = %s
+                WHERE razorpay_order_id = %s
+            ''', (payment_id, signature, start_date, end_date, order_id))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error updating subscription: {e}")
+            return False
+    
+    def get_active_subscription(self, user_id):
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute('''
+                SELECT * FROM subscriptions 
+                WHERE user_id = %s AND status = 'active' AND end_date > NOW()
+                ORDER BY created_at DESC LIMIT 1
+            ''', (user_id,))
+            result = cur.fetchone()
+            cur.close()
+            conn.close()
+            return result
+        except Exception as e:
+            print(f"Error fetching subscription: {e}")
+            return None
+    
+    def get_all_subscriptions(self):
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute('''
+                SELECT s.*, u.email, u.full_name 
+                FROM subscriptions s
+                JOIN users u ON s.user_id = u.id
+                ORDER BY s.created_at DESC
+            ''')
+            results = cur.fetchall()
+            cur.close()
+            conn.close()
+            return results
+        except Exception as e:
+            print(f"Error fetching subscriptions: {e}")
+            return []
