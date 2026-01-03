@@ -17,6 +17,7 @@ def get_razorpay_client():
 def create_order(amount=DISCOUNTED_PRICE, currency=CURRENCY, receipt=None):
     client = get_razorpay_client()
     if not client:
+        print("Razorpay client not initialized - check API keys")
         return None
     
     if receipt is None:
@@ -32,9 +33,12 @@ def create_order(amount=DISCOUNTED_PRICE, currency=CURRENCY, receipt=None):
     try:
         order = client.order.create(data=order_data)
         return order
+    except razorpay.errors.BadRequestError as e:
+        print(f"Razorpay BadRequest: {e}")
+        return {"error": str(e)}
     except Exception as e:
         print(f"Error creating order: {e}")
-        return None
+        return {"error": str(e)}
 
 def verify_payment_signature(order_id, payment_id, signature):
     client = get_razorpay_client()
