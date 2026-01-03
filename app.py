@@ -1069,34 +1069,6 @@ def display_welcome_screen():
     
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <h2 class="section-title">Pricing</h2>
-    <p class="section-subtitle">Simple, transparent pricing for smart investors</p>
-    """, unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 1.5, 1])
-    with col2:
-        st.markdown("""
-        <div style='background: white; border: 2px solid #e31837; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.1);'>
-            <div style='background: #e31837; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-size: 12px; font-weight: 600;'>LIMITED OFFER</div>
-            <h3 style='color: #1a1a1a; font-size: 22px; margin-bottom: 10px;'>Monthly Premium</h3>
-            <div style='margin: 15px 0;'>
-                <span style='color: #888; font-size: 16px; text-decoration: line-through;'>₹999/month</span>
-                <div style='color: #e31837; font-size: 42px; font-weight: 800; margin: 5px 0;'>₹499<span style='font-size: 16px; font-weight: 400;'>/month</span></div>
-                <span style='background: #fff3cd; color: #856404; padding: 3px 12px; border-radius: 12px; font-size: 12px;'>Save 50%!</span>
-            </div>
-            <hr style='margin: 20px 0; border: 0; border-top: 1px solid #eee;'>
-            <div style='text-align: left; padding: 0 15px; font-size: 14px;'>
-                <p style='color: #333; margin: 8px 0;'>✅ Unlimited portfolio analyses</p>
-                <p style='color: #333; margin: 8px 0;'>✅ AI-powered recommendations</p>
-                <p style='color: #333; margin: 8px 0;'>✅ Benchmark comparisons</p>
-                <p style='color: #333; margin: 8px 0;'>✅ PDF report downloads</p>
-                <p style='color: #333; margin: 8px 0;'>✅ Priority support</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("""
     <div class="cta-section">
         <h2 class="cta-title">Ready to Optimize Your Portfolio?</h2>
         <p class="cta-subtitle">Join thousands of investors using data-driven insights to make better investment decisions</p>
