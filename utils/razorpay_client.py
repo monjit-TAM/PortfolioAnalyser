@@ -2,17 +2,19 @@ import razorpay
 import os
 from datetime import datetime, timedelta
 
-RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
-RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
-
 MONTHLY_PRICE = 49900
 DISCOUNTED_PRICE = 49900
 CURRENCY = "INR"
 
 def get_razorpay_client():
-    if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
+    key_id = os.environ.get('RAZORPAY_KEY_ID')
+    key_secret = os.environ.get('RAZORPAY_KEY_SECRET')
+    
+    if not key_id or not key_secret:
+        print(f"Razorpay keys missing - ID: {bool(key_id)}, Secret: {bool(key_secret)}")
         return None
-    return razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+    
+    return razorpay.Client(auth=(key_id, key_secret))
 
 def create_order(amount=DISCOUNTED_PRICE, currency=CURRENCY, receipt=None):
     client = get_razorpay_client()
@@ -36,9 +38,15 @@ def create_order(amount=DISCOUNTED_PRICE, currency=CURRENCY, receipt=None):
     except razorpay.errors.BadRequestError as e:
         print(f"Razorpay BadRequest: {e}")
         return {"error": str(e)}
+    except razorpay.errors.ServerError as e:
+        print(f"Razorpay ServerError: {e}")
+        return {"error": "Payment gateway temporarily unavailable"}
     except Exception as e:
-        print(f"Error creating order: {e}")
-        return {"error": str(e)}
+        error_msg = str(e)
+        print(f"Error creating order: {error_msg}")
+        if "Authentication" in error_msg or "401" in error_msg:
+            return {"error": "Authentication failed. Please verify Razorpay API keys in your dashboard."}
+        return {"error": error_msg}
 
 def verify_payment_signature(order_id, payment_id, signature):
     client = get_razorpay_client()
