@@ -797,7 +797,7 @@ def display_analysis():
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Create tabs for different analysis sections
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
         "📊 Dashboard", 
         "🏭 Sector Analysis", 
         "📈 Stock Performance", 
@@ -805,7 +805,8 @@ def display_analysis():
         "💡 Recommendations",
         "⚖️ Rebalancing",
         "📅 Historical Performance",
-        "👤 Customer Profile"
+        "👤 Customer Profile",
+        "🤖 AI Assistant"
     ])
     
     with tab1:
@@ -869,6 +870,110 @@ def display_analysis():
             st.session_state.portfolio_data,
             st.session_state.recommendations
         )
+    
+    with tab9:
+        render_ai_assistant()
+
+def render_ai_assistant():
+    """Render the AI Assistant chat interface"""
+    from utils.ai_assistant import chat_with_assistant, get_quick_insights
+    
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;'>
+        <h2 style='color: white; margin: 0; font-size: 24px;'>🤖 Alphalens AI Assistant</h2>
+        <p style='color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;'>Ask me anything about your portfolio analysis - metrics, recommendations, rebalancing strategies, and more!</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if 'ai_chat_history' not in st.session_state:
+        st.session_state.ai_chat_history = []
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col2:
+        st.markdown("**💡 Quick Questions**")
+        quick_questions = [
+            "Explain my portfolio performance",
+            "Why are some stocks recommended as SELL?",
+            "How is my sector diversification?",
+            "How do I compare to NIFTY 50?",
+            "What should I do to improve my portfolio?",
+            "Explain the rebalancing suggestions"
+        ]
+        
+        for q in quick_questions:
+            if st.button(q, key=f"quick_{q[:20]}", use_container_width=True):
+                st.session_state.pending_question = q
+                st.rerun()
+        
+        st.markdown("---")
+        if st.button("🗑️ Clear Chat", use_container_width=True):
+            st.session_state.ai_chat_history = []
+            st.rerun()
+    
+    with col1:
+        chat_container = st.container()
+        
+        with chat_container:
+            if not st.session_state.ai_chat_history:
+                st.markdown("""
+                <div style='background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;'>
+                    <p style='color: #666; margin: 0;'>👋 Hello! I'm your portfolio AI assistant. Ask me about:</p>
+                    <ul style='text-align: left; color: #555; margin-top: 10px;'>
+                        <li>Portfolio metrics and calculations</li>
+                        <li>Sector allocation and diversification</li>
+                        <li>Benchmark comparisons (NIFTY 50, Sensex)</li>
+                        <li>Stock recommendations and rationale</li>
+                        <li>Rebalancing strategies</li>
+                        <li>Ways to improve your portfolio</li>
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                for msg in st.session_state.ai_chat_history:
+                    if msg["role"] == "user":
+                        st.markdown(f"""
+                        <div style='background: #e3f2fd; padding: 12px 15px; border-radius: 15px 15px 5px 15px; margin: 10px 0; margin-left: 20%;'>
+                            <strong>You:</strong> {msg["content"]}
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div style='background: #f5f5f5; padding: 12px 15px; border-radius: 15px 15px 15px 5px; margin: 10px 0; margin-right: 10%;'>
+                            <strong>🤖 Alphalens AI:</strong><br>{msg["content"]}
+                        </div>
+                        """, unsafe_allow_html=True)
+        
+        if 'pending_question' in st.session_state:
+            question = st.session_state.pending_question
+            del st.session_state.pending_question
+            
+            st.session_state.ai_chat_history.append({"role": "user", "content": question})
+            
+            with st.spinner("Thinking..."):
+                response = chat_with_assistant(
+                    question,
+                    st.session_state.analysis_results,
+                    st.session_state.portfolio_data,
+                    st.session_state.ai_chat_history
+                )
+                st.session_state.ai_chat_history.append({"role": "assistant", "content": response})
+            st.rerun()
+        
+        user_input = st.chat_input("Ask about your portfolio analysis...")
+        
+        if user_input:
+            st.session_state.ai_chat_history.append({"role": "user", "content": user_input})
+            
+            with st.spinner("Thinking..."):
+                response = chat_with_assistant(
+                    user_input,
+                    st.session_state.analysis_results,
+                    st.session_state.portfolio_data,
+                    st.session_state.ai_chat_history
+                )
+                st.session_state.ai_chat_history.append({"role": "assistant", "content": response})
+            st.rerun()
 
 def display_welcome_screen():
     """Display modern, sleek welcome screen"""

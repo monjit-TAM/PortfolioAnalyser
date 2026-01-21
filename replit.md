@@ -26,6 +26,7 @@ The backend consists of core services:
 3.  **Recommendation Engine:** Provides dual-perspective (Value/Growth) BUY/HOLD/SELL recommendations and alternative stock suggestions.
 4.  **PDF Report Generator:** Creates comprehensive reports with embedded Matplotlib charts using ReportLab.
 5.  **Authentication Manager:** Handles user login, signup, and session management using PostgreSQL for user data.
+6.  **AI Assistant:** Interactive chatbot powered by OpenAI (via Replit AI Integrations) that answers questions about portfolio metrics, recommendations, sector analysis, benchmark comparisons, and rebalancing strategies.
 
 ### Data Storage Solutions
 
