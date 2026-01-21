@@ -741,20 +741,30 @@ def display_analysis():
     
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     
-    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 0.5])
-    
-    with col1:
+    # User info and logout row
+    info_col, logout_col = st.columns([6, 1])
+    with info_col:
         user_name = ""
         if st.session_state.user:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', '')
         st.markdown(f"**📅 Analysis Date:** {datetime.now().strftime('%B %d, %Y at %I:%M %p')} | **User:** {user_name}")
+    with logout_col:
+        if st.button("🚪 Logout", key="logout_analysis", help="Sign out"):
+            st.session_state.authenticated = False
+            st.session_state.user = None
+            st.session_state.portfolio_data = None
+            st.session_state.analysis_complete = False
+            st.rerun()
     
-    with col2:
+    # Action buttons row with AI Assistant prominently placed
+    col1, col2, col3, col4 = st.columns([1, 1.2, 1, 1.2])
+    
+    with col1:
         if st.button("🔄 Refresh Prices", type="secondary", help="Update with latest stock prices", use_container_width=True):
             with st.spinner("Refreshing prices..."):
                 refresh_prices()
     
-    with col3:
+    with col2:
         # Generate PDF report
         if st.button("📄 Download Report", type="primary", help="Generate comprehensive PDF report", use_container_width=True):
             with st.spinner("Generating PDF report..."):
@@ -784,24 +794,33 @@ def display_analysis():
                 except Exception as e:
                     st.error(f"Error generating PDF: {str(e)}")
     
-    with col4:
+    with col3:
         if st.button("🏠 New Analysis", type="secondary", help="Start a new portfolio analysis", use_container_width=True):
             st.session_state.portfolio_data = None
             st.session_state.analysis_complete = False
             st.rerun()
     
-    with col5:
-        if st.button("Logout", key="logout_analysis"):
-            st.session_state.authenticated = False
-            st.session_state.user = None
-            st.session_state.portfolio_data = None
-            st.session_state.analysis_complete = False
+    with col4:
+        # AI Assistant button - prominent placement
+        st.markdown("""
+        <style>
+        div[data-testid="stButton"] button[kind="primary"]:has(span:contains("AI Assistant")) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        if st.button("✨ AI Assistant", type="primary", help="Chat with AI about your portfolio", use_container_width=True):
+            st.session_state.show_ai_assistant = True
             st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # Show AI Assistant modal if triggered
+    if st.session_state.get('show_ai_assistant', False):
+        render_ai_assistant_modal()
+    
     # Create tabs for different analysis sections
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
         "📊 Dashboard", 
         "🏭 Sector Analysis", 
         "📈 Stock Performance", 
@@ -809,8 +828,7 @@ def display_analysis():
         "💡 Recommendations",
         "⚖️ Rebalancing",
         "📅 Historical Performance",
-        "👤 Customer Profile",
-        "🤖 AI Assistant"
+        "👤 Customer Profile"
     ])
     
     with tab1:
@@ -874,12 +892,101 @@ def display_analysis():
             st.session_state.portfolio_data,
             st.session_state.recommendations
         )
+
+@st.dialog("✨ Alphalens AI Assistant", width="large")
+def render_ai_assistant_modal():
+    """Render the AI Assistant as a modal dialog"""
+    from utils.ai_assistant import chat_with_assistant
     
-    with tab9:
-        render_ai_assistant()
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 20px; border-radius: 10px; margin-bottom: 15px;'>
+        <p style='color: white; margin: 0; font-size: 16px;'>Ask me anything about your portfolio - performance, recommendations, sector allocation, and more!</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if 'ai_chat_history' not in st.session_state:
+        st.session_state.ai_chat_history = []
+    
+    # Chat history display
+    chat_container = st.container(height=350)
+    with chat_container:
+        if not st.session_state.ai_chat_history:
+            st.markdown("""
+            <div style='background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;'>
+                <p style='color: #666; margin: 0 0 10px 0;'>👋 Hello! I'm your AI portfolio assistant.</p>
+                <p style='color: #888; font-size: 13px; margin: 0;'>Try: "How is my portfolio doing?" or "Which stocks should I sell?"</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            for msg in st.session_state.ai_chat_history:
+                if msg["role"] == "user":
+                    st.markdown(f"""
+                    <div style='background: #e3f2fd; padding: 10px 12px; border-radius: 12px 12px 4px 12px; margin: 8px 0; margin-left: 15%;'>
+                        <strong>You:</strong> {msg["content"]}
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div style='background: #f5f5f5; padding: 10px 12px; border-radius: 12px 12px 12px 4px; margin: 8px 0; margin-right: 10%;'>
+                        <strong>✨ AI:</strong> {msg["content"]}
+                    </div>
+                    """, unsafe_allow_html=True)
+    
+    # Quick questions
+    st.markdown("**💡 Quick Questions:**")
+    qcol1, qcol2, qcol3 = st.columns(3)
+    quick_questions = [
+        ("Portfolio performance", "How is my portfolio performing?"),
+        ("Top performers", "Which are my best performing stocks?"),
+        ("Recommendations", "What stocks should I buy or sell?")
+    ]
+    
+    for i, (label, question) in enumerate(quick_questions):
+        with [qcol1, qcol2, qcol3][i]:
+            if st.button(label, key=f"modal_q_{i}", use_container_width=True):
+                st.session_state.ai_chat_history.append({"role": "user", "content": question})
+                with st.spinner("Analyzing..."):
+                    response = chat_with_assistant(
+                        question,
+                        st.session_state.analysis_results,
+                        st.session_state.portfolio_data,
+                        st.session_state.ai_chat_history
+                    )
+                    st.session_state.ai_chat_history.append({"role": "assistant", "content": response})
+                st.rerun()
+    
+    # Input field
+    col_input, col_btn = st.columns([5, 1])
+    with col_input:
+        user_input = st.text_input("Your question:", key="ai_modal_input", placeholder="Ask about your portfolio...", label_visibility="collapsed")
+    with col_btn:
+        send_clicked = st.button("Send", type="primary", use_container_width=True)
+    
+    if send_clicked and user_input:
+        st.session_state.ai_chat_history.append({"role": "user", "content": user_input})
+        with st.spinner("Thinking..."):
+            response = chat_with_assistant(
+                user_input,
+                st.session_state.analysis_results,
+                st.session_state.portfolio_data,
+                st.session_state.ai_chat_history
+            )
+            st.session_state.ai_chat_history.append({"role": "assistant", "content": response})
+        st.rerun()
+    
+    # Close and clear buttons
+    bcol1, bcol2 = st.columns(2)
+    with bcol1:
+        if st.button("🗑️ Clear Chat", use_container_width=True):
+            st.session_state.ai_chat_history = []
+            st.rerun()
+    with bcol2:
+        if st.button("Close", use_container_width=True):
+            st.session_state.show_ai_assistant = False
+            st.rerun()
 
 def render_ai_assistant():
-    """Render the AI Assistant chat interface"""
+    """Render the AI Assistant chat interface (legacy tab version)"""
     from utils.ai_assistant import chat_with_assistant, get_quick_insights
     
     st.markdown("""
