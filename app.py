@@ -50,43 +50,39 @@ def main():
     
     st.markdown("""
     <style>
+        /* Hide Streamlit's running status icon and deploy button */
+        [data-testid="stStatusWidget"] {
+            display: none !important;
+        }
+        header[data-testid="stHeader"] {
+            display: none !important;
+        }
+        #MainMenu {
+            visibility: hidden !important;
+        }
+        footer {
+            visibility: hidden !important;
+        }
+        .stDeployButton {
+            display: none !important;
+        }
+        
+        /* Main container with proper margins */
         .block-container {
-            padding-top: 0.2rem;
-            padding-bottom: 1rem;
-            padding-left: 0rem !important;
-            padding-right: 0rem !important;
-            max-width: 100% !important;
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+            padding-left: 4rem !important;
+            padding-right: 4rem !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
         }
         h2, h3 {
             margin-top: 0.5rem !important;
             margin-bottom: 0.5rem !important;
         }
-        .stImage {
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-        }
         .content-section {
-            padding-left: 5rem;
-            padding-right: 5rem;
-        }
-        .hero-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 15px;
-            padding-left: 5rem;
-            padding-right: 5rem;
-        }
-        .hero-header .logo-row {
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }
-        .hero-header .heading-row {
-            text-align: center;
-            width: 100%;
+            padding-left: 2rem;
+            padding-right: 2rem;
         }
         .auth-container {
             max-width: 400px;
@@ -139,14 +135,14 @@ def main():
     add_footer()
 
 def render_top_header():
-    """Render compact top header with logo left and auth buttons far right"""
-    col_logo, col_spacer, col_auth = st.columns([1.2, 2.5, 1.3])
+    """Render compact top header with logo on left, auth buttons center-right, and alpha symbol on right for symmetry"""
+    col_logo, col_spacer, col_auth, col_alpha = st.columns([1.2, 1.8, 1.5, 0.5])
     
     with col_logo:
-        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=280)
+        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=260)
     
     with col_auth:
-        st.markdown("<div style='height: 45px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
             if st.session_state.user.get('is_admin'):
@@ -185,6 +181,14 @@ def render_top_header():
                 if st.button("SignUp", key="register_top", type="primary", use_container_width=True):
                     st.session_state.show_signup = True
                     st.rerun()
+    
+    with col_alpha:
+        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style='text-align: right;'>
+            <span style='font-size: 48px; font-weight: 800; color: #e31837; font-family: Georgia, serif;'>α</span>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("<hr style='margin: 5px 0 15px 0; border: none; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
 
