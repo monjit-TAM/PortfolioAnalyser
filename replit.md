@@ -21,12 +21,14 @@ The frontend is built with Streamlit, providing an interactive, single-page user
 ### Backend Architecture
 
 The backend consists of core services:
-1.  **Data Fetcher:** Retrieves real-time and historical stock data from TrueData (primary) and Yahoo Finance (fallback), and market indices.
-2.  **Portfolio Analyzer:** Calculates performance metrics, allocation, and aggregates statistics.
+1.  **Data Fetcher:** Retrieves real-time and historical stock data from Twelve Data (primary) → Alpha Vantage → Yahoo Finance (fallback), and market indices.
+2.  **Portfolio Analyzer:** Calculates performance metrics, allocation, and aggregates statistics. Includes corporate actions adjustments (bonus, splits).
 3.  **Recommendation Engine:** Provides dual-perspective (Value/Growth) BUY/HOLD/SELL recommendations and alternative stock suggestions.
 4.  **PDF Report Generator:** Creates comprehensive reports with embedded Matplotlib charts using ReportLab.
 5.  **Authentication Manager:** Handles user login, signup, and session management using PostgreSQL for user data.
 6.  **AI Assistant:** Interactive chatbot powered by OpenAI (via Replit AI Integrations) that answers questions about portfolio metrics, recommendations, sector analysis, benchmark comparisons, and rebalancing strategies.
+7.  **Advanced Metrics Calculator:** Provides 10-layer institutional-grade analysis including structural diagnostics, style analysis, concentration risk, volatility metrics, behavior analysis, drift analysis, overlap detection, return attribution, liquidity risk, tail risk, macro sensitivity, health score, and scenario analysis.
+8.  **Corporate Actions Manager:** Adjusts buy prices and quantities for bonus issues and stock splits to ensure accurate performance calculations.
 
 ### Data Storage Solutions
 

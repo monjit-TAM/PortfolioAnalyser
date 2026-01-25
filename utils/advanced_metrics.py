@@ -37,7 +37,28 @@ class AdvancedMetricsCalculator:
         return results
     
     def calculate_structural_diagnostics(self, portfolio_df):
+        if portfolio_df is None or portfolio_df.empty:
+            return {
+                'market_cap_allocation': {'Large Cap': 0, 'Mid Cap': 0, 'Small Cap': 0},
+                'sector_allocation': {},
+                'industry_concentration': {'top_sector': 'N/A', 'top_sector_pct': 0, 'is_concentrated': False},
+                'thematic_clusters': ['Empty Portfolio'],
+                'total_stocks': 0,
+                'total_value': 0
+            }
+        
         total_value = portfolio_df['Current Value'].sum()
+        total_stocks = len(portfolio_df)
+        
+        if total_stocks == 0 or total_value == 0:
+            return {
+                'market_cap_allocation': {'Large Cap': 0, 'Mid Cap': 0, 'Small Cap': 0},
+                'sector_allocation': {},
+                'industry_concentration': {'top_sector': 'N/A', 'top_sector_pct': 0, 'is_concentrated': False},
+                'thematic_clusters': ['Empty Portfolio'],
+                'total_stocks': 0,
+                'total_value': 0
+            }
         
         market_cap_allocation = {'Large Cap': 0, 'Mid Cap': 0, 'Small Cap': 0}
         if 'Category' in portfolio_df.columns:
@@ -75,7 +96,6 @@ class AdvancedMetricsCalculator:
         tech_count = sum(1 for s in portfolio_df['Stock Name'] if any(t in str(s).upper() for t in tech_stocks))
         banking_count = sum(1 for s in portfolio_df['Stock Name'] if any(b in str(s).upper() for b in banking_stocks))
         
-        total_stocks = len(portfolio_df)
         if psu_count / total_stocks > 0.3:
             thematic_clusters.append('PSU-Heavy')
         if tech_count / total_stocks > 0.3:
@@ -93,6 +113,16 @@ class AdvancedMetricsCalculator:
         }
     
     def calculate_style_analysis(self, portfolio_df, historical_data):
+        if portfolio_df is None or portfolio_df.empty:
+            return {
+                'value_tilt': 50,
+                'growth_tilt': 50,
+                'momentum_exposure': 0,
+                'quality_factor': 'N/A',
+                'volatility_tilt': 'Neutral',
+                'style_label': 'Blend'
+            }
+        
         value_score = 0
         growth_score = 0
         momentum_score = 0
@@ -102,14 +132,23 @@ class AdvancedMetricsCalculator:
         high_beta_count = 0
         low_vol_count = 0
         
+        quality_stocks = ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'HDFC', 'ICICIBANK', 'KOTAKBANK', 
+                         'HINDUNILVR', 'ITC', 'BHARTIARTL', 'ASIANPAINT', 'BAJFINANCE', 'MARUTI',
+                         'TITAN', 'NESTLEIND', 'BRITANNIA', 'PIDILITIND', 'DABUR']
+        
         for _, row in portfolio_df.iterrows():
             stock_name = row['Stock Name']
             gain_pct = row.get('Percentage Gain/Loss', 0)
             
             if gain_pct > 20:
                 momentum_score += 1
+                growth_score += 1
             if gain_pct < -10:
                 value_score += 1
+            
+            stock_upper = str(stock_name).upper().replace('.NS', '').replace('.BO', '')
+            if any(q in stock_upper for q in quality_stocks):
+                quality_score += 1
             
             if stock_name in historical_data and not historical_data[stock_name].empty:
                 hist = historical_data[stock_name]
@@ -131,11 +170,13 @@ class AdvancedMetricsCalculator:
         value_pct = (value_score / total * 100) if total > 0 else 0
         growth_pct = 100 - value_pct
         
+        quality_factor = 'High' if quality_score > total * 0.4 else ('Medium' if quality_score > total * 0.2 else 'Low')
+        
         return {
             'value_tilt': round(value_pct, 1),
             'growth_tilt': round(growth_pct, 1),
             'momentum_exposure': round((momentum_score / total * 100) if total > 0 else 0, 1),
-            'quality_factor': 'High' if quality_score > total * 0.5 else 'Medium',
+            'quality_factor': quality_factor,
             'volatility_tilt': volatility_tilt,
             'style_label': 'Value' if value_pct > 60 else ('Growth' if growth_pct > 60 else 'Blend')
         }

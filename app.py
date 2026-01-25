@@ -605,6 +605,9 @@ def analyze_portfolio():
         st.session_state.historical_data = historical_data
         st.session_state.analysis_complete = True
         
+        if 'advanced_metrics' in st.session_state:
+            del st.session_state.advanced_metrics
+        
         progress_bar.progress(1.0)
         st.success("Analysis complete!")
         
@@ -676,6 +679,9 @@ def refresh_prices():
         st.session_state.current_data = current_data
         st.session_state.analysis_results = analysis_results
         st.session_state.recommendations = recommendations
+        
+        if 'advanced_metrics' in st.session_state:
+            del st.session_state.advanced_metrics
         
         st.success("Prices updated successfully!")
         st.rerun()
