@@ -1,0 +1,112 @@
+🧠 Layer 1: Core Structural Diagnostics (Foundation)
+These are non-negotiable.
+📊 1. Allocation Breakdown
+Market cap: Large / Mid / Small
+Sector allocation
+Industry concentration
+Domestic vs International (if applicable)
+Equity vs Debt vs Cash
+Thematic clustering (PSU-heavy, Tech-heavy etc.)
+🎯 2. Style Analysis
+Value vs Growth tilt
+Momentum exposure
+Quality factor exposure
+Low-vol vs High-beta tilt
+This becomes your “Value/Growth engine” USP.
+📉 Layer 2: Risk Intelligence (This is where you differentiate)
+Most Indian tools are shallow here.
+⚠️ 3. Concentration Risk
+Top 3 / Top 5 exposure %
+Single sector overexposure flag
+Single stock > X% threshold indicator
+📉 4. Volatility & Drawdown Metrics
+Historical volatility
+Max drawdown
+Downside deviation
+Beta vs benchmark
+Sortino ratio (retail-friendly explanation)
+Not just numbers — visual representation.
+📊 Layer 3: Behavioural Signals (This will be your killer feature)
+This is where you stand apart.
+🧠 5. Behaviour Score
+Overtrading detection
+Average holding period
+High churn behaviour
+Panic sell history (if available via broker data)
+You can label it as:
+“Portfolio Behaviour Pattern”
+Not:
+“You are emotional.”
+📈 Layer 4: Benchmark & Opportunity Intelligence
+Still analytical, not advisory.
+📍 6. Drift Analysis
+How far portfolio deviates from:
+Nifty 50
+Sensex
+Model Portfolio (broker-defined)
+Call it:
+Alignment Score
+Not:
+Rebalance recommendation.
+📊 7. Overlap Detection
+Duplicate exposure across:
+Multiple stocks in same business
+Same sector theme
+Example:
+6 different PSU exposure positions
+💰 Layer 5: Return Attribution
+This is rare in retail tools.
+📌 8. Return Contribution Analysis
+Which stock contributed most to gains
+Which stock dragged returns
+Sector contribution breakdown
+Style contribution breakdown
+It educates without advising.
+🔬 Layer 6: Hidden Risk Radar (Advanced, Powerful)
+🔎 9. Liquidity Risk Indicator
+Avg traded value vs position size
+Days to liquidate metric
+Given your liquidity post earlier — this will resonate.
+💣 10. Tail Risk Exposure
+% portfolio in high-volatility stocks
+% in ASM/GSM stocks
+Small cap risk exposure score
+No “sell.” Just “risk classification.”
+🌍 Layer 7: Macro Sensitivity Layer
+Very powerful for brokers.
+🌐 11. Interest Rate Sensitivity
+Banking-heavy portfolio flag
+Duration risk for debt allocation
+🛢 12. Commodity Exposure Mapping
+Crude-sensitive companies
+INR-sensitive exposure
+This makes you institutional.
+📊 Layer 8: Portfolio Health Score (The Visual Hook)
+Create a composite score:
+Diversification Score
+Risk Score
+Style Balance Score
+Liquidity Score
+Call it:
+AlphaMarket Portfolio Health Index
+This becomes shareable.
+🔥 Layer 9: Scenario Engine (Big Differentiator)
+Without advising, you can simulate:
+“If Nifty falls 10%”
+“If Midcaps correct 20%”
+“If Banking drops 15%”
+Show projected impact.
+Not advice. Just stress testing.
+🚀 Layer 10: AI Narrative Summary (Huge UX Win)
+At the end of report:
+“Your portfolio shows a strong mid-cap growth tilt with moderate sector concentration and elevated volatility compared to Nifty 50…”
+Educational. Clean. Non-prescriptive.
+This makes brokers look smart.
+🏗 How You Architect It (Important)
+Build it modular:
+Core Engine
+→ Risk Layer
+→ Behaviour Layer
+→ Attribution Layer
+→ Scenario Engine
+→ AI Summary
