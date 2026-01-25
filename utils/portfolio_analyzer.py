@@ -9,6 +9,27 @@ class PortfolioAnalyzer:
         self.data_fetcher = DataFetcher()
         self.corporate_actions = CorporateActionsManager()
     
+    def _normalize_date(self, date_value):
+        """Convert various date formats to Python date object"""
+        if date_value is None or pd.isna(date_value):
+            return None
+        
+        if isinstance(date_value, pd.Timestamp):
+            return date_value.date()
+        elif isinstance(date_value, datetime):
+            return date_value.date()
+        elif hasattr(date_value, 'date'):
+            return date_value.date()
+        elif isinstance(date_value, str):
+            try:
+                return datetime.strptime(date_value, '%Y-%m-%d').date()
+            except ValueError:
+                try:
+                    return pd.to_datetime(date_value).date()
+                except:
+                    return None
+        return date_value
+    
     def apply_corporate_action_adjustments(self, portfolio_df):
         """Apply bonus, split, and dividend adjustments to portfolio"""
         adjusted_df = portfolio_df.copy()
@@ -20,23 +41,27 @@ class PortfolioAnalyzer:
         
         for idx, row in adjusted_df.iterrows():
             stock_name = row['Stock Name']
-            buy_date = row['Buy Date']
+            buy_date = self._normalize_date(row['Buy Date'])
             original_price = row['Buy Price']
             original_qty = row['Quantity']
             
-            if pd.isna(buy_date):
+            if buy_date is None:
                 continue
             
-            details = self.corporate_actions.get_adjustment_details(stock_name, buy_date)
-            
-            if details['actions_applied']:
-                factor = details['total_adjustment_factor']
-                adjusted_df.at[idx, 'Buy Price'] = original_price / factor
-                adjusted_df.at[idx, 'Quantity'] = int(original_qty * factor)
-                adjusted_df.at[idx, 'Adjustment Factor'] = factor
+            try:
+                details = self.corporate_actions.get_adjustment_details(stock_name, buy_date)
                 
-                action_descriptions = [a['description'] for a in details['actions_applied']]
-                adjusted_df.at[idx, 'Corporate Actions'] = '; '.join(action_descriptions)
+                if details['actions_applied']:
+                    factor = details['total_adjustment_factor']
+                    adjusted_df.at[idx, 'Buy Price'] = original_price / factor
+                    adjusted_df.at[idx, 'Quantity'] = int(original_qty * factor)
+                    adjusted_df.at[idx, 'Adjustment Factor'] = factor
+                    
+                    action_descriptions = [a['description'] for a in details['actions_applied']]
+                    adjusted_df.at[idx, 'Corporate Actions'] = '; '.join(action_descriptions)
+            except Exception as e:
+                print(f"Error applying corporate actions for {stock_name}: {e}")
+                continue
         
         return adjusted_df
     
