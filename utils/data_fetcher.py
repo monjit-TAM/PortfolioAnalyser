@@ -22,6 +22,9 @@ class DataFetcher:
         
         self._alpha_vantage_client = None
         self._alpha_vantage_initialized = False
+        
+        self._twelve_data_client = None
+        self._twelve_data_initialized = False
     
     @property
     def symbol_aliases(self):
@@ -290,6 +293,19 @@ class DataFetcher:
             base_name = self.symbol_aliases[base_name]
         return self.sector_mapping.get(base_name, 'Others')
     
+    def _init_twelve_data(self):
+        if self._twelve_data_initialized:
+            return self._twelve_data_client
+        
+        try:
+            from utils.twelve_data import TwelveDataClient
+            self._twelve_data_client = TwelveDataClient()
+            self._twelve_data_initialized = True
+            return self._twelve_data_client
+        except Exception as e:
+            print(f"Twelve Data initialization failed: {e}")
+            return None
+    
     def _init_alpha_vantage(self):
         if self._alpha_vantage_initialized:
             return self._alpha_vantage_client
@@ -307,11 +323,22 @@ class DataFetcher:
         symbol = self.get_stock_symbol(stock_name)
         base_name = stock_name.upper().strip().replace(self.nse_suffix, '').replace(self.bse_suffix, '')
         
+        td_client = self._init_twelve_data()
+        if td_client and td_client.is_available():
+            try:
+                td_fundamentals = td_client.get_fundamentals(base_name)
+                if td_fundamentals and (td_fundamentals.get('pe_ratio') is not None or td_fundamentals.get('market_cap') is not None):
+                    print(f"Using Twelve Data fundamentals for {stock_name}")
+                    return td_fundamentals
+            except Exception as e:
+                print(f"Twelve Data fetch failed for {stock_name}: {e}")
+        
         av_client = self._init_alpha_vantage()
         if av_client and av_client.is_available():
             try:
                 av_fundamentals = av_client.get_full_fundamentals(base_name)
                 if av_fundamentals and av_fundamentals.get('pe_ratio') is not None:
+                    print(f"Using Alpha Vantage fundamentals for {stock_name}")
                     return av_fundamentals
             except Exception as e:
                 print(f"Alpha Vantage fetch failed for {stock_name}: {e}")
