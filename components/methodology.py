@@ -22,6 +22,20 @@ class Methodology:
 8. Rebalancing Strategy Framework
 9. Risk Metrics & Correlation
 10. Limitations & Disclaimers
+11. **Advanced Portfolio Metrics** (NEW)
+    - Structural Diagnostics
+    - Style Analysis
+    - Concentration Risk
+    - Volatility & Drawdown
+    - Behavior Analysis
+    - Drift Analysis
+    - Overlap Detection
+    - Return Attribution
+    - Liquidity Risk
+    - Tail Risk
+    - Macro Sensitivity
+    - Health Score
+    - Scenario Analysis
         """)
         
         st.divider()
@@ -378,6 +392,136 @@ Annualized Volatility = Daily Volatility × √252""", language=None)
 - Sector classifications are simplified and may not reflect all nuances
         """)
         
+        st.divider()
+        
+        # Section 11: Advanced Metrics
+        st.subheader("11. Advanced Portfolio Metrics")
+        
+        st.write("The Advanced Metrics module provides institutional-grade portfolio analysis across 10 layers.")
+        
+        st.markdown("**11.1 Structural Diagnostics**")
+        st.markdown("""
+- **Market Cap Allocation:** Percentage of portfolio in Large/Mid/Small cap stocks
+- **Sector Allocation:** Distribution across different sectors
+- **Industry Concentration:** Flag if any single sector exceeds 30% allocation
+- **Thematic Clusters:** Detection of PSU-heavy, Tech-heavy, or Banking-heavy portfolios
+        """)
+        
+        st.markdown("**11.2 Style Analysis**")
+        st.code("""Value Tilt % = (Underperforming stocks / Total stocks) × 100
+Growth Tilt % = 100 - Value Tilt %
+Momentum Exposure = (Stocks with >20% gain / Total stocks) × 100""", language=None)
+        st.markdown("""
+- **Value Style:** Stocks trading below intrinsic value
+- **Growth Style:** Stocks with high earnings/revenue growth
+- **Blend:** Balanced mix of value and growth
+        """)
+        
+        st.markdown("**11.3 Concentration Risk**")
+        st.code("""Top N Exposure % = (Sum of Top N stock values / Total Portfolio Value) × 100
+
+Risk Thresholds:
+- Single stock > 15% = Flag
+- Single sector > 30% = Flag
+- Top 3 stocks > 50% = High concentration""", language=None)
+        
+        st.markdown("**11.4 Volatility & Drawdown Metrics**")
+        st.code("""Historical Volatility = Standard Deviation of Returns × √252 × 100
+
+Max Drawdown = ((Peak Value - Trough Value) / Peak Value) × 100
+
+Downside Deviation = Std Dev of Negative Returns × √252 × 100
+
+Beta = Covariance(Stock, Benchmark) / Variance(Benchmark)
+
+Sortino Ratio = (Portfolio Return - Risk-Free Rate) / Downside Deviation""", language=None)
+        st.markdown("""
+- **Sortino Ratio Interpretation:** Higher is better (measures return per unit of downside risk)
+- **Beta Interpretation:** Beta > 1 means more volatile than market, Beta < 1 means less volatile
+        """)
+        
+        st.markdown("**11.5 Behavior Analysis**")
+        st.code("""Average Holding Period = Mean(Days held for each stock)
+
+Behavior Score Components:
+- Short-term holdings (<90 days) penalty
+- Overtrading detection (>50% short-term)
+- Long-term holdings bonus""", language=None)
+        st.markdown("""
+| Pattern | Holding Period | Interpretation |
+|---------|---------------|----------------|
+| Patient Investor | >365 days | Long-term wealth builder |
+| Medium-Term Holder | 180-365 days | Balanced approach |
+| Active Trader | 90-180 days | Moderate churning |
+| High Churn | <90 days | Potential overtrading |
+        """)
+        
+        st.markdown("**11.6 Drift Analysis (Alignment Score)**")
+        st.code("""Sector Drift = Portfolio Sector % - Benchmark Sector %
+Alignment Score = 100 - Sum of |Sector Drifts|""", language=None)
+        st.write("Compares your portfolio's sector allocation against Nifty 50's sector weights.")
+        
+        st.markdown("**11.7 Overlap Detection**")
+        st.markdown("""
+Identifies duplicate exposure through:
+- Same business group holdings (Tata Group, Reliance Group, etc.)
+- Same sector concentration (>4 stocks in one sector)
+- Correlated stock movements
+        """)
+        
+        st.markdown("**11.8 Return Attribution**")
+        st.code("""Stock Contribution = Stock's Absolute Gain/Loss
+Contribution % = (Stock Contribution / Total Portfolio Gain) × 100
+
+Sector Attribution = Sum of stock contributions within sector""", language=None)
+        st.write("Shows which stocks and sectors contributed most to your gains or losses.")
+        
+        st.markdown("**11.9 Liquidity Risk**")
+        st.code("""Average Traded Value = Average Volume × Average Price
+Days to Liquidate = Position Value / (Average Traded Value × 10%)
+
+Liquidity Grades:
+- High: <1 day to liquidate
+- Medium: 1-5 days
+- Low: >5 days""", language=None)
+        
+        st.markdown("**11.10 Tail Risk Exposure**")
+        st.code("""High Volatility Exposure = Sum of (stocks with >40% volatility) / Total Value
+Small Cap Exposure = Sum of Small Cap stocks / Total Value
+
+Tail Risk Score = 100 - penalties for high-vol and small-cap exposure""", language=None)
+        
+        st.markdown("**11.11 Macro Sensitivity**")
+        st.markdown("""
+| Sensitivity Type | Stocks Tracked | Impact |
+|-----------------|----------------|--------|
+| Interest Rate | Banking, NBFC stocks | Rate hikes hurt valuations |
+| Crude Oil | Oil & Gas, Refineries | Import costs, margins |
+| Currency (INR) | IT, Pharma exporters | INR weakness = benefit |
+| Metals | Steel, Aluminum companies | Global commodity cycles |
+        """)
+        
+        st.markdown("**11.12 Portfolio Health Score**")
+        st.code("""Health Score = Weighted Average of:
+- Diversification Score (25%)
+- Risk Score (25%)
+- Liquidity Score (20%)
+- Behavior Score (15%)
+- Style Balance Score (15%)
+
+Grades: A (≥80), B (65-79), C (50-64), D (<50)""", language=None)
+        
+        st.markdown("**11.13 Scenario Analysis (Stress Testing)**")
+        st.code("""Projected Impact = Σ(Stock Value × Beta × Market Move %)
+
+Scenarios:
+- Nifty falls 10%
+- Midcaps correct 20%
+- Banking drops 15%""", language=None)
+        st.info("Scenario analysis uses historical betas to project potential losses. Actual results may differ.")
+        
+        st.divider()
+        
         st.markdown("**Important Disclaimer:**")
         st.error("""
 **THIS IS NOT FINANCIAL ADVICE**
@@ -393,4 +537,4 @@ Investing in stocks involves risk of capital loss.
         
         # Footer
         st.caption("Alphalens Portfolio Analyzer by Edhaz Financial Services")
-        st.caption("Methodology Version 1.0 | Last Updated: January 2026")
+        st.caption("Methodology Version 2.0 | Last Updated: January 2026")

@@ -11,6 +11,7 @@ import os
 from utils.data_fetcher import DataFetcher
 from utils.portfolio_analyzer import PortfolioAnalyzer
 from utils.recommendation_engine import RecommendationEngine
+from utils.advanced_metrics import AdvancedMetricsCalculator
 from components.dashboard import Dashboard
 from components.sector_analysis import SectorAnalysis
 from components.stock_performance import StockPerformance
@@ -19,6 +20,7 @@ from components.recommendations import Recommendations
 from components.customer_profile import CustomerProfile
 from components.rebalancing import PortfolioRebalancing
 from components.historical_performance import HistoricalPerformance
+from components.advanced_metrics_tab import render_advanced_metrics_tab
 from utils.pdf_generator import PDFReportGenerator
 from components.homepage import (
     render_modern_homepage, render_upload_section, render_features_section,
@@ -838,7 +840,7 @@ def display_analysis():
     """, unsafe_allow_html=True)
     
     # Create tabs for different analysis sections
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
         "📊 Dashboard", 
         "🏭 Sectors", 
         "📈 Stocks", 
@@ -847,6 +849,7 @@ def display_analysis():
         "⚖️ Rebalance",
         "📅 History",
         "👤 Profile",
+        "🔬 Advanced",
         "📐 Methodology"
     ])
     
@@ -913,6 +916,26 @@ def display_analysis():
         )
     
     with tab9:
+        if 'advanced_metrics' not in st.session_state:
+            with st.spinner("Calculating advanced metrics..."):
+                metrics_calculator = AdvancedMetricsCalculator()
+                
+                stock_perf = st.session_state.analysis_results.get('stock_performance', [])
+                portfolio_for_metrics = pd.DataFrame(stock_perf)
+                
+                benchmark_data = None
+                if 'NIFTY 50' in st.session_state.historical_data:
+                    benchmark_data = st.session_state.historical_data['NIFTY 50']
+                
+                st.session_state.advanced_metrics = metrics_calculator.calculate_all_metrics(
+                    portfolio_for_metrics,
+                    st.session_state.historical_data,
+                    benchmark_data
+                )
+        
+        render_advanced_metrics_tab(st.session_state.advanced_metrics)
+    
+    with tab10:
         from components.methodology import Methodology
         methodology = Methodology()
         methodology.render()
