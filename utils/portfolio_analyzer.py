@@ -2,22 +2,54 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from utils.data_fetcher import DataFetcher
+from utils.corporate_actions import CorporateActionsManager
 
 class PortfolioAnalyzer:
     def __init__(self):
         self.data_fetcher = DataFetcher()
+        self.corporate_actions = CorporateActionsManager()
+    
+    def apply_corporate_action_adjustments(self, portfolio_df):
+        """Apply bonus, split, and dividend adjustments to portfolio"""
+        adjusted_df = portfolio_df.copy()
+        
+        adjusted_df['Original Buy Price'] = adjusted_df['Buy Price']
+        adjusted_df['Original Quantity'] = adjusted_df['Quantity']
+        adjusted_df['Adjustment Factor'] = 1.0
+        adjusted_df['Corporate Actions'] = ''
+        
+        for idx, row in adjusted_df.iterrows():
+            stock_name = row['Stock Name']
+            buy_date = row['Buy Date']
+            original_price = row['Buy Price']
+            original_qty = row['Quantity']
+            
+            if pd.isna(buy_date):
+                continue
+            
+            details = self.corporate_actions.get_adjustment_details(stock_name, buy_date)
+            
+            if details['actions_applied']:
+                factor = details['total_adjustment_factor']
+                adjusted_df.at[idx, 'Buy Price'] = original_price / factor
+                adjusted_df.at[idx, 'Quantity'] = int(original_qty * factor)
+                adjusted_df.at[idx, 'Adjustment Factor'] = factor
+                
+                action_descriptions = [a['description'] for a in details['actions_applied']]
+                adjusted_df.at[idx, 'Corporate Actions'] = '; '.join(action_descriptions)
+        
+        return adjusted_df
     
     def analyze_portfolio(self, portfolio_df, current_data, historical_data):
         """Perform comprehensive portfolio analysis"""
         results = {}
         
-        # Calculate basic portfolio metrics
         portfolio_df = portfolio_df.copy()
         
-        # Add current prices and calculations
+        portfolio_df = self.apply_corporate_action_adjustments(portfolio_df)
+        
         portfolio_df['Current Price'] = portfolio_df['Stock Name'].map(current_data)
         
-        # Handle missing prices (fill with 0 or buy price as fallback)
         portfolio_df['Current Price'] = portfolio_df['Current Price'].fillna(portfolio_df['Buy Price'])
         
         portfolio_df['Investment Value'] = portfolio_df['Buy Price'] * portfolio_df['Quantity']
