@@ -19,6 +19,9 @@ class DataFetcher:
         
         self._truedata_client = None
         self._truedata_initialized = False
+        
+        self._alpha_vantage_client = None
+        self._alpha_vantage_initialized = False
     
     @property
     def symbol_aliases(self):
@@ -287,8 +290,31 @@ class DataFetcher:
             base_name = self.symbol_aliases[base_name]
         return self.sector_mapping.get(base_name, 'Others')
     
+    def _init_alpha_vantage(self):
+        if self._alpha_vantage_initialized:
+            return self._alpha_vantage_client
+        
+        try:
+            from utils.alpha_vantage import AlphaVantageClient
+            self._alpha_vantage_client = AlphaVantageClient()
+            self._alpha_vantage_initialized = True
+            return self._alpha_vantage_client
+        except Exception as e:
+            print(f"Alpha Vantage initialization failed: {e}")
+            return None
+    
     def get_stock_fundamentals(self, stock_name):
         symbol = self.get_stock_symbol(stock_name)
+        base_name = stock_name.upper().strip().replace(self.nse_suffix, '').replace(self.bse_suffix, '')
+        
+        av_client = self._init_alpha_vantage()
+        if av_client and av_client.is_available():
+            try:
+                av_fundamentals = av_client.get_full_fundamentals(base_name)
+                if av_fundamentals and av_fundamentals.get('pe_ratio') is not None:
+                    return av_fundamentals
+            except Exception as e:
+                print(f"Alpha Vantage fetch failed for {stock_name}: {e}")
         
         try:
             ticker = yf.Ticker(symbol)
@@ -305,6 +331,7 @@ class DataFetcher:
                 'earnings_growth': info.get('earningsGrowth'),
                 'fifty_two_week_high': info.get('fiftyTwoWeekHigh'),
                 'fifty_two_week_low': info.get('fiftyTwoWeekLow'),
+                'source': 'yahoo_finance'
             }
             
             return fundamentals
