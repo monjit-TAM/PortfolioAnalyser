@@ -820,7 +820,7 @@ def display_analysis():
         render_ai_assistant_modal()
     
     # Create tabs for different analysis sections
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
         "📊 Dashboard", 
         "🏭 Sector Analysis", 
         "📈 Stock Performance", 
@@ -828,7 +828,8 @@ def display_analysis():
         "💡 Recommendations",
         "⚖️ Rebalancing",
         "📅 Historical Performance",
-        "👤 Customer Profile"
+        "👤 Customer Profile",
+        "📐 Methodology"
     ])
     
     with tab1:
@@ -892,6 +893,11 @@ def display_analysis():
             st.session_state.portfolio_data,
             st.session_state.recommendations
         )
+    
+    with tab9:
+        from components.methodology import Methodology
+        methodology = Methodology()
+        methodology.render()
 
 @st.dialog("✨ Alphalens AI Assistant", width="large")
 def render_ai_assistant_modal():
