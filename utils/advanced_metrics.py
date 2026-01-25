@@ -154,7 +154,7 @@ class AdvancedMetricsCalculator:
                 hist = historical_data[stock_name]
                 if len(hist) > 20:
                     returns = hist['Close'].pct_change().dropna()
-                    vol = returns.std() * np.sqrt(252) * 100
+                    vol = float(returns.std() * np.sqrt(252) * 100)
                     if vol > 35:
                         high_beta_count += 1
                     elif vol < 20:
@@ -249,7 +249,7 @@ class AdvancedMetricsCalculator:
                 hist = historical_data[stock_name]
                 if len(hist) > 20:
                     returns = hist['Close'].pct_change().dropna()
-                    vol = returns.std() * np.sqrt(252) * 100
+                    vol = float(returns.std() * np.sqrt(252) * 100)
                     stock_volatilities.append({'stock': stock_name, 'volatility': vol, 'weight': weight})
                     
                     if benchmark_returns is not None and len(returns) > 0:
@@ -284,14 +284,14 @@ class AdvancedMetricsCalculator:
                 if len(combined) > 0:
                     peak = combined.expanding().max()
                     drawdown = (combined - peak) / peak * 100
-                    max_drawdown = abs(drawdown.min())
+                    max_drawdown = float(abs(drawdown.min()))
                     
                     returns = combined.pct_change().dropna()
                     negative_returns = returns[returns < 0]
                     if len(negative_returns) > 0:
-                        downside_deviation = negative_returns.std() * np.sqrt(252) * 100
+                        downside_deviation = float(negative_returns.std() * np.sqrt(252) * 100)
                         
-                        avg_return = returns.mean() * 252
+                        avg_return = float(returns.mean() * 252)
                         risk_free_rate = 0.06
                         if downside_deviation > 0:
                             sortino_ratio = (avg_return - risk_free_rate) / (downside_deviation / 100)
@@ -556,7 +556,7 @@ class AdvancedMetricsCalculator:
                 hist = historical_data[stock_name]
                 if len(hist) > 20:
                     returns = hist['Close'].pct_change().dropna()
-                    vol = returns.std() * np.sqrt(252) * 100
+                    vol = float(returns.std() * np.sqrt(252) * 100)
                     
                     if vol > 40:
                         high_vol_stocks.append({
