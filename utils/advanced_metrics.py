@@ -513,13 +513,13 @@ class AdvancedMetricsCalculator:
             if stock_name in historical_data and not historical_data[stock_name].empty:
                 hist = historical_data[stock_name]
                 if 'Volume' in hist.columns:
-                    avg_volume = hist['Volume'].tail(20).mean()
-                    avg_price = hist['Close'].tail(20).mean()
+                    avg_volume = float(hist['Volume'].tail(20).mean())
+                    avg_price = float(hist['Close'].tail(20).mean())
                     avg_traded_value = avg_volume * avg_price
             
-            days_to_liquidate = 0
+            days_to_liquidate = 0.0
             if avg_traded_value > 0:
-                days_to_liquidate = position_value / (avg_traded_value * 0.1)
+                days_to_liquidate = float(position_value / (avg_traded_value * 0.1))
             
             liquidity_scores.append({
                 'stock': stock_name,
