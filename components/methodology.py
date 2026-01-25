@@ -370,23 +370,15 @@ Annualized Volatility = Daily Volatility × √252""", language=None)
         # Section 10: Limitations
         st.subheader("10. Limitations & Disclaimers")
         
-        st.markdown("**10.1 Data Limitations**")
-        st.markdown("""
-- **Price Data:** Live prices via TrueData (if configured), otherwise Yahoo Finance with 15-20 minute delay
-- **Fundamental Data:** Sourced from Yahoo Finance - may not reflect latest quarterly results
-- **Historical Data:** Limited to available data from Yahoo Finance API
-        """)
-        
-        st.markdown("**10.2 Model Limitations**")
+        st.markdown("**Model Limitations:**")
         st.markdown("""
 - Recommendations are **rule-based**, not AI/ML predictive models
 - Past performance does not guarantee future results
-- Fundamental data may be outdated (quarterly lag)
 - Does not account for macroeconomic factors, news events, or market sentiment
 - Sector classifications are simplified and may not reflect all nuances
         """)
         
-        st.markdown("**10.3 Important Disclaimer**")
+        st.markdown("**Important Disclaimer:**")
         st.error("""
 **THIS IS NOT FINANCIAL ADVICE**
 
