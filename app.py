@@ -819,16 +819,34 @@ def display_analysis():
     if st.session_state.get('show_ai_assistant', False):
         render_ai_assistant_modal()
     
+    # Add CSS to make tabs scrollable and compact
+    st.markdown("""
+    <style>
+    /* Make tabs container scrollable */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+    /* Compact tab styling */
+    .stTabs [data-baseweb="tab"] {
+        padding: 8px 12px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Create tabs for different analysis sections
     tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
         "📊 Dashboard", 
-        "🏭 Sector Analysis", 
-        "📈 Stock Performance", 
-        "📊 Benchmark Comparison", 
-        "💡 Recommendations",
-        "⚖️ Rebalancing",
-        "📅 Historical Performance",
-        "👤 Customer Profile",
+        "🏭 Sectors", 
+        "📈 Stocks", 
+        "📊 Benchmark", 
+        "💡 Advice",
+        "⚖️ Rebalance",
+        "📅 History",
+        "👤 Profile",
         "📐 Methodology"
     ])
     
