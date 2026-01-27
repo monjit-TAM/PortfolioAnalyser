@@ -140,6 +140,10 @@ class BenchmarkComparison:
         
         st.markdown("---")
         
+        self.render_sector_heatmap(stock_performance)
+        
+        st.markdown("---")
+        
         # Individual Stock Benchmark Comparison
         st.subheader("🔍 Individual Stock vs Benchmark")
         
@@ -316,3 +320,114 @@ class BenchmarkComparison:
                     benchmark_returns[benchmark_name] = 18.7
         
         return benchmark_returns
+    
+    def render_sector_heatmap(self, stock_performance):
+        """Render Sector Heatmap comparing portfolio weights vs NIFTY benchmark"""
+        
+        st.subheader("🔥 Sector Allocation Heatmap - Portfolio vs NIFTY 50")
+        
+        nifty_sector_weights = {
+            'Financial Services': 28.0,
+            'Technology': 15.0,
+            'Oil & Gas': 12.0,
+            'Consumer Goods': 10.0,
+            'Automobile': 6.0,
+            'Pharma': 5.0,
+            'Metals': 4.0,
+            'Telecom': 3.0,
+            'Power': 3.0,
+            'Cement': 2.0,
+            'Healthcare': 2.0,
+            'Others': 10.0
+        }
+        
+        if 'Sector' not in stock_performance.columns or 'Current Value' not in stock_performance.columns:
+            st.warning("Sector data not available for heatmap comparison")
+            return
+        
+        total_value = stock_performance['Current Value'].sum()
+        portfolio_sector_weights = stock_performance.groupby('Sector')['Current Value'].sum() / total_value * 100
+        
+        all_sectors = set(list(nifty_sector_weights.keys()) + list(portfolio_sector_weights.index))
+        
+        heatmap_data = []
+        for sector in all_sectors:
+            portfolio_weight = portfolio_sector_weights.get(sector, 0)
+            nifty_weight = nifty_sector_weights.get(sector, 0)
+            difference = portfolio_weight - nifty_weight
+            
+            if portfolio_weight > 0 or nifty_weight > 0:
+                heatmap_data.append({
+                    'Sector': sector,
+                    'Portfolio %': round(portfolio_weight, 1),
+                    'NIFTY 50 %': round(nifty_weight, 1),
+                    'Difference': round(difference, 1),
+                    'Status': 'Overweight' if difference > 2 else ('Underweight' if difference < -2 else 'Aligned')
+                })
+        
+        heatmap_df = pd.DataFrame(heatmap_data)
+        heatmap_df = heatmap_df.sort_values('Difference', ascending=False)
+        
+        colors = ['#e74c3c' if x < -5 else '#f39c12' if x < -2 else '#2ecc71' if x > 5 else '#27ae60' if x > 2 else '#95a5a6' 
+                  for x in heatmap_df['Difference']]
+        
+        fig = go.Figure()
+        
+        fig.add_trace(go.Bar(
+            name='Portfolio',
+            x=heatmap_df['Sector'],
+            y=heatmap_df['Portfolio %'],
+            marker_color='#3498db',
+            text=[f"{x:.1f}%" for x in heatmap_df['Portfolio %']],
+            textposition='outside'
+        ))
+        
+        fig.add_trace(go.Bar(
+            name='NIFTY 50',
+            x=heatmap_df['Sector'],
+            y=heatmap_df['NIFTY 50 %'],
+            marker_color='#e67e22',
+            text=[f"{x:.1f}%" for x in heatmap_df['NIFTY 50 %']],
+            textposition='outside'
+        ))
+        
+        fig.update_layout(
+            title="Sector Allocation: Portfolio vs NIFTY 50 Benchmark",
+            xaxis_title="Sector",
+            yaxis_title="Weight (%)",
+            barmode='group',
+            height=450,
+            xaxis_tickangle=-45,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**🔺 Overweight Sectors (vs NIFTY)**")
+            overweight = heatmap_df[heatmap_df['Difference'] > 2]
+            if len(overweight) > 0:
+                for _, row in overweight.iterrows():
+                    st.markdown(f"• **{row['Sector']}**: +{row['Difference']:.1f}% above NIFTY")
+            else:
+                st.markdown("_No significant overweight positions_")
+        
+        with col2:
+            st.markdown("**🔻 Underweight Sectors (vs NIFTY)**")
+            underweight = heatmap_df[heatmap_df['Difference'] < -2]
+            if len(underweight) > 0:
+                for _, row in underweight.iterrows():
+                    st.markdown(f"• **{row['Sector']}**: {row['Difference']:.1f}% below NIFTY")
+            else:
+                st.markdown("_No significant underweight positions_")
+        
+        most_overweight = heatmap_df.iloc[0] if len(heatmap_df) > 0 else None
+        most_underweight = heatmap_df.iloc[-1] if len(heatmap_df) > 0 else None
+        
+        if most_overweight is not None and most_overweight['Difference'] > 5:
+            st.warning(f"⚠️ **High sector concentration**: {most_overweight['Sector']} is {most_overweight['Difference']:.1f}% overweight vs NIFTY 50. This may amplify sector-specific risks.")
+        
+        if most_underweight is not None and most_underweight['Difference'] < -10:
+            st.info(f"ℹ️ **Sector gap identified**: Your portfolio has minimal exposure to {most_underweight['Sector']} compared to NIFTY 50. Consider if this aligns with your investment thesis.")

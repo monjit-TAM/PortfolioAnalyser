@@ -13,6 +13,7 @@ def render_advanced_metrics_tab(advanced_metrics):
     
     metric_categories = [
         "Portfolio Health Score",
+        "Risk Radar",
         "Structural Diagnostics",
         "Style Analysis",
         "Concentration Risk",
@@ -23,6 +24,7 @@ def render_advanced_metrics_tab(advanced_metrics):
         "Return Attribution",
         "Liquidity Risk",
         "Tail Risk",
+        "Tax Impact",
         "Macro Sensitivity",
         "Scenario Analysis"
     ]
@@ -30,7 +32,7 @@ def render_advanced_metrics_tab(advanced_metrics):
     selected_categories = st.multiselect(
         "Select Metric Categories",
         metric_categories,
-        default=["Portfolio Health Score", "Concentration Risk", "Return Attribution"]
+        default=["Portfolio Health Score", "Risk Radar", "Return Attribution"]
     )
     
     st.markdown("---")
@@ -38,6 +40,8 @@ def render_advanced_metrics_tab(advanced_metrics):
     for category in selected_categories:
         if category == "Portfolio Health Score":
             render_health_score(advanced_metrics.get('health_score', {}))
+        elif category == "Risk Radar":
+            render_risk_radar(advanced_metrics)
         elif category == "Structural Diagnostics":
             render_structural_diagnostics(advanced_metrics.get('structural', {}))
         elif category == "Style Analysis":
@@ -58,6 +62,8 @@ def render_advanced_metrics_tab(advanced_metrics):
             render_liquidity_risk(advanced_metrics.get('liquidity', {}))
         elif category == "Tail Risk":
             render_tail_risk(advanced_metrics.get('tail_risk', {}))
+        elif category == "Tax Impact":
+            render_tax_impact(advanced_metrics.get('tax_impact', {}))
         elif category == "Macro Sensitivity":
             render_macro_sensitivity(advanced_metrics.get('macro', {}))
         elif category == "Scenario Analysis":
@@ -104,6 +110,121 @@ def render_health_score(health_data):
     with col3:
         st.markdown("**Summary**")
         st.info(health_data.get('summary', 'No summary available'))
+    
+    st.markdown("---")
+
+def render_risk_radar(advanced_metrics):
+    """Render Risk Radar spider chart showing factor exposures"""
+    st.markdown("## 🎯 Risk Radar - Factor Exposure Analysis")
+    
+    def normalize_score(value, min_val=0, max_val=100):
+        """Ensure score is clamped between 0 and 100"""
+        if value is None or pd.isna(value):
+            return 50
+        return max(0, min(100, float(value)))
+    
+    volatility = advanced_metrics.get('volatility', {})
+    concentration = advanced_metrics.get('concentration', {})
+    liquidity = advanced_metrics.get('liquidity', {})
+    behavior = advanced_metrics.get('behavior', {})
+    style = advanced_metrics.get('style', {})
+    tail_risk = advanced_metrics.get('tail_risk', {})
+    
+    hist_vol = volatility.get('historical_volatility', 25)
+    if hist_vol is None or pd.isna(hist_vol):
+        hist_vol = 25
+    volatility_score = normalize_score(100 - float(hist_vol) * 2)
+    
+    raw_concentration = concentration.get('concentration_score', 50)
+    if raw_concentration is None or pd.isna(raw_concentration):
+        raw_concentration = 50
+    concentration_score = normalize_score(float(raw_concentration))
+    
+    raw_liquidity = liquidity.get('portfolio_liquidity_score', 70)
+    if raw_liquidity is None or pd.isna(raw_liquidity):
+        raw_liquidity = 70
+    liquidity_score = normalize_score(float(raw_liquidity))
+    
+    raw_behavior = behavior.get('behavior_score', 60)
+    if raw_behavior is None or pd.isna(raw_behavior):
+        raw_behavior = 60
+    behavior_score = normalize_score(float(raw_behavior))
+    
+    value_tilt = style.get('value_tilt', 50)
+    if value_tilt is None or pd.isna(value_tilt):
+        value_tilt = 50
+    style_balance = normalize_score(100 - abs(50 - float(value_tilt)))
+    
+    raw_tail = tail_risk.get('tail_risk_score', 70)
+    if raw_tail is None or pd.isna(raw_tail):
+        raw_tail = 70
+    tail_score = normalize_score(float(raw_tail))
+    
+    beta = volatility.get('portfolio_beta', 1.0)
+    if beta is None or pd.isna(beta):
+        beta = 1.0
+    market_sensitivity = normalize_score(100 - abs(1 - float(beta)) * 50)
+    
+    categories = ['Volatility Control', 'Diversification', 'Liquidity', 
+                  'Investment Discipline', 'Style Balance', 'Tail Risk Mgmt', 'Market Sensitivity']
+    values = [volatility_score, concentration_score, liquidity_score, 
+              behavior_score, style_balance, tail_score, market_sensitivity]
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatterpolar(
+        r=values + [values[0]],
+        theta=categories + [categories[0]],
+        fill='toself',
+        fillcolor='rgba(99, 110, 250, 0.3)',
+        line=dict(color='#636EFA', width=2),
+        name='Your Portfolio'
+    ))
+    
+    fig.add_trace(go.Scatterpolar(
+        r=[70, 70, 70, 70, 70, 70, 70, 70],
+        theta=categories + [categories[0]],
+        fill='none',
+        line=dict(color='#2ecc71', width=1, dash='dash'),
+        name='Target (Good)'
+    ))
+    
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 100],
+                ticksuffix='',
+                tickfont=dict(size=10)
+            )
+        ),
+        showlegend=True,
+        height=450,
+        title="Risk Factor Exposure Radar"
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**📊 Factor Scores:**")
+        for cat, val in zip(categories, values):
+            color = '#2ecc71' if val >= 70 else '#f39c12' if val >= 50 else '#e74c3c'
+            icon = '🟢' if val >= 70 else '🟡' if val >= 50 else '🔴'
+            st.markdown(f"{icon} **{cat}**: {val:.0f}/100")
+    
+    with col2:
+        st.markdown("**💡 Key Insights:**")
+        weak_factors = [(cat, val) for cat, val in zip(categories, values) if val < 60]
+        strong_factors = [(cat, val) for cat, val in zip(categories, values) if val >= 80]
+        
+        if strong_factors:
+            st.success(f"**Strengths**: {', '.join([f[0] for f in strong_factors])}")
+        if weak_factors:
+            st.warning(f"**Areas to improve**: {', '.join([f[0] for f in weak_factors])}")
+        if not weak_factors and not strong_factors:
+            st.info("Your portfolio shows balanced risk across all factors.")
     
     st.markdown("---")
 
@@ -264,18 +385,19 @@ def render_volatility_metrics(volatility_data):
         st.info("Volatility data not available")
         return
     
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric("Historical Volatility", f"{volatility_data.get('historical_volatility', 0):.1f}%")
-    with col2:
         st.metric("Max Drawdown", f"{volatility_data.get('max_drawdown', 0):.1f}%")
-    with col3:
+    with col2:
         st.metric("Downside Deviation", f"{volatility_data.get('downside_deviation', 0):.1f}%")
-    with col4:
         st.metric("Portfolio Beta", f"{volatility_data.get('portfolio_beta', 1.0):.2f}")
-    with col5:
-        st.metric("Sortino Ratio", f"{volatility_data.get('sortino_ratio', 0):.2f}")
+    with col3:
+        sharpe = volatility_data.get('sharpe_ratio', 0)
+        sortino = volatility_data.get('sortino_ratio', 0)
+        st.metric("Sharpe Ratio", f"{sharpe:.2f}", help="Risk-adjusted return vs risk-free rate")
+        st.metric("Sortino Ratio", f"{sortino:.2f}", help="Risk-adjusted return vs downside risk")
     
     st.markdown("### Risk Classification")
     risk_class = volatility_data.get('risk_classification', 'Unknown')
@@ -566,6 +688,82 @@ def render_tail_risk(tail_data):
         df['value'] = df['value'].apply(lambda x: f"₹{x:,.0f}")
         df.columns = ['Stock', 'Volatility %', 'Value']
         st.dataframe(df, hide_index=True, use_container_width=True)
+    
+    st.markdown("---")
+
+def render_tax_impact(tax_data):
+    st.markdown("## 💰 Tax Impact Analysis")
+    
+    if not tax_data:
+        st.info("Tax impact data not available")
+        return
+    
+    st.info(tax_data.get('tax_note', 'Tax calculations are estimates based on current Indian tax laws.'))
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Short-term Gains", f"₹{tax_data.get('short_term_gains', 0):,.0f}")
+        st.metric("Short-term Losses", f"₹{tax_data.get('short_term_losses', 0):,.0f}")
+    
+    with col2:
+        st.metric("Long-term Gains", f"₹{tax_data.get('long_term_gains', 0):,.0f}")
+        st.metric("Long-term Losses", f"₹{tax_data.get('long_term_losses', 0):,.0f}")
+    
+    with col3:
+        st.metric("Est. STCG Tax (15%)", f"₹{tax_data.get('estimated_stcg_tax', 0):,.0f}")
+        st.metric("Est. LTCG Tax (10%)", f"₹{tax_data.get('estimated_ltcg_tax', 0):,.0f}")
+    
+    with col4:
+        total_tax = tax_data.get('total_estimated_tax', 0)
+        st.metric("Total Estimated Tax", f"₹{total_tax:,.0f}")
+        remaining_exemption = tax_data.get('ltcg_exemption_remaining', 100000)
+        if remaining_exemption > 0:
+            st.success(f"LTCG Exemption Remaining: ₹{remaining_exemption:,.0f}")
+        else:
+            st.warning("LTCG Exemption: Fully Used")
+    
+    stock_breakdown = tax_data.get('stock_breakdown', [])
+    if stock_breakdown:
+        st.markdown("### Stock-wise Tax Classification")
+        
+        stcg_stocks = [s for s in stock_breakdown if s['tax_implication'] == 'STCG']
+        ltcg_stocks = [s for s in stock_breakdown if s['tax_implication'] == 'LTCG']
+        loss_stocks = [s for s in stock_breakdown if s['tax_implication'] == 'Loss']
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if stcg_stocks:
+                st.markdown("#### 📊 Short-term Capital Gains (STCG)")
+                df_stcg = pd.DataFrame(stcg_stocks)
+                df_stcg['gain_loss'] = df_stcg['gain_loss'].apply(lambda x: f"₹{x:,.0f}")
+                df_stcg = df_stcg[['stock', 'gain_loss', 'holding_days']]
+                df_stcg.columns = ['Stock', 'Gain', 'Days Held']
+                st.dataframe(df_stcg, hide_index=True, use_container_width=True)
+            
+            if ltcg_stocks:
+                st.markdown("#### 📈 Long-term Capital Gains (LTCG)")
+                df_ltcg = pd.DataFrame(ltcg_stocks)
+                df_ltcg['gain_loss'] = df_ltcg['gain_loss'].apply(lambda x: f"₹{x:,.0f}")
+                df_ltcg = df_ltcg[['stock', 'gain_loss', 'holding_days']]
+                df_ltcg.columns = ['Stock', 'Gain', 'Days Held']
+                st.dataframe(df_ltcg, hide_index=True, use_container_width=True)
+        
+        with col2:
+            if loss_stocks:
+                st.markdown("#### 📉 Capital Losses")
+                df_loss = pd.DataFrame(loss_stocks)
+                df_loss['gain_loss'] = df_loss['gain_loss'].apply(lambda x: f"₹{x:,.0f}")
+                df_loss = df_loss[['stock', 'gain_loss', 'holding_days', 'term']]
+                df_loss.columns = ['Stock', 'Loss', 'Days Held', 'Term']
+                st.dataframe(df_loss, hide_index=True, use_container_width=True)
+            
+            st.markdown("#### ℹ️ Tax Harvest Tips")
+            if stcg_stocks:
+                st.info(f"Consider holding {len(stcg_stocks)} stocks for 365+ days to qualify for lower LTCG rates.")
+            if loss_stocks:
+                st.info("Consider tax-loss harvesting to offset gains before year-end.")
     
     st.markdown("---")
 

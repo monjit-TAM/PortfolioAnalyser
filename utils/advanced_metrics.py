@@ -31,6 +31,7 @@ class AdvancedMetricsCalculator:
         results['liquidity'] = self.calculate_liquidity_risk(portfolio_df, historical_data)
         results['tail_risk'] = self.calculate_tail_risk(portfolio_df, historical_data)
         results['macro'] = self.calculate_macro_sensitivity(portfolio_df)
+        results['tax_impact'] = self.calculate_tax_impact(portfolio_df)
         results['health_score'] = self.calculate_health_score(results)
         results['scenario'] = self.calculate_scenario_analysis(portfolio_df, historical_data, benchmark_data)
         
@@ -296,12 +297,34 @@ class AdvancedMetricsCalculator:
                         if downside_deviation > 0:
                             sortino_ratio = (avg_return - risk_free_rate) / (downside_deviation / 100)
         
+        sharpe_ratio = 0
+        risk_free_rate = 0.06
+        if historical_data:
+            portfolio_values = []
+            for _, row in portfolio_df.iterrows():
+                stock_name = row['Stock Name']
+                if stock_name in historical_data and not historical_data[stock_name].empty:
+                    hist = historical_data[stock_name].copy()
+                    hist['contribution'] = hist['Close'] * row['Quantity']
+                    portfolio_values.append(hist['contribution'])
+            
+            if portfolio_values:
+                combined_vals = pd.concat(portfolio_values, axis=1).sum(axis=1)
+                if len(combined_vals) > 1:
+                    port_returns = combined_vals.pct_change().dropna()
+                    if len(port_returns) > 0:
+                        annual_return = float(port_returns.mean() * 252)
+                        annual_std = float(port_returns.std() * np.sqrt(252))
+                        if annual_std > 0:
+                            sharpe_ratio = (annual_return - risk_free_rate) / annual_std
+        
         return {
             'historical_volatility': round(avg_volatility, 2),
             'max_drawdown': round(max_drawdown, 2),
             'downside_deviation': round(downside_deviation, 2),
             'portfolio_beta': round(portfolio_beta, 2),
             'sortino_ratio': round(sortino_ratio, 2),
+            'sharpe_ratio': round(sharpe_ratio, 2),
             'stock_volatilities': sorted(stock_volatilities, key=lambda x: x['volatility'], reverse=True)[:5],
             'risk_classification': 'High Risk' if avg_volatility > 30 else ('Moderate Risk' if avg_volatility > 20 else 'Low Risk')
         }
@@ -759,4 +782,85 @@ class AdvancedMetricsCalculator:
             'scenarios': scenarios,
             'current_portfolio_value': current_value,
             'stress_test_note': 'These projections are based on historical correlations and may not reflect actual outcomes.'
+        }
+    
+    def calculate_tax_impact(self, portfolio_df):
+        """Calculate tax impact of unrealized gains/losses"""
+        if portfolio_df is None or portfolio_df.empty:
+            return {
+                'total_unrealized_gain': 0,
+                'total_unrealized_loss': 0,
+                'short_term_gains': 0,
+                'long_term_gains': 0,
+                'short_term_losses': 0,
+                'long_term_losses': 0,
+                'estimated_stcg_tax': 0,
+                'estimated_ltcg_tax': 0,
+                'stock_breakdown': []
+            }
+        
+        today = datetime.now()
+        short_term_gains = 0
+        long_term_gains = 0
+        short_term_losses = 0
+        long_term_losses = 0
+        stock_breakdown = []
+        
+        for _, row in portfolio_df.iterrows():
+            stock_name = row.get('Stock Name', 'Unknown')
+            buy_date = row.get('Buy Date')
+            gain_loss = row.get('Absolute Gain/Loss', 0)
+            
+            is_long_term = False
+            holding_days = 0
+            
+            if pd.notna(buy_date):
+                try:
+                    if isinstance(buy_date, str):
+                        buy_date = pd.to_datetime(buy_date)
+                    holding_days = (today - buy_date).days
+                    is_long_term = holding_days >= 365
+                except:
+                    pass
+            
+            if gain_loss >= 0:
+                if is_long_term:
+                    long_term_gains += gain_loss
+                else:
+                    short_term_gains += gain_loss
+            else:
+                if is_long_term:
+                    long_term_losses += abs(gain_loss)
+                else:
+                    short_term_losses += abs(gain_loss)
+            
+            stock_breakdown.append({
+                'stock': stock_name,
+                'gain_loss': round(gain_loss, 2),
+                'holding_days': holding_days,
+                'term': 'Long-term' if is_long_term else 'Short-term',
+                'tax_implication': 'LTCG' if is_long_term and gain_loss > 0 else ('STCG' if gain_loss > 0 else 'Loss')
+            })
+        
+        stcg_tax_rate = 0.15
+        ltcg_tax_rate = 0.10
+        ltcg_exemption = 100000
+        
+        estimated_stcg_tax = short_term_gains * stcg_tax_rate
+        taxable_ltcg = max(0, long_term_gains - ltcg_exemption)
+        estimated_ltcg_tax = taxable_ltcg * ltcg_tax_rate
+        
+        return {
+            'total_unrealized_gain': round(short_term_gains + long_term_gains, 2),
+            'total_unrealized_loss': round(short_term_losses + long_term_losses, 2),
+            'short_term_gains': round(short_term_gains, 2),
+            'long_term_gains': round(long_term_gains, 2),
+            'short_term_losses': round(short_term_losses, 2),
+            'long_term_losses': round(long_term_losses, 2),
+            'estimated_stcg_tax': round(estimated_stcg_tax, 2),
+            'estimated_ltcg_tax': round(estimated_ltcg_tax, 2),
+            'total_estimated_tax': round(estimated_stcg_tax + estimated_ltcg_tax, 2),
+            'ltcg_exemption_remaining': round(max(0, ltcg_exemption - long_term_gains), 2),
+            'stock_breakdown': stock_breakdown,
+            'tax_note': 'Tax calculations are estimates based on current Indian tax laws. STCG: 15%, LTCG: 10% above ₹1L exemption.'
         }

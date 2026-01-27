@@ -2,53 +2,275 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+import numpy as np
 
 class Dashboard:
     def render(self, analysis_results, portfolio_data, current_data):
         """Render the main dashboard"""
         
-        # Key Metrics Row - in a card
         summary = analysis_results['portfolio_summary']
+        stock_performance = pd.DataFrame(analysis_results['stock_performance'])
+        
+        self.render_executive_summary(summary, portfolio_data)
+        self.render_concentration_alerts(portfolio_data, summary)
+        self.render_contribution_waterfall(stock_performance)
+        self.render_performance_charts(summary, stock_performance, analysis_results)
+    
+    def render_executive_summary(self, summary, portfolio_data):
+        """Render Executive Summary with health score gauge"""
+        
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                    border-radius: 12px; padding: 25px; margin-bottom: 20px; 
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);'>
+            <h2 style='color: #fff; margin: 0 0 20px 0; font-size: 24px;'>📊 Executive Summary</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col_health, col_metrics = st.columns([1, 2])
+        
+        with col_health:
+            health_score = self.calculate_health_score(summary, portfolio_data)
+            health_color = '#2ecc71' if health_score >= 75 else '#f39c12' if health_score >= 50 else '#e74c3c'
+            grade = 'A' if health_score >= 85 else 'B' if health_score >= 70 else 'C' if health_score >= 55 else 'D'
+            
+            fig_gauge = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=health_score,
+                domain={'x': [0, 1], 'y': [0, 1]},
+                title={'text': "Portfolio Health Score", 'font': {'size': 16}},
+                number={'suffix': f" ({grade})", 'font': {'size': 28}},
+                gauge={
+                    'axis': {'range': [0, 100], 'tickwidth': 1},
+                    'bar': {'color': health_color},
+                    'bgcolor': "white",
+                    'borderwidth': 2,
+                    'steps': [
+                        {'range': [0, 50], 'color': '#ffebee'},
+                        {'range': [50, 75], 'color': '#fff3e0'},
+                        {'range': [75, 100], 'color': '#e8f5e9'}
+                    ],
+                    'threshold': {
+                        'line': {'color': "black", 'width': 2},
+                        'thickness': 0.75,
+                        'value': health_score
+                    }
+                }
+            ))
+            fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
+            st.plotly_chart(fig_gauge, use_container_width=True)
+        
+        with col_metrics:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Total Investment", f"₹{summary['total_investment']:,.0f}")
+                st.metric("Holdings", f"{summary.get('total_stocks', len(portfolio_data))} stocks")
+            
+            with col2:
+                st.metric("Current Value", f"₹{summary['current_value']:,.0f}")
+                profit_ratio = summary['profitable_stocks'] / max(1, summary.get('total_stocks', len(portfolio_data))) * 100
+                st.metric("Win Rate", f"{profit_ratio:.0f}%")
+            
+            with col3:
+                gain_color = "normal" if summary['total_gain_loss'] >= 0 else "inverse"
+                st.metric("Total Gain/Loss", f"₹{summary['total_gain_loss']:,.0f}", 
+                         delta=f"{summary['total_gain_loss_percentage']:+.2f}%")
+                st.metric("Profitable", f"{summary['profitable_stocks']} / {summary.get('total_stocks', len(portfolio_data))}")
+        
+        st.markdown("---")
+    
+    def calculate_health_score(self, summary, portfolio_data):
+        """Calculate portfolio health score based on multiple factors"""
+        score = 50
+        
+        total_stocks = len(portfolio_data) if portfolio_data is not None else 0
+        if total_stocks >= 10:
+            score += 15
+        elif total_stocks >= 5:
+            score += 10
+        elif total_stocks >= 3:
+            score += 5
+        
+        if 'Sector' in portfolio_data.columns:
+            unique_sectors = portfolio_data['Sector'].nunique()
+            if unique_sectors >= 5:
+                score += 15
+            elif unique_sectors >= 3:
+                score += 10
+            elif unique_sectors >= 2:
+                score += 5
+        
+        profit_ratio = summary['profitable_stocks'] / max(1, total_stocks)
+        score += int(profit_ratio * 10)
+        
+        if summary['total_gain_loss_percentage'] > 0:
+            score += min(10, summary['total_gain_loss_percentage'] / 2)
+        
+        return min(100, max(0, int(score)))
+    
+    def render_concentration_alerts(self, portfolio_data, summary):
+        """Render concentration alerts with traffic-light icons"""
+        
+        alerts = []
+        
+        if 'Sector' in portfolio_data.columns and 'Current Value' in portfolio_data.columns:
+            total_value = portfolio_data['Current Value'].sum()
+            sector_pcts = portfolio_data.groupby('Sector')['Current Value'].sum() / total_value * 100
+            
+            for sector, pct in sector_pcts.items():
+                if pct > 40:
+                    alerts.append({
+                        'type': 'danger',
+                        'icon': '🔴',
+                        'message': f"Very high concentration in {sector}: {pct:.1f}% of portfolio",
+                        'insight': f"Consider diversifying to reduce sector-specific risk"
+                    })
+                elif pct > 30:
+                    alerts.append({
+                        'type': 'warning',
+                        'icon': '🟡',
+                        'message': f"High allocation to {sector}: {pct:.1f}% of portfolio",
+                        'insight': f"Monitor this sector closely for any market shifts"
+                    })
+        
+        if 'Current Value' in portfolio_data.columns:
+            total_value = portfolio_data['Current Value'].sum()
+            stock_pcts = portfolio_data.set_index('Stock Name')['Current Value'] / total_value * 100
+            
+            top_stock = stock_pcts.idxmax()
+            top_pct = stock_pcts.max()
+            
+            if top_pct > 25:
+                alerts.append({
+                    'type': 'danger',
+                    'icon': '🔴',
+                    'message': f"Single stock risk: {top_stock} = {top_pct:.1f}% of portfolio",
+                    'insight': "High exposure to one stock increases volatility risk"
+                })
+            elif top_pct > 15:
+                alerts.append({
+                    'type': 'warning',
+                    'icon': '🟡',
+                    'message': f"Concentrated position: {top_stock} = {top_pct:.1f}% of portfolio",
+                    'insight': "Consider if this aligns with your risk tolerance"
+                })
+            
+            top3_pct = stock_pcts.nlargest(3).sum()
+            if top3_pct > 60:
+                alerts.append({
+                    'type': 'warning',
+                    'icon': '🟡',
+                    'message': f"Top 3 stocks account for {top3_pct:.1f}% of portfolio",
+                    'insight': "Portfolio returns heavily depend on a few stocks"
+                })
+        
+        total_stocks = len(portfolio_data)
+        if total_stocks < 5:
+            alerts.append({
+                'type': 'warning',
+                'icon': '🟡',
+                'message': f"Limited diversification: Only {total_stocks} stocks in portfolio",
+                'insight': "Consider adding more holdings to spread risk"
+            })
+        
+        if not alerts:
+            alerts.append({
+                'type': 'success',
+                'icon': '🟢',
+                'message': "Good diversification: No major concentration issues detected",
+                'insight': "Your portfolio appears reasonably diversified"
+            })
+        
+        if alerts:
+            st.markdown("""
+            <div style='background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 20px;'>
+                <h4 style='margin: 0 0 15px 0; color: #333;'>⚠️ Risk Alerts & Insights</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            for alert in alerts[:5]:
+                bg_color = '#fee2e2' if alert['type'] == 'danger' else '#fef3c7' if alert['type'] == 'warning' else '#d1fae5'
+                border_color = '#ef4444' if alert['type'] == 'danger' else '#f59e0b' if alert['type'] == 'warning' else '#10b981'
+                
+                st.markdown(f"""
+                <div style='background: {bg_color}; border-left: 4px solid {border_color}; 
+                            padding: 12px 15px; margin-bottom: 10px; border-radius: 0 8px 8px 0;'>
+                    <div style='font-weight: 600; color: #333;'>{alert['icon']} {alert['message']}</div>
+                    <div style='font-size: 13px; color: #666; margin-top: 4px;'>💡 {alert['insight']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+    def render_contribution_waterfall(self, stock_performance):
+        """Render Contribution Waterfall chart showing how each stock contributed to P&L"""
         
         st.markdown("""
         <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
                     padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
-            <h3 style='color: #FF6B35; margin-bottom: 15px; margin-top: 0;'>📊 Key Performance Metrics</h3>
+            <h3 style='color: #FF6B35; margin-bottom: 15px; margin-top: 0;'>📊 Contribution Waterfall - Stock Impact on Portfolio P&L</h3>
         """, unsafe_allow_html=True)
         
-        col1, col2, col3, col4 = st.columns(4)
+        sorted_df = stock_performance.sort_values('Absolute Gain/Loss', ascending=True)
         
+        colors = ['#e74c3c' if x < 0 else '#2ecc71' for x in sorted_df['Absolute Gain/Loss']]
+        
+        fig_waterfall = go.Figure(go.Bar(
+            y=sorted_df['Stock Name'],
+            x=sorted_df['Absolute Gain/Loss'],
+            orientation='h',
+            marker_color=colors,
+            text=[f"₹{x:+,.0f}" for x in sorted_df['Absolute Gain/Loss']],
+            textposition='outside',
+            hovertemplate="<b>%{y}</b><br>Contribution: ₹%{x:,.2f}<extra></extra>"
+        ))
+        
+        fig_waterfall.update_layout(
+            title="Stock Contribution to Portfolio Gain/Loss",
+            xaxis_title="Contribution (₹)",
+            yaxis_title="",
+            height=max(300, len(sorted_df) * 35),
+            showlegend=False,
+            xaxis=dict(zeroline=True, zerolinewidth=2, zerolinecolor='black')
+        )
+        
+        st.plotly_chart(fig_waterfall, use_container_width=True)
+        
+        total_gain = stock_performance['Absolute Gain/Loss'].sum()
+        top_contributor = stock_performance.loc[stock_performance['Absolute Gain/Loss'].idxmax()]
+        worst_contributor = stock_performance.loc[stock_performance['Absolute Gain/Loss'].idxmin()]
+        
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric(
-                label="Total Investment",
-                value=f"₹{summary['total_investment']:,.2f}",
-                delta=None
-            )
-        
+            st.markdown(f"""
+            <div style='background: #e8f5e9; padding: 10px; border-radius: 8px; text-align: center;'>
+                <div style='font-size: 12px; color: #666;'>Top Contributor</div>
+                <div style='font-size: 16px; font-weight: bold; color: #2e7d32;'>{top_contributor['Stock Name']}</div>
+                <div style='font-size: 14px; color: #388e3c;'>₹{top_contributor['Absolute Gain/Loss']:+,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
         with col2:
-            st.metric(
-                label="Current Value",
-                value=f"₹{summary['current_value']:,.2f}",
-                delta=f"₹{summary['total_gain_loss']:,.2f}"
-            )
-        
+            bg = '#e8f5e9' if total_gain >= 0 else '#ffebee'
+            color = '#2e7d32' if total_gain >= 0 else '#c62828'
+            st.markdown(f"""
+            <div style='background: {bg}; padding: 10px; border-radius: 8px; text-align: center;'>
+                <div style='font-size: 12px; color: #666;'>Net Portfolio P&L</div>
+                <div style='font-size: 20px; font-weight: bold; color: {color};'>₹{total_gain:+,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
         with col3:
-            st.metric(
-                label="Total Gain/Loss",
-                value=f"₹{summary['total_gain_loss']:,.2f}",
-                delta=f"{summary['total_gain_loss_percentage']:,.2f}%"
-            )
+            st.markdown(f"""
+            <div style='background: #ffebee; padding: 10px; border-radius: 8px; text-align: center;'>
+                <div style='font-size: 12px; color: #666;'>Worst Contributor</div>
+                <div style='font-size: 16px; font-weight: bold; color: #c62828;'>{worst_contributor['Stock Name']}</div>
+                <div style='font-size: 14px; color: #e53935;'>₹{worst_contributor['Absolute Gain/Loss']:+,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
         
-        with col4:
-            st.metric(
-                label="Portfolio Return",
-                value=f"{summary['total_gain_loss_percentage']:,.2f}%",
-                delta=None
-            )
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    def render_performance_charts(self, summary, stock_performance, analysis_results):
+        """Render performance overview charts"""
         
-        st.markdown("</div>", unsafe_allow_html=True)  # Close metrics card
-        
-        # Portfolio Composition Charts - in a card
         st.markdown("""
         <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
                     padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
@@ -58,7 +280,6 @@ class Dashboard:
         col1, col2 = st.columns(2)
         
         with col1:
-            # Profit/Loss Distribution
             profit_stocks = summary['profitable_stocks']
             loss_stocks = summary['loss_making_stocks']
             
@@ -66,7 +287,7 @@ class Dashboard:
                 go.Bar(
                     x=['Profitable', 'Loss-making'],
                     y=[profit_stocks, loss_stocks],
-                    marker_color=['green', 'red'],
+                    marker_color=['#2ecc71', '#e74c3c'],
                     text=[profit_stocks, loss_stocks],
                     textposition='auto'
                 )
@@ -76,19 +297,18 @@ class Dashboard:
                 title="Stock Performance Distribution",
                 xaxis_title="Performance Category",
                 yaxis_title="Number of Stocks",
-                height=400
+                height=350
             )
             
             st.plotly_chart(fig_performance, use_container_width=True)
         
         with col2:
-            # Investment vs Current Value
             fig_value = go.Figure()
             
             fig_value.add_trace(go.Bar(
                 x=['Investment', 'Current Value'],
                 y=[summary['total_investment'], summary['current_value']],
-                marker_color=['lightblue', 'darkblue'],
+                marker_color=['#3498db', '#2980b9'],
                 text=[f"₹{summary['total_investment']:,.0f}", f"₹{summary['current_value']:,.0f}"],
                 textposition='auto'
             ))
@@ -96,14 +316,13 @@ class Dashboard:
             fig_value.update_layout(
                 title="Investment vs Current Portfolio Value",
                 yaxis_title="Amount (₹)",
-                height=400
+                height=350
             )
             
             st.plotly_chart(fig_value, use_container_width=True)
         
-        st.markdown("</div>", unsafe_allow_html=True)  # Close performance overview card
+        st.markdown("</div>", unsafe_allow_html=True)
         
-        # Top Performers and Worst Performers - in a card
         st.markdown("""
         <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
                     padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
@@ -111,8 +330,6 @@ class Dashboard:
         """, unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
-        
-        stock_performance = pd.DataFrame(analysis_results['stock_performance'])
         
         with col1:
             st.subheader("🏆 Top Performers")
@@ -146,9 +363,8 @@ class Dashboard:
                     unsafe_allow_html=True
                 )
         
-        st.markdown("</div>", unsafe_allow_html=True)  # Close highlights card
+        st.markdown("</div>", unsafe_allow_html=True)
         
-        # Portfolio Allocation Table - in a card
         st.markdown("""
         <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
                     padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
@@ -158,7 +374,6 @@ class Dashboard:
         display_df = stock_performance[['Stock Name', 'Sector', 'Category', 'Quantity', 'Buy Price', 'Current Price', 
                                       'Investment Value', 'Current Value', 'Absolute Gain/Loss', 'Percentage Gain/Loss']].copy()
         
-        # Format currency columns
         currency_cols = ['Buy Price', 'Current Price', 'Investment Value', 'Current Value', 'Absolute Gain/Loss']
         for col in currency_cols:
             display_df.loc[:, col] = display_df[col].apply(lambda x: f"₹{x:,.2f}")
@@ -167,9 +382,8 @@ class Dashboard:
         
         st.dataframe(display_df, use_container_width=True, height=400)
         
-        st.markdown("</div>", unsafe_allow_html=True)  # Close holdings table card
+        st.markdown("</div>", unsafe_allow_html=True)
         
-        # AI Assistant Quick Access Card
         st.markdown("""
         <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                     border-radius: 12px; padding: 25px; margin-bottom: 20px; 
@@ -185,7 +399,7 @@ class Dashboard:
                 Ask questions about your holdings, sector allocation, recommendations, and get AI-powered investment guidance based on your actual portfolio data.
             </p>
             <p style='color: rgba(255,255,255,0.7); font-size: 13px; margin: 0;'>
-                💡 <strong>Tip:</strong> Click the "🤖 AI Assistant" tab above to start chatting!
+                💡 <strong>Tip:</strong> Click the "🤖 AI Assistant" button above to start chatting!
             </p>
         </div>
         """, unsafe_allow_html=True)
