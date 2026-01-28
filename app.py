@@ -251,14 +251,16 @@ def render_top_header():
     
     st.markdown("""
     <style>
-        /* Header container with peach/salmon background like thealphamarket */
-        .stApp > header {
-            background: linear-gradient(90deg, #fff5f0 0%, #ffe8dc 100%) !important;
-        }
-        [data-testid="stAppViewContainer"] > div:first-child {
+        /* Top header bar with peach background */
+        .top-header-bar {
             background: linear-gradient(90deg, #fff5f0 0%, #ffe8dc 100%);
-            padding-bottom: 16px;
+            margin: -1rem -4rem 0 -4rem;
+            padding: 12px 4rem 16px 4rem;
             border-bottom: 1px solid #f0d4c4;
+        }
+        /* Main page background stays white */
+        .stApp {
+            background: white !important;
         }
         /* Style nav buttons */
         .nav-btn button {
@@ -292,18 +294,11 @@ def render_top_header():
     </style>
     """, unsafe_allow_html=True)
     
+    st.markdown('<div class="top-header-bar">', unsafe_allow_html=True)
+    
     col_logo, col_menu, col_auth = st.columns([1.5, 2.5, 1])
     
     with col_logo:
-        st.markdown("""
-        <style>
-            /* Remove white background from logo image */
-            [data-testid="stImage"] > img {
-                background: transparent !important;
-                mix-blend-mode: multiply;
-            }
-        </style>
-        """, unsafe_allow_html=True)
         st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=160)
     
     with col_menu:
@@ -358,8 +353,10 @@ def render_top_header():
                     st.session_state.show_signup = True
                     st.rerun()
     
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     st.markdown("""
-    <div style="height: 3px; background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%); margin: 10px 0 20px 0; border-radius: 2px;"></div>
+    <div style="height: 3px; background: linear-gradient(90deg, #e74c3c 0%, #c0392b 50%, #e74c3c 100%); margin: 10px 0 20px 0; border-radius: 2px;"></div>
     """, unsafe_allow_html=True)
 
 def render_auth_header():

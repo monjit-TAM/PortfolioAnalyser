@@ -767,30 +767,30 @@ def render_methodology_section():
     
     with col1:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="font-size: 40px; margin-bottom: 14px;">💎</div>
-            <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Value Investing</div>
-            <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
-                <p style="margin: 5px 0;">• P/E Ratio vs Industry</p>
-                <p style="margin: 5px 0;">• Price-to-Book Value</p>
-                <p style="margin: 5px 0;">• Dividend Yield</p>
-                <p style="margin: 5px 0;">• Debt-to-Equity Ratio</p>
-                <p style="margin: 5px 0;">• Margin of Safety</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Value Investing</div>
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+                <p style="margin: 8px 0;">• P/E Ratio vs Industry</p>
+                <p style="margin: 8px 0;">• Price-to-Book Value</p>
+                <p style="margin: 8px 0;">• Dividend Yield</p>
+                <p style="margin: 8px 0;">• Debt-to-Equity Ratio</p>
+                <p style="margin: 8px 0;">• Margin of Safety</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="font-size: 40px; margin-bottom: 14px;">🚀</div>
-            <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Growth Investing</div>
-            <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
-                <p style="margin: 5px 0;">• Revenue Growth Rate</p>
-                <p style="margin: 5px 0;">• EPS Growth Trajectory</p>
-                <p style="margin: 5px 0;">• 52-week Momentum</p>
-                <p style="margin: 5px 0;">• Relative Strength</p>
-                <p style="margin: 5px 0;">• PEG Ratio</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Growth Investing</div>
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+                <p style="margin: 8px 0;">• Revenue Growth Rate</p>
+                <p style="margin: 8px 0;">• EPS Growth Trajectory</p>
+                <p style="margin: 8px 0;">• 52-week Momentum</p>
+                <p style="margin: 8px 0;">• Relative Strength</p>
+                <p style="margin: 8px 0;">• PEG Ratio</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -801,30 +801,30 @@ def render_methodology_section():
     
     with col3:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="font-size: 40px; margin-bottom: 14px;">💡</div>
-            <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Recommendations</div>
-            <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
-                <p style="margin: 5px 0;">• Value + Growth Scores</p>
-                <p style="margin: 5px 0;">• BUY/HOLD/SELL Signals</p>
-                <p style="margin: 5px 0;">• Sector Comparison</p>
-                <p style="margin: 5px 0;">• Risk-Adjusted Tips</p>
-                <p style="margin: 5px 0;">• Alternative Stocks</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">💡</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Recommendations</div>
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+                <p style="margin: 8px 0;">• Value + Growth Scores</p>
+                <p style="margin: 8px 0;">• BUY/HOLD/SELL Signals</p>
+                <p style="margin: 8px 0;">• Sector Comparison</p>
+                <p style="margin: 8px 0;">• Risk-Adjusted Tips</p>
+                <p style="margin: 8px 0;">• Alternative Stocks</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="font-size: 40px; margin-bottom: 14px;">⚖️</div>
-            <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Rebalancing</div>
-            <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
-                <p style="margin: 5px 0;">• Sector Optimization</p>
-                <p style="margin: 5px 0;">• Risk Profile Matching</p>
-                <p style="margin: 5px 0;">• Concentration Alerts</p>
-                <p style="margin: 5px 0;">• Target Weights</p>
-                <p style="margin: 5px 0;">• Tax-Efficient Tips</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Rebalancing</div>
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+                <p style="margin: 8px 0;">• Sector Optimization</p>
+                <p style="margin: 8px 0;">• Risk Profile Matching</p>
+                <p style="margin: 8px 0;">• Concentration Alerts</p>
+                <p style="margin: 8px 0;">• Target Weights</p>
+                <p style="margin: 8px 0;">• Tax-Efficient Tips</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
