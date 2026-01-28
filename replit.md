@@ -16,7 +16,22 @@ The application employs a modular, service-oriented architecture. It integrates 
 
 ### Frontend Architecture
 
-The frontend is built with Streamlit, providing an interactive, single-page user interface. The UI/UX prioritizes a clean, professional design with minimal whitespace, a compact layout, and integrated functionality. Key visual elements include the Alphalens logo, a hero banner, and a professional footer.
+The frontend is built with Streamlit, providing an interactive, single-page user interface. The UI/UX follows a modern, portfoliosmith-inspired design with:
+
+**Homepage Design (components/homepage.py):**
+- Hero section with gradient background (purple/indigo), stats row, and CTA button
+- Feature cards grid showcasing 6 key capabilities (Performance Analytics, Risk Assessment, Behavioral Insights, AI Recommendations, Portfolio Rebalancing, Tax Impact)
+- Insights alternating sections highlighting Post-Analysis, Behavioral Biases, and Actionable Insights
+- "How It Works" section with 3 numbered steps (Upload → Analyze → Insights)
+- CTA section with gradient background for signup conversion
+- CSV requirements section for user guidance
+- Professional footer with disclaimer
+
+**Visual Design:**
+- Color scheme: Primary gradient (#667eea to #764ba2), white backgrounds, subtle shadows
+- Typography: Inter font family via Google Fonts
+- Cards with hover effects, rounded corners (16-24px), and subtle borders
+- Mobile-responsive grid layouts for feature cards and insights sections
 
 ### Backend Architecture
 
