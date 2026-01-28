@@ -149,6 +149,22 @@ def main():
             display: none !important;
             content: none !important;
         }
+        /* Hide loading spinner and running indicator */
+        .stSpinner, 
+        [data-testid="stSpinner"],
+        .st-emotion-cache-1dp5vir,
+        div[data-testid="stStatusWidget"],
+        .stApp [data-testid="stDecoration"],
+        .stDeployButton,
+        button[kind="header"] {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        /* Hide hamburger menu */
+        button[kind="header"],
+        .st-emotion-cache-eczf16 {
+            display: none !important;
+        }
         
         /* Main container with proper margins */
         .block-container {
@@ -1294,102 +1310,282 @@ def render_ai_assistant():
             st.rerun()
 
 def render_partner_section():
-    """Render Partner with Us section"""
+    """Render Partner with Us section using Streamlit columns"""
     st.markdown("""
-    <div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <h1 style="font-size: 42px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px;">Partner with Us</h1>
-            <p style="font-size: 18px; color: #666; line-height: 1.6;">
-                Join hands with Alphalens to revolutionize portfolio analytics for Indian investors
-            </p>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 40px;">
-            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
-                <div style="font-size: 36px; margin-bottom: 16px;">🏦</div>
-                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Broking Partners</h3>
-                <p style="color: #666; line-height: 1.7;">Integrate Alphalens into your platform to provide clients with advanced portfolio analytics and recommendations.</p>
-            </div>
-            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
-                <div style="font-size: 36px; margin-bottom: 16px;">💼</div>
-                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Wealth Advisors</h3>
-                <p style="color: #666; line-height: 1.7;">Use our white-label solution to offer institutional-grade analysis to your high-net-worth clients.</p>
-            </div>
-            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
-                <div style="font-size: 36px; margin-bottom: 16px;">🎓</div>
-                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Educational Institutions</h3>
-                <p style="color: #666; line-height: 1.7;">Partner with us to teach investment analysis and portfolio management to finance students.</p>
-            </div>
-            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
-                <div style="font-size: 36px; margin-bottom: 16px;">🤝</div>
-                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">API Integration</h3>
-                <p style="color: #666; line-height: 1.7;">Access our analytics engine via API to build custom solutions for your specific requirements.</p>
-            </div>
-        </div>
-        
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px; text-align: center;">
-            <h2 style="color: white; font-size: 28px; font-weight: 700; margin-bottom: 16px;">Ready to Partner?</h2>
-            <p style="color: rgba(255,255,255,0.9); font-size: 16px; margin-bottom: 24px;">Contact us at <strong>partners@thealphamarket.com</strong></p>
-            <p style="color: rgba(255,255,255,0.8); font-size: 14px;">We'll get back to you within 24 hours</p>
-        </div>
+    <div style="text-align: center; margin-bottom: 40px; padding-top: 20px;">
+        <h1 style="font-size: 42px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px;">Partner with Us</h1>
+        <p style="font-size: 18px; color: #666; line-height: 1.6;">
+            Join hands with Alphalens to revolutionize portfolio analytics for Indian investors
+        </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px; min-height: 200px;">
+            <div style="font-size: 36px; margin-bottom: 16px;">🏦</div>
+            <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Broking Partners</h3>
+            <p style="color: #666; line-height: 1.7;">Integrate Alphalens into your platform to provide clients with advanced portfolio analytics and recommendations.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px; min-height: 200px;">
+            <div style="font-size: 36px; margin-bottom: 16px;">💼</div>
+            <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Wealth Advisors</h3>
+            <p style="color: #666; line-height: 1.7;">Use our white-label solution to offer institutional-grade analysis to your high-net-worth clients.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px; min-height: 200px;">
+            <div style="font-size: 36px; margin-bottom: 16px;">🎓</div>
+            <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Educational Institutions</h3>
+            <p style="color: #666; line-height: 1.7;">Partner with us to teach investment analysis and portfolio management to finance students.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px; min-height: 200px;">
+            <div style="font-size: 36px; margin-bottom: 16px;">🤝</div>
+            <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">API Integration</h3>
+            <p style="color: #666; line-height: 1.7;">Access our analytics engine via API to build custom solutions for your specific requirements.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px; text-align: center;">
+        <h2 style="color: white; font-size: 28px; font-weight: 700; margin-bottom: 16px;">Ready to Partner?</h2>
+        <p style="color: rgba(255,255,255,0.9); font-size: 16px; margin-bottom: 24px;">Contact us at <strong>partners@thealphamarket.com</strong></p>
+        <p style="color: rgba(255,255,255,0.8); font-size: 14px;">We'll get back to you within 24 hours</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def render_features_page():
+    """Render dedicated Features page with detailed feature descriptions"""
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 40px; padding-top: 20px;">
+        <h1 style="font-size: 42px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px;">Features</h1>
+        <p style="font-size: 18px; color: #666; line-height: 1.6;">
+            Comprehensive portfolio analysis tools designed for the Indian market
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Feature 1: Performance Analytics
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.markdown("""
+        <div style="padding: 30px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <span style="font-size: 28px;">📊</span>
+            </div>
+            <h2 style="font-size: 28px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Performance Analytics</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
+                Track your portfolio's complete performance history with detailed metrics including total returns, 
+                absolute gains, win rate percentage, and identification of best and worst performers.
+            </p>
+            <ul style="color: #555; font-size: 15px; line-height: 2;">
+                <li>Real-time portfolio valuation</li>
+                <li>Historical performance tracking</li>
+                <li>All-time high analysis for each stock</li>
+                <li>Weighted average cost calculation</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f8faff 0%, #eef2f7 100%); border-radius: 20px; padding: 40px; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+                <div style="font-size: 80px; margin-bottom: 16px;">📈</div>
+                <p style="color: #667eea; font-weight: 600;">Track Every Rupee</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<hr style='margin: 40px 0; border: none; border-top: 1px solid #eef2f7;'>", unsafe_allow_html=True)
+    
+    # Feature 2: Risk Assessment
+    col3, col4 = st.columns([1, 1])
+    with col3:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%); border-radius: 20px; padding: 40px; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+                <div style="font-size: 80px; margin-bottom: 16px;">🎯</div>
+                <p style="color: #dc2626; font-weight: 600;">Manage Risk Wisely</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col4:
+        st.markdown("""
+        <div style="padding: 30px;">
+            <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <span style="font-size: 28px;">⚠️</span>
+            </div>
+            <h2 style="font-size: 28px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Risk Assessment</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
+                Understand your portfolio's risk profile with institutional-grade metrics including Beta, Sharpe Ratio, 
+                Sortino Ratio, Maximum Drawdown, and volatility analysis.
+            </p>
+            <ul style="color: #555; font-size: 15px; line-height: 2;">
+                <li>Risk Radar with 7-factor analysis</li>
+                <li>Concentration risk alerts</li>
+                <li>Sector exposure monitoring</li>
+                <li>Tail risk assessment</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<hr style='margin: 40px 0; border: none; border-top: 1px solid #eef2f7;'>", unsafe_allow_html=True)
+    
+    # Feature 3: Expert Recommendations
+    col5, col6 = st.columns([1, 1])
+    with col5:
+        st.markdown("""
+        <div style="padding: 30px;">
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <span style="font-size: 28px;">💡</span>
+            </div>
+            <h2 style="font-size: 28px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Expert Recommendations</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
+                Receive data-driven BUY, HOLD, or SELL recommendations based on dual Value and Growth investing 
+                frameworks with clear rationale for each suggestion.
+            </p>
+            <ul style="color: #555; font-size: 15px; line-height: 2;">
+                <li>Value investing metrics analysis</li>
+                <li>Growth momentum indicators</li>
+                <li>Alternative stock suggestions</li>
+                <li>Sector-relative comparisons</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col6:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 20px; padding: 40px; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+                <div style="font-size: 80px; margin-bottom: 16px;">💡</div>
+                <p style="color: #10b981; font-weight: 600;">Actionable Insights</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<hr style='margin: 40px 0; border: none; border-top: 1px solid #eef2f7;'>", unsafe_allow_html=True)
+    
+    # Feature 4: Tax Impact
+    col7, col8 = st.columns([1, 1])
+    with col7:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 20px; padding: 40px; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+                <div style="font-size: 80px; margin-bottom: 16px;">💰</div>
+                <p style="color: #d97706; font-weight: 600;">Optimize Your Taxes</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col8:
+        st.markdown("""
+        <div style="padding: 30px;">
+            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <span style="font-size: 28px;">💰</span>
+            </div>
+            <h2 style="font-size: 28px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Tax Impact Analysis</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
+                Understand your tax liability with STCG/LTCG classification based on Indian tax laws, 
+                including ₹1 lakh LTCG exemption tracking and tax harvesting opportunities.
+            </p>
+            <ul style="color: #555; font-size: 15px; line-height: 2;">
+                <li>Short-term vs Long-term classification</li>
+                <li>Estimated tax liability calculation</li>
+                <li>Tax-loss harvesting suggestions</li>
+                <li>Holding period optimization</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def render_about_section():
-    """Render About section"""
+    """Render About section using Streamlit columns"""
     st.markdown("""
-    <div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <h1 style="font-size: 42px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px;">About Alphalens</h1>
-            <p style="font-size: 18px; color: #666; line-height: 1.6;">
-                By Edhaz Financial Services - Empowering Indian Investors with Data-Driven Insights
-            </p>
-        </div>
-        
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 40px; margin-bottom: 32px;">
-            <h2 style="font-size: 24px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px;">Our Mission</h2>
-            <p style="color: #555; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
-                At Alphalens, we believe every investor deserves access to institutional-grade portfolio analytics. 
-                Our mission is to democratize sophisticated investment analysis tools that were previously available 
-                only to large financial institutions and wealthy individuals.
-            </p>
-            <p style="color: #555; font-size: 16px; line-height: 1.8;">
-                We combine decades of investment research with cutting-edge technology to provide 
-                actionable insights that help you make informed decisions about your portfolio.
-            </p>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px;">
-            <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
-                <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">50+</div>
-                <div style="color: #666; font-size: 14px;">Metrics Analyzed</div>
-            </div>
-            <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
-                <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">10</div>
-                <div style="color: #666; font-size: 14px;">Analysis Layers</div>
-            </div>
-            <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
-                <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">2</div>
-                <div style="color: #666; font-size: 14px;">Investment Frameworks</div>
-            </div>
-        </div>
-        
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 40px;">
-            <h2 style="font-size: 24px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px;">Contact Us</h2>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                <div>
-                    <p style="color: #888; font-size: 13px; margin-bottom: 4px;">Email</p>
-                    <p style="color: #333; font-size: 16px; font-weight: 600;">hello@thealphamarket.com</p>
-                </div>
-                <div>
-                    <p style="color: #888; font-size: 13px; margin-bottom: 4px;">Location</p>
-                    <p style="color: #333; font-size: 16px; font-weight: 600;">Mumbai, India</p>
-                </div>
-            </div>
-        </div>
+    <div style="text-align: center; margin-bottom: 40px; padding-top: 20px;">
+        <h1 style="font-size: 42px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px;">About Alphalens</h1>
+        <p style="font-size: 18px; color: #666; line-height: 1.6;">
+            By Edhaz Financial Services - Empowering Indian Investors with Data-Driven Insights
+        </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 40px; margin-bottom: 32px;">
+        <h2 style="font-size: 24px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px;">Our Mission</h2>
+        <p style="color: #555; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
+            At Alphalens, we believe every investor deserves access to institutional-grade portfolio analytics. 
+            Our mission is to democratize sophisticated investment analysis tools that were previously available 
+            only to large financial institutions and wealthy individuals.
+        </p>
+        <p style="color: #555; font-size: 16px; line-height: 1.8;">
+            We combine decades of investment research with cutting-edge technology to provide 
+            actionable insights that help you make informed decisions about your portfolio.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
+            <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">50+</div>
+            <div style="color: #666; font-size: 14px;">Metrics Analyzed</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
+            <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">10</div>
+            <div style="color: #666; font-size: 14px;">Analysis Layers</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
+            <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">2</div>
+            <div style="color: #666; font-size: 14px;">Investment Frameworks</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col4, col5 = st.columns(2)
+    
+    with col4:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
+            <p style="color: #888; font-size: 13px; margin-bottom: 4px;">Email</p>
+            <p style="color: #333; font-size: 16px; font-weight: 600;">hello@thealphamarket.com</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col5:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
+            <p style="color: #888; font-size: 13px; margin-bottom: 4px;">Location</p>
+            <p style="color: #333; font-size: 16px; font-weight: 600;">Mumbai, India</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def display_welcome_screen():
@@ -1431,6 +1627,13 @@ def display_welcome_screen():
             st.rerun()
         return
     
+    if st.session_state.nav_section == "features":
+        render_features_page()
+        if st.button("← Back to Home", key="back_from_features"):
+            st.session_state.nav_section = None
+            st.rerun()
+        return
+    
     def show_signup():
         st.session_state.show_signup = True
         st.rerun()
@@ -1446,9 +1649,6 @@ def display_welcome_screen():
         analyze_callback=None
     )
     
-    # For Features nav, just scroll to homepage (features are already on homepage)
-    if st.session_state.nav_section == "features":
-        st.session_state.nav_section = None
     
     render_methodology_section()
     render_metrics_section()
