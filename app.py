@@ -255,127 +255,102 @@ def render_top_header():
         .stApp {
             background: white !important;
         }
-        /* Style all buttons in header area */
-        .header-container button {
-            border-radius: 25px !important;
-            font-weight: 600 !important;
-            font-size: 14px !important;
+        /* Style the menu container */
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div[data-testid="stVerticalBlock"] > div[data-testid="stHorizontalBlock"]) {
+            background: linear-gradient(90deg, #fff8f5 0%, #ffede6 100%) !important;
+            border-radius: 50px !important;
+            border: none !important;
             padding: 8px 20px !important;
+            margin-bottom: 20px !important;
         }
-        .header-container .nav-buttons button {
+        /* Style buttons with rounded corners */
+        div[data-testid="stVerticalBlockBorderWrapper"] button {
+            border-radius: 20px !important;
+            font-size: 14px !important;
+        }
+        /* Nav buttons - transparent with border */
+        .nav-section button {
             background: transparent !important;
-            border: none !important;
+            border: 1px solid #ddd !important;
             color: #333 !important;
-            box-shadow: none !important;
-            font-weight: 500 !important;
         }
-        .header-container .nav-buttons button:hover {
-            background: rgba(231, 76, 60, 0.1) !important;
-            color: #e74c3c !important;
-        }
-        .header-container .cta-button button {
+        /* CTA button - coral */
+        .cta-section button {
             background: #e8734a !important;
-            color: white !important;
             border: none !important;
+            color: white !important;
         }
-        .header-container .register-button button {
+        /* Register button - coral */
+        .register-section button {
             background: #e8734a !important;
-            color: white !important;
             border: none !important;
+            color: white !important;
         }
-        .header-container .login-button button {
+        /* Login button - green */
+        .login-section button {
             background: #27ae60 !important;
-            color: white !important;
             border: none !important;
-        }
-        .header-container .logout-button button {
-            background: #95a5a6 !important;
             color: white !important;
-            border: none !important;
         }
     </style>
     """, unsafe_allow_html=True)
     
-    st.markdown('<div class="header-container">', unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style="background: linear-gradient(90deg, #fff8f5 0%, #ffede6 100%); 
-                border-radius: 50px; 
-                padding: 10px 25px; 
-                margin-bottom: 20px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-    """, unsafe_allow_html=True)
-    
-    col_logo, col_nav, col_cta, col_auth = st.columns([1.5, 3.5, 1.2, 1.8])
-    
-    with col_logo:
-        st.markdown("""
-        <div style="padding: 5px 0; font-size: 26px; font-weight: 700; color: #333;">
-            <span style="color: #e74c3c;">α</span>lphalens
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col_nav:
-        st.markdown('<div class="nav-buttons">', unsafe_allow_html=True)
-        n1, n2, n3, n4 = st.columns(4)
-        with n1:
-            st.button("Features", key="nav_features", use_container_width=True)
-        with n2:
-            st.button("Methodology", key="nav_methodology", use_container_width=True)
-        with n3:
-            st.button("About", key="nav_about", use_container_width=True)
-        with n4:
-            st.button("Partnership", key="nav_partner", use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with col_cta:
-        st.markdown('<div class="cta-button">', unsafe_allow_html=True)
-        if st.button("Analyze Portfolio", key="cta_analyze", use_container_width=True):
-            if st.session_state.authenticated:
-                pass
-            else:
-                st.session_state.show_login = True
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with col_auth:
-        if st.session_state.authenticated:
-            user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-            c1, c2 = st.columns([1.2, 1])
-            with c1:
-                st.markdown(f"""
-                <div style="color: #27ae60; font-weight: 600; font-size: 13px; padding-top: 10px; text-align: center;">
-                    ✅ {user_name[:10]}
-                </div>
-                """, unsafe_allow_html=True)
-            with c2:
-                st.markdown('<div class="logout-button">', unsafe_allow_html=True)
-                if st.button("Logout", key="logout_top", use_container_width=True):
-                    st.session_state.authenticated = False
-                    st.session_state.user = None
-                    st.session_state.portfolio_data = None
-                    st.session_state.analysis_complete = False
-                    st.session_state.show_admin = False
-                    st.session_state.show_subscription = False
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-        else:
-            c1, c2 = st.columns(2)
-            with c1:
-                st.markdown('<div class="register-button">', unsafe_allow_html=True)
-                if st.button("Register", key="register_top", use_container_width=True):
-                    st.session_state.show_signup = True
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-            with c2:
-                st.markdown('<div class="login-button">', unsafe_allow_html=True)
-                if st.button("Login", key="login_top", use_container_width=True):
+    with st.container(border=True):
+        col_logo, col_nav, col_cta, col_auth = st.columns([1.5, 3.5, 1.2, 1.8])
+        
+        with col_logo:
+            st.markdown("""
+            <div style="padding: 5px 0; font-size: 26px; font-weight: 700; color: #333;">
+                <span style="color: #e74c3c;">α</span>lphalens
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col_nav:
+            n1, n2, n3, n4 = st.columns(4)
+            with n1:
+                st.button("Features", key="nav_features", use_container_width=True)
+            with n2:
+                st.button("Methodology", key="nav_methodology", use_container_width=True)
+            with n3:
+                st.button("About", key="nav_about", use_container_width=True)
+            with n4:
+                st.button("Partnership", key="nav_partner", use_container_width=True)
+        
+        with col_cta:
+            if st.button("Analyze Portfolio", key="cta_analyze", use_container_width=True, type="primary"):
+                if not st.session_state.authenticated:
                     st.session_state.show_login = True
                     st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col_auth:
+            if st.session_state.authenticated:
+                user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
+                c1, c2 = st.columns([1.2, 1])
+                with c1:
+                    st.markdown(f"""
+                    <div style="color: #27ae60; font-weight: 600; font-size: 13px; padding-top: 10px; text-align: center;">
+                        ✅ {user_name[:10]}
+                    </div>
+                    """, unsafe_allow_html=True)
+                with c2:
+                    if st.button("Logout", key="logout_top", use_container_width=True):
+                        st.session_state.authenticated = False
+                        st.session_state.user = None
+                        st.session_state.portfolio_data = None
+                        st.session_state.analysis_complete = False
+                        st.session_state.show_admin = False
+                        st.session_state.show_subscription = False
+                        st.rerun()
+            else:
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button("Register", key="register_top", use_container_width=True, type="primary"):
+                        st.session_state.show_signup = True
+                        st.rerun()
+                with c2:
+                    if st.button("Login", key="login_top", use_container_width=True):
+                        st.session_state.show_login = True
+                        st.rerun()
 
 def render_auth_header():
     with st.sidebar:
