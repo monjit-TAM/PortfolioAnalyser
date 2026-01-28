@@ -149,20 +149,31 @@ def main():
             display: none !important;
             content: none !important;
         }
-        /* Hide loading spinner and running indicator */
+        /* Hide loading spinner, running indicator, and Streamlit logo */
         .stSpinner, 
         [data-testid="stSpinner"],
         .st-emotion-cache-1dp5vir,
         div[data-testid="stStatusWidget"],
         .stApp [data-testid="stDecoration"],
         .stDeployButton,
-        button[kind="header"] {
+        button[kind="header"],
+        [data-testid="stLogoImprovedImage"],
+        [data-testid="stLogo"],
+        img[alt="Streamlit logo"],
+        .st-emotion-cache-h5rgaw,
+        .st-emotion-cache-1avcm0n,
+        div[data-testid="stImage"] img[src*="streamlit"] {
             display: none !important;
             visibility: hidden !important;
+            opacity: 0 !important;
         }
         /* Hide hamburger menu */
         button[kind="header"],
         .st-emotion-cache-eczf16 {
+            display: none !important;
+        }
+        /* Hide loading screen logo */
+        [data-testid="stAppViewBlockContainer"] > [data-testid="stVerticalBlock"]:first-child::before {
             display: none !important;
         }
         
@@ -240,42 +251,45 @@ def render_top_header():
     
     st.markdown("""
     <style>
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            justify-content: center;
+        /* Header container with white background and shadow */
+        section[data-testid="stSidebar"] + div > div:first-child {
+            background: white !important;
         }
-        .nav-link {
-            color: #333;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            padding: 8px 0;
-            cursor: pointer;
-        }
-        .nav-link:hover {
-            color: #667eea;
-        }
-        .login-btn {
-            border: 1px solid #ddd;
+        .header-wrapper {
             background: white;
-            color: #333;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 8px 0;
+            margin: -1rem -4rem 20px -4rem;
+            border-bottom: 1px solid #eef2f7;
         }
-        .signup-btn {
-            background: #1e3a5f;
-            color: white;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
+        /* Style nav buttons */
+        .nav-btn button {
+            background: transparent !important;
+            border: none !important;
+            color: #333 !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            padding: 8px 12px !important;
+            box-shadow: none !important;
+        }
+        .nav-btn button:hover {
+            color: #667eea !important;
+            background: transparent !important;
+        }
+        /* Style auth buttons */
+        .auth-login button {
+            background: white !important;
+            border: 1px solid #1e3a5f !important;
+            color: #1e3a5f !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+        }
+        .auth-signup button {
+            background: #1e3a5f !important;
+            border: none !important;
+            color: white !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -283,27 +297,10 @@ def render_top_header():
     col_logo, col_menu, col_auth = st.columns([1.2, 2.5, 1.3])
     
     with col_logo:
-        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=220)
+        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=200)
     
     with col_menu:
-        st.markdown("""
-        <style>
-            div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {
-                background: transparent !important;
-                border: none !important;
-                color: #333 !important;
-                font-size: 15px !important;
-                font-weight: 500 !important;
-                padding: 8px 16px !important;
-                box-shadow: none !important;
-            }
-            div[data-testid="stHorizontalBlock"] > div:nth-child(2) button:hover {
-                color: #667eea !important;
-                background: transparent !important;
-            }
-        </style>
-        """, unsafe_allow_html=True)
-        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         m1, m2, m3, m4 = st.columns(4)
         with m1:
             if st.button("Features", key="nav_features", use_container_width=True):

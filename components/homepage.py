@@ -428,7 +428,18 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
                 </div>
             </div>
             <div class="hero-image">
-                <div style="font-size: 150px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));">📊</div>
+                <div style="background: rgba(255,255,255,0.15); border-radius: 24px; padding: 40px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 50px; background: #10b981; border-radius: 4px;"></div>
+                            <div style="width: 8px; height: 80px; background: #3b82f6; border-radius: 4px;"></div>
+                            <div style="width: 8px; height: 35px; background: #ef4444; border-radius: 4px;"></div>
+                            <div style="width: 8px; height: 65px; background: #f59e0b; border-radius: 4px;"></div>
+                            <div style="width: 8px; height: 45px; background: #8b5cf6; border-radius: 4px;"></div>
+                        </div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 14px; text-align: center;">Portfolio Performance</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -570,30 +581,30 @@ def render_insights_section():
         """, unsafe_allow_html=True)
     with col2:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
-            <div style="background: white; border-radius: 16px; padding: 30px; width: 100%; text-align: center;">
-                <div style="font-size: 60px;">📉📈</div>
-                <div style="color: #666; margin-top: 16px;">Interactive Performance Charts</div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 50px; display: flex; align-items: center; justify-content: center; min-height: 260px;">
+            <div style="text-align: center;">
+                <div style="font-size: 72px; margin-bottom: 12px;">📈</div>
+                <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600;">Performance Charts</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     
     col3, col4 = st.columns(2)
     with col3:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
-            <div style="background: white; border-radius: 16px; padding: 30px; width: 100%; text-align: center;">
-                <div style="font-size: 60px;">🎯🧠</div>
-                <div style="color: #666; margin-top: 16px;">Risk Radar Analysis</div>
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 24px; padding: 50px; display: flex; align-items: center; justify-content: center; min-height: 260px;">
+            <div style="text-align: center;">
+                <div style="font-size: 72px; margin-bottom: 12px;">🎯</div>
+                <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600;">Risk Radar Analysis</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     with col4:
         st.markdown("""
         <div style="padding: 20px;">
-            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">🧠 Behavioral</span>
+            <span style="display: inline-block; background: #ecfdf5; color: #059669; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">🧠 Behavioral</span>
             <h3 style="font-size: 32px; font-weight: 800; color: #1a1a2e; line-height: 1.25; margin-bottom: 16px;">Know Your Investment Biases</h3>
             <p style="font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 24px;">
                 Behavioral biases can lead to suboptimal decisions and eat away your returns. 
@@ -607,13 +618,13 @@ def render_insights_section():
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     
     col5, col6 = st.columns(2)
     with col5:
         st.markdown("""
         <div style="padding: 20px;">
-            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">💡 Actionable</span>
+            <span style="display: inline-block; background: #fef3c7; color: #d97706; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">💡 Actionable</span>
             <h3 style="font-size: 32px; font-weight: 800; color: #1a1a2e; line-height: 1.25; margin-bottom: 16px;">Get Precise Investment Guidance</h3>
             <p style="font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 24px;">
                 Our advanced algorithms diagnose your portfolio and provide solutions 
@@ -629,10 +640,10 @@ def render_insights_section():
         """, unsafe_allow_html=True)
     with col6:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
-            <div style="background: white; border-radius: 16px; padding: 30px; width: 100%; text-align: center;">
-                <div style="font-size: 60px;">💡📋</div>
-                <div style="color: #666; margin-top: 16px;">Expert Recommendations</div>
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 24px; padding: 50px; display: flex; align-items: center; justify-content: center; min-height: 260px;">
+            <div style="text-align: center;">
+                <div style="font-size: 72px; margin-bottom: 12px;">💡</div>
+                <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600;">Expert Recommendations</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -731,30 +742,34 @@ def render_methodology_section():
     
     with col1:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
-            <div style="font-size: 40px; margin-bottom: 16px;">📊</div>
-            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Value Investing Framework</div>
-            <div style="font-size: 15px; color: #666; line-height: 1.8;">
-                <p style="margin: 8px 0;">• P/E Ratio Analysis (vs Industry & Historical)</p>
-                <p style="margin: 8px 0;">• Price-to-Book Value Assessment</p>
-                <p style="margin: 8px 0;">• Dividend Yield Evaluation</p>
-                <p style="margin: 8px 0;">• Debt-to-Equity Ratio Check</p>
-                <p style="margin: 8px 0;">• Margin of Safety Calculation</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <span style="font-size: 28px;">📊</span>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Value Investing Framework</div>
+            <div style="font-size: 14px; color: #666; line-height: 1.9; text-align: left;">
+                <p style="margin: 6px 0;">• P/E Ratio Analysis (vs Industry & Historical)</p>
+                <p style="margin: 6px 0;">• Price-to-Book Value Assessment</p>
+                <p style="margin: 6px 0;">• Dividend Yield Evaluation</p>
+                <p style="margin: 6px 0;">• Debt-to-Equity Ratio Check</p>
+                <p style="margin: 6px 0;">• Margin of Safety Calculation</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
-            <div style="font-size: 40px; margin-bottom: 16px;">🚀</div>
-            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Growth Investing Framework</div>
-            <div style="font-size: 15px; color: #666; line-height: 1.8;">
-                <p style="margin: 8px 0;">• Revenue Growth Rate Analysis</p>
-                <p style="margin: 8px 0;">• EPS Growth Trajectory</p>
-                <p style="margin: 8px 0;">• Price Momentum (52-week performance)</p>
-                <p style="margin: 8px 0;">• Relative Strength vs Benchmark</p>
-                <p style="margin: 8px 0;">• PEG Ratio Evaluation</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <span style="font-size: 28px;">🚀</span>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Growth Investing Framework</div>
+            <div style="font-size: 14px; color: #666; line-height: 1.9; text-align: left;">
+                <p style="margin: 6px 0;">• Revenue Growth Rate Analysis</p>
+                <p style="margin: 6px 0;">• EPS Growth Trajectory</p>
+                <p style="margin: 6px 0;">• Price Momentum (52-week performance)</p>
+                <p style="margin: 6px 0;">• Relative Strength vs Benchmark</p>
+                <p style="margin: 6px 0;">• PEG Ratio Evaluation</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -765,30 +780,34 @@ def render_methodology_section():
     
     with col3:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
-            <div style="font-size: 40px; margin-bottom: 16px;">🎯</div>
-            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Recommendation Logic</div>
-            <div style="font-size: 15px; color: #666; line-height: 1.8;">
-                <p style="margin: 8px 0;">• Combined Value + Growth Scores</p>
-                <p style="margin: 8px 0;">• BUY/HOLD/SELL Signal Generation</p>
-                <p style="margin: 8px 0;">• Sector-Relative Comparison</p>
-                <p style="margin: 8px 0;">• Risk-Adjusted Recommendations</p>
-                <p style="margin: 8px 0;">• Alternative Stock Suggestions</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <span style="font-size: 28px;">🎯</span>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Recommendation Logic</div>
+            <div style="font-size: 14px; color: #666; line-height: 1.9; text-align: left;">
+                <p style="margin: 6px 0;">• Combined Value + Growth Scores</p>
+                <p style="margin: 6px 0;">• BUY/HOLD/SELL Signal Generation</p>
+                <p style="margin: 6px 0;">• Sector-Relative Comparison</p>
+                <p style="margin: 6px 0;">• Risk-Adjusted Recommendations</p>
+                <p style="margin: 6px 0;">• Alternative Stock Suggestions</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
-        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
-            <div style="font-size: 40px; margin-bottom: 16px;">⚖️</div>
-            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Rebalancing Strategy</div>
-            <div style="font-size: 15px; color: #666; line-height: 1.8;">
-                <p style="margin: 8px 0;">• Sector Allocation Optimization</p>
-                <p style="margin: 8px 0;">• Risk Profile Matching</p>
-                <p style="margin: 8px 0;">• Concentration Risk Reduction</p>
-                <p style="margin: 8px 0;">• Target Weight Recommendations</p>
-                <p style="margin: 8px 0;">• Tax-Efficient Rebalancing Tips</p>
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <span style="font-size: 28px;">⚖️</span>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Rebalancing Strategy</div>
+            <div style="font-size: 14px; color: #666; line-height: 1.9; text-align: left;">
+                <p style="margin: 6px 0;">• Sector Allocation Optimization</p>
+                <p style="margin: 6px 0;">• Risk Profile Matching</p>
+                <p style="margin: 6px 0;">• Concentration Risk Reduction</p>
+                <p style="margin: 6px 0;">• Target Weight Recommendations</p>
+                <p style="margin: 6px 0;">• Tax-Efficient Rebalancing Tips</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
