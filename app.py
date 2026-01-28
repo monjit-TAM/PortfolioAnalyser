@@ -295,6 +295,15 @@ def render_top_header():
     col_logo, col_menu, col_auth = st.columns([1.5, 2.5, 1])
     
     with col_logo:
+        st.markdown("""
+        <style>
+            /* Remove white background from logo image */
+            [data-testid="stImage"] > img {
+                background: transparent !important;
+                mix-blend-mode: multiply;
+            }
+        </style>
+        """, unsafe_allow_html=True)
         st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=160)
     
     with col_menu:

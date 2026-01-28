@@ -748,7 +748,7 @@ def render_methodology_section():
     
     st.markdown("""
     <div style="text-align: center; max-width: 800px; margin: 60px auto 40px auto; padding: 0 20px;">
-        <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        <div style="display: inline-block; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
             font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">
             Our Methodology
@@ -768,7 +768,7 @@ def render_methodology_section():
     with col1:
         st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin: 0 auto 14px auto;"></div>
+            <div style="font-size: 40px; margin-bottom: 14px;">💎</div>
             <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Value Investing</div>
             <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
                 <p style="margin: 5px 0;">• P/E Ratio vs Industry</p>
@@ -783,7 +783,7 @@ def render_methodology_section():
     with col2:
         st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin: 0 auto 14px auto;"></div>
+            <div style="font-size: 40px; margin-bottom: 14px;">🚀</div>
             <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Growth Investing</div>
             <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
                 <p style="margin: 5px 0;">• Revenue Growth Rate</p>
@@ -802,7 +802,7 @@ def render_methodology_section():
     with col3:
         st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin: 0 auto 14px auto;"></div>
+            <div style="font-size: 40px; margin-bottom: 14px;">💡</div>
             <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Recommendations</div>
             <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
                 <p style="margin: 5px 0;">• Value + Growth Scores</p>
@@ -817,7 +817,7 @@ def render_methodology_section():
     with col4:
         st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 28px; text-align: center;">
-            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin: 0 auto 14px auto;"></div>
+            <div style="font-size: 40px; margin-bottom: 14px;">⚖️</div>
             <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;">Rebalancing</div>
             <div style="font-size: 13px; color: #666; line-height: 1.8; text-align: left;">
                 <p style="margin: 5px 0;">• Sector Optimization</p>
