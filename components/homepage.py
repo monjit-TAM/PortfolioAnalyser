@@ -763,14 +763,12 @@ def render_methodology_section():
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
+    st.markdown("""
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 900px; margin: 0 auto;">
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 16px;">💎</div>
             <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Value Investing</div>
-            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left; padding-left: 20px;">
                 <p style="margin: 8px 0;">• P/E Ratio vs Industry</p>
                 <p style="margin: 8px 0;">• Price-to-Book Value</p>
                 <p style="margin: 8px 0;">• Dividend Yield</p>
@@ -778,14 +776,10 @@ def render_methodology_section():
                 <p style="margin: 8px 0;">• Margin of Safety</p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
             <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Growth Investing</div>
-            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left; padding-left: 20px;">
                 <p style="margin: 8px 0;">• Revenue Growth Rate</p>
                 <p style="margin: 8px 0;">• EPS Growth Trajectory</p>
                 <p style="margin: 8px 0;">• 52-week Momentum</p>
@@ -793,18 +787,10 @@ def render_methodology_section():
                 <p style="margin: 8px 0;">• PEG Ratio</p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col3, col4 = st.columns(2)
-    
-    with col3:
-        st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 16px;">💡</div>
             <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Recommendations</div>
-            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left; padding-left: 20px;">
                 <p style="margin: 8px 0;">• Value + Growth Scores</p>
                 <p style="margin: 8px 0;">• BUY/HOLD/SELL Signals</p>
                 <p style="margin: 8px 0;">• Sector Comparison</p>
@@ -812,14 +798,10 @@ def render_methodology_section():
                 <p style="margin: 8px 0;">• Alternative Stocks</p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 16px;">⚖️</div>
             <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 18px;">Rebalancing</div>
-            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left;">
+            <div style="font-size: 16px; color: #555; line-height: 2; text-align: left; padding-left: 20px;">
                 <p style="margin: 8px 0;">• Sector Optimization</p>
                 <p style="margin: 8px 0;">• Risk Profile Matching</p>
                 <p style="margin: 8px 0;">• Concentration Alerts</p>
@@ -827,7 +809,8 @@ def render_methodology_section():
                 <p style="margin: 8px 0;">• Tax-Efficient Tips</p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def render_metrics_section():

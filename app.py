@@ -251,30 +251,9 @@ def render_top_header():
     
     st.markdown("""
     <style>
-        /* Top header bar with peach background */
-        .top-header-bar {
-            background: linear-gradient(90deg, #fff5f0 0%, #ffe8dc 100%);
-            margin: -1rem -4rem 0 -4rem;
-            padding: 12px 4rem 16px 4rem;
-            border-bottom: 1px solid #f0d4c4;
-        }
         /* Main page background stays white */
         .stApp {
             background: white !important;
-        }
-        /* Style nav buttons */
-        .nav-btn button {
-            background: transparent !important;
-            border: none !important;
-            color: #333 !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            padding: 8px 12px !important;
-            box-shadow: none !important;
-        }
-        .nav-btn button:hover {
-            color: #e74c3c !important;
-            background: transparent !important;
         }
         /* Style auth buttons */
         .auth-login button {
@@ -294,7 +273,14 @@ def render_top_header():
     </style>
     """, unsafe_allow_html=True)
     
-    st.markdown('<div class="top-header-bar">', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background: linear-gradient(90deg, #fff5f0 0%, #ffe8dc 100%); 
+                border-radius: 16px; 
+                padding: 16px 32px; 
+                margin: 0 0 20px 0; 
+                border: 1px solid #f0d4c4;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    """, unsafe_allow_html=True)
     
     col_logo, col_menu, col_auth = st.columns([1.5, 2.5, 1])
     
@@ -356,7 +342,7 @@ def render_top_header():
     st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown("""
-    <div style="height: 3px; background: linear-gradient(90deg, #e74c3c 0%, #c0392b 50%, #e74c3c 100%); margin: 10px 0 20px 0; border-radius: 2px;"></div>
+    <div style="height: 3px; background: linear-gradient(90deg, #e74c3c 0%, #c0392b 50%, #e74c3c 100%); margin: 0 0 20px 0; border-radius: 2px;"></div>
     """, unsafe_allow_html=True)
 
 def render_auth_header():
