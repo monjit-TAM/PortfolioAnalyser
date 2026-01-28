@@ -255,155 +255,127 @@ def render_top_header():
         .stApp {
             background: white !important;
         }
-        /* Hide default streamlit header */
-        header[data-testid="stHeader"] {
-            display: none;
+        /* Style all buttons in header area */
+        .header-container button {
+            border-radius: 25px !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            padding: 8px 20px !important;
         }
-        /* Menu bar styling */
-        .menu-bar {
-            background: linear-gradient(90deg, #fff8f5 0%, #ffede6 100%);
-            border-radius: 50px;
-            padding: 12px 24px;
-            margin: 10px 0 25px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        .header-container .nav-buttons button {
+            background: transparent !important;
+            border: none !important;
+            color: #333 !important;
+            box-shadow: none !important;
+            font-weight: 500 !important;
         }
-        .menu-bar .logo-section {
-            display: flex;
-            align-items: center;
+        .header-container .nav-buttons button:hover {
+            background: rgba(231, 76, 60, 0.1) !important;
+            color: #e74c3c !important;
         }
-        .menu-bar .logo-section img {
-            height: 45px;
-        }
-        .menu-bar .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .menu-bar .nav-links a {
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        .menu-bar .nav-links a:hover {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-        }
-        .menu-bar .nav-links .cta-btn {
-            background: #e8734a;
+        .header-container .cta-button button {
+            background: #e8734a !important;
             color: white !important;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-weight: 600;
+            border: none !important;
         }
-        .menu-bar .nav-links .cta-btn:hover {
-            background: #d9623a;
-        }
-        .menu-bar .auth-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .menu-bar .auth-section .register-btn {
-            background: #e8734a;
+        .header-container .register-button button {
+            background: #e8734a !important;
             color: white !important;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: 600;
-            text-decoration: none;
+            border: none !important;
         }
-        .menu-bar .auth-section .login-btn {
-            background: #27ae60;
+        .header-container .login-button button {
+            background: #27ae60 !important;
             color: white !important;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: 600;
-            text-decoration: none;
+            border: none !important;
         }
-        .menu-bar .auth-section .user-info {
-            color: #27ae60;
-            font-weight: 600;
-            font-size: 13px;
-        }
-        .menu-bar .auth-section .logout-btn {
-            background: #95a5a6;
+        .header-container .logout-button button {
+            background: #95a5a6 !important;
             color: white !important;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 500;
-            text-decoration: none;
-            font-size: 13px;
+            border: none !important;
         }
     </style>
     """, unsafe_allow_html=True)
     
-    if st.session_state.authenticated:
-        user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-        auth_html = f'''
-            <div class="auth-section">
-                <span class="user-info">✅ {user_name[:12]}</span>
-                <a href="#" class="logout-btn" onclick="return false;">Logout</a>
-            </div>
-        '''
-    else:
-        auth_html = '''
-            <div class="auth-section">
-                <a href="#" class="register-btn" onclick="return false;">Register</a>
-                <a href="#" class="login-btn" onclick="return false;">Login</a>
-            </div>
-        '''
+    st.markdown('<div class="header-container">', unsafe_allow_html=True)
     
-    st.markdown(f'''
-    <div class="menu-bar">
-        <div class="logo-section">
-            <img src="app/static/logo.png" alt="Alphalens" onerror="this.style.display='none'">
-            <span style="font-size: 24px; font-weight: 700; color: #333;"><span style="color: #e74c3c;">α</span>lphalens</span>
+    st.markdown("""
+    <div style="background: linear-gradient(90deg, #fff8f5 0%, #ffede6 100%); 
+                border-radius: 50px; 
+                padding: 10px 25px; 
+                margin-bottom: 20px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    """, unsafe_allow_html=True)
+    
+    col_logo, col_nav, col_cta, col_auth = st.columns([1.5, 3.5, 1.2, 1.8])
+    
+    with col_logo:
+        st.markdown("""
+        <div style="padding: 5px 0; font-size: 26px; font-weight: 700; color: #333;">
+            <span style="color: #e74c3c;">α</span>lphalens
         </div>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#methodology">Methodology</a>
-            <a href="#about">About</a>
-            <a href="#partner">Partnership</a>
-            <a href="#" class="cta-btn">Analyze Portfolio</a>
-        </div>
-        {auth_html}
-    </div>
-    ''', unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
-    col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 1, 1, 1.2, 1.2])
+    with col_nav:
+        st.markdown('<div class="nav-buttons">', unsafe_allow_html=True)
+        n1, n2, n3, n4 = st.columns(4)
+        with n1:
+            st.button("Features", key="nav_features", use_container_width=True)
+        with n2:
+            st.button("Methodology", key="nav_methodology", use_container_width=True)
+        with n3:
+            st.button("About", key="nav_about", use_container_width=True)
+        with n4:
+            st.button("Partnership", key="nav_partner", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    with col5:
-        if not st.session_state.authenticated:
-            if st.button("Register", key="register_top", type="primary", use_container_width=True):
-                st.session_state.show_signup = True
-                st.rerun()
-        else:
-            if st.button("💎 Premium", key="premium_top", use_container_width=True):
-                st.session_state.show_subscription = True
-                st.rerun()
-    
-    with col6:
-        if not st.session_state.authenticated:
-            if st.button("Login", key="login_top", use_container_width=True):
+    with col_cta:
+        st.markdown('<div class="cta-button">', unsafe_allow_html=True)
+        if st.button("Analyze Portfolio", key="cta_analyze", use_container_width=True):
+            if st.session_state.authenticated:
+                pass
+            else:
                 st.session_state.show_login = True
                 st.rerun()
-        else:
-            if st.button("🚪 Logout", key="logout_top", use_container_width=True):
-                st.session_state.authenticated = False
-                st.session_state.user = None
-                st.session_state.portfolio_data = None
-                st.session_state.analysis_complete = False
-                st.session_state.show_admin = False
-                st.session_state.show_subscription = False
-                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown("<div style='margin-top: -60px;'></div>", unsafe_allow_html=True)
+    with col_auth:
+        if st.session_state.authenticated:
+            user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
+            c1, c2 = st.columns([1.2, 1])
+            with c1:
+                st.markdown(f"""
+                <div style="color: #27ae60; font-weight: 600; font-size: 13px; padding-top: 10px; text-align: center;">
+                    ✅ {user_name[:10]}
+                </div>
+                """, unsafe_allow_html=True)
+            with c2:
+                st.markdown('<div class="logout-button">', unsafe_allow_html=True)
+                if st.button("Logout", key="logout_top", use_container_width=True):
+                    st.session_state.authenticated = False
+                    st.session_state.user = None
+                    st.session_state.portfolio_data = None
+                    st.session_state.analysis_complete = False
+                    st.session_state.show_admin = False
+                    st.session_state.show_subscription = False
+                    st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            c1, c2 = st.columns(2)
+            with c1:
+                st.markdown('<div class="register-button">', unsafe_allow_html=True)
+                if st.button("Register", key="register_top", use_container_width=True):
+                    st.session_state.show_signup = True
+                    st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+            with c2:
+                st.markdown('<div class="login-button">', unsafe_allow_html=True)
+                if st.button("Login", key="login_top", use_container_width=True):
+                    st.session_state.show_login = True
+                    st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def render_auth_header():
     with st.sidebar:
