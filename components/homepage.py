@@ -406,7 +406,7 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
     <div class="hero-section">
         <div class="hero-content">
             <div class="hero-text">
-                <span class="hero-badge">🚀 AI-Powered Portfolio Intelligence</span>
+                <span class="hero-badge">🚀 Professional Portfolio Intelligence</span>
                 <h1 class="hero-title">Make Informed<br>Investing Decisions</h1>
                 <p class="hero-subtitle">
                     Evaluate your portfolio performance with our smart, user-friendly analysis tool. 
@@ -512,7 +512,7 @@ def render_features_section():
         st.markdown("""
         <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 220px;">
             <div style="font-size: 40px; margin-bottom: 16px;">💡</div>
-            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">AI Recommendations</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Expert Recommendations</div>
             <div style="font-size: 15px; color: #666; line-height: 1.7;">
                 Receive data-driven BUY, HOLD, or SELL recommendations based on 
                 Value and Growth investing frameworks.
@@ -616,7 +616,7 @@ def render_insights_section():
             <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">💡 Actionable</span>
             <h3 style="font-size: 32px; font-weight: 800; color: #1a1a2e; line-height: 1.25; margin-bottom: 16px;">Get Precise Investment Guidance</h3>
             <p style="font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 24px;">
-                Our AI-powered algorithms diagnose your portfolio and provide solutions 
+                Our advanced algorithms diagnose your portfolio and provide solutions 
                 to the problems. You also get precise guidance on What, When and How Much 
                 to buy, sell or hold.
             </p>
@@ -632,7 +632,7 @@ def render_insights_section():
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
             <div style="background: white; border-radius: 16px; padding: 30px; width: 100%; text-align: center;">
                 <div style="font-size: 60px;">💡📋</div>
-                <div style="color: #666; margin-top: 16px;">AI-Powered Recommendations</div>
+                <div style="color: #666; margin-top: 16px;">Expert Recommendations</div>
             </div>
         </div>
         """, unsafe_allow_html=True)

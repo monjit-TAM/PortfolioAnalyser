@@ -116,7 +116,7 @@ def main():
     
     st.markdown("""
     <style>
-        /* Hide Streamlit's running status icon and deploy button */
+        /* Hide all Streamlit branding and elements */
         [data-testid="stStatusWidget"] {
             display: none !important;
         }
@@ -131,6 +131,23 @@ def main():
         }
         .stDeployButton {
             display: none !important;
+        }
+        /* Hide Made with Streamlit */
+        .viewerBadge_container__1QSob,
+        .viewerBadge_link__1S137,
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        .stApp > header,
+        #stDecoration,
+        .streamlit-footer {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        /* Remove Streamlit watermark */
+        .reportview-container .main footer,
+        footer::after {
+            display: none !important;
+            content: none !important;
         }
         
         /* Main container with proper margins */
@@ -492,7 +509,7 @@ def display_subscription_page():
             <hr style='margin: 25px 0; border: 0; border-top: 1px solid #eee;'>
             <div style='text-align: left; padding: 0 20px;'>
                 <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Unlimited portfolio analyses</p>
-                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Advanced AI recommendations</p>
+                <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Advanced expert recommendations</p>
                 <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Sector-wise allocation insights</p>
                 <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ Benchmark comparisons (NIFTY 50, Sensex)</p>
                 <p style='color: #333; margin: 10px 0; font-size: 15px;'>✅ PDF report downloads</p>
@@ -919,7 +936,7 @@ def display_analysis():
         }
         </style>
         """, unsafe_allow_html=True)
-        if st.button("✨ AI Assistant", type="primary", help="Chat with AI about your portfolio", use_container_width=True):
+        if st.button("✨ Portfolio Advisor", type="primary", help="Get expert insights about your portfolio", use_container_width=True):
             st.session_state.show_ai_assistant = True
             st.rerun()
     
@@ -1054,9 +1071,9 @@ def display_analysis():
         methodology = Methodology()
         methodology.render()
 
-@st.dialog("✨ Alphalens AI Assistant", width="large")
+@st.dialog("✨ Alphalens Portfolio Advisor", width="large")
 def render_ai_assistant_modal():
-    """Render the AI Assistant as a modal dialog"""
+    """Render the Portfolio Advisor as a modal dialog"""
     from utils.ai_assistant import chat_with_assistant
     
     st.markdown("""
@@ -1074,7 +1091,7 @@ def render_ai_assistant_modal():
         if not st.session_state.ai_chat_history:
             st.markdown("""
             <div style='background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;'>
-                <p style='color: #666; margin: 0 0 10px 0;'>👋 Hello! I'm your AI portfolio assistant.</p>
+                <p style='color: #666; margin: 0 0 10px 0;'>👋 Hello! I'm your portfolio advisor.</p>
                 <p style='color: #888; font-size: 13px; margin: 0;'>Try: "How is my portfolio doing?" or "Which stocks should I sell?"</p>
             </div>
             """, unsafe_allow_html=True)
@@ -1089,7 +1106,7 @@ def render_ai_assistant_modal():
                 else:
                     st.markdown(f"""
                     <div style='background: #f5f5f5; padding: 10px 12px; border-radius: 12px 12px 12px 4px; margin: 8px 0; margin-right: 10%;'>
-                        <strong>✨ AI:</strong> {msg["content"]}
+                        <strong>✨ Advisor:</strong> {msg["content"]}
                     </div>
                     """, unsafe_allow_html=True)
     
@@ -1147,12 +1164,12 @@ def render_ai_assistant_modal():
             st.rerun()
 
 def render_ai_assistant():
-    """Render the AI Assistant chat interface (legacy tab version)"""
+    """Render the Portfolio Advisor chat interface (legacy tab version)"""
     from utils.ai_assistant import chat_with_assistant, get_quick_insights
     
     st.markdown("""
     <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;'>
-        <h2 style='color: white; margin: 0; font-size: 24px;'>🤖 Alphalens AI Assistant</h2>
+        <h2 style='color: white; margin: 0; font-size: 24px;'>✨ Alphalens Portfolio Advisor</h2>
         <p style='color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;'>Ask me anything about your portfolio analysis - metrics, recommendations, rebalancing strategies, and more!</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1190,7 +1207,7 @@ def render_ai_assistant():
             if not st.session_state.ai_chat_history:
                 st.markdown("""
                 <div style='background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;'>
-                    <p style='color: #666; margin: 0;'>👋 Hello! I'm your portfolio AI assistant. Ask me about:</p>
+                    <p style='color: #666; margin: 0;'>👋 Hello! I'm your portfolio advisor. Ask me about:</p>
                     <ul style='text-align: left; color: #555; margin-top: 10px;'>
                         <li>Portfolio metrics and calculations</li>
                         <li>Sector allocation and diversification</li>
@@ -1212,7 +1229,7 @@ def render_ai_assistant():
                     else:
                         st.markdown(f"""
                         <div style='background: #f5f5f5; padding: 12px 15px; border-radius: 15px 15px 15px 5px; margin: 10px 0; margin-right: 10%;'>
-                            <strong>🤖 Alphalens AI:</strong><br>{msg["content"]}
+                            <strong>✨ Alphalens:</strong><br>{msg["content"]}
                         </div>
                         """, unsafe_allow_html=True)
         

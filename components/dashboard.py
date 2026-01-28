@@ -389,17 +389,17 @@ class Dashboard:
                     border-radius: 12px; padding: 25px; margin-bottom: 20px; 
                     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);'>
             <div style='display: flex; align-items: center; margin-bottom: 15px;'>
-                <span style='font-size: 40px; margin-right: 15px;'>🤖</span>
+                <span style='font-size: 40px; margin-right: 15px;'>✨</span>
                 <div>
-                    <h3 style='color: white; margin: 0; font-size: 22px;'>AI Portfolio Assistant</h3>
+                    <h3 style='color: white; margin: 0; font-size: 22px;'>Portfolio Advisor</h3>
                     <p style='color: rgba(255,255,255,0.85); margin: 5px 0 0 0; font-size: 14px;'>Get personalized insights about your portfolio</p>
                 </div>
             </div>
             <p style='color: rgba(255,255,255,0.9); font-size: 15px; line-height: 1.6; margin-bottom: 15px;'>
-                Ask questions about your holdings, sector allocation, recommendations, and get AI-powered investment guidance based on your actual portfolio data.
+                Ask questions about your holdings, sector allocation, recommendations, and get expert investment guidance based on your actual portfolio data.
             </p>
             <p style='color: rgba(255,255,255,0.7); font-size: 13px; margin: 0;'>
-                💡 <strong>Tip:</strong> Click the "🤖 AI Assistant" button above to start chatting!
+                💡 <strong>Tip:</strong> Click the "✨ Portfolio Advisor" button above to start chatting!
             </p>
         </div>
         """, unsafe_allow_html=True)

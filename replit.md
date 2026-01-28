@@ -20,7 +20,7 @@ The frontend is built with Streamlit, providing an interactive, single-page user
 
 **Homepage Design (components/homepage.py):**
 - Hero section with gradient background (purple/indigo), stats row, and CTA button
-- Feature cards grid showcasing 6 key capabilities (Performance Analytics, Risk Assessment, Behavioral Insights, AI Recommendations, Portfolio Rebalancing, Tax Impact)
+- Feature cards grid showcasing 6 key capabilities (Performance Analytics, Risk Assessment, Behavioral Insights, Expert Recommendations, Portfolio Rebalancing, Tax Impact)
 - Insights alternating sections highlighting Post-Analysis, Behavioral Biases, and Actionable Insights
 - "How It Works" section with 3 numbered steps (Upload → Analyze → Insights)
 - CTA section with gradient background for signup conversion
@@ -41,7 +41,7 @@ The backend consists of core services:
 3.  **Recommendation Engine:** Provides dual-perspective (Value/Growth) BUY/HOLD/SELL recommendations and alternative stock suggestions.
 4.  **PDF Report Generator:** Creates comprehensive reports with embedded Matplotlib charts using ReportLab.
 5.  **Authentication Manager:** Handles user login, signup, and session management using PostgreSQL for user data.
-6.  **AI Assistant:** Interactive chatbot powered by OpenAI (via Replit AI Integrations) that answers questions about portfolio metrics, recommendations, sector analysis, benchmark comparisons, and rebalancing strategies.
+6.  **Portfolio Advisor:** Interactive advisor module that answers questions about portfolio metrics, recommendations, sector analysis, benchmark comparisons, and rebalancing strategies.
 7.  **Advanced Metrics Calculator:** Provides 10-layer institutional-grade analysis including structural diagnostics, style analysis, concentration risk, volatility metrics, behavior analysis, drift analysis, overlap detection, return attribution, liquidity risk, tail risk, macro sensitivity, health score, and scenario analysis.
 8.  **Corporate Actions Manager:** Adjusts buy prices and quantities for bonus issues and stock splits to ensure accurate performance calculations.
 
