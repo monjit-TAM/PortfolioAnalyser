@@ -25,7 +25,7 @@ from utils.pdf_generator import PDFReportGenerator
 from components.homepage import (
     render_modern_homepage, render_upload_section, render_features_section,
     render_how_it_works_section, render_cta_section, render_csv_requirements,
-    render_insights_section, render_footer
+    render_insights_section, render_footer, render_methodology_section, render_metrics_section
 )
 
 def init_database():
@@ -254,7 +254,7 @@ def render_top_header():
         st.markdown("""
         <div style="display: flex; align-items: center; gap: 35px; justify-content: center; padding-top: 15px;">
             <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Features</span>
-            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Pricing</span>
+            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Methodology</span>
             <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Partner with Us</span>
             <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">About ▾</span>
         </div>
@@ -1276,6 +1276,9 @@ def display_welcome_screen():
         show_signup_callback=show_signup,
         analyze_callback=None
     )
+    
+    render_methodology_section()
+    render_metrics_section()
     
     if st.session_state.authenticated:
         st.markdown("<br>", unsafe_allow_html=True)

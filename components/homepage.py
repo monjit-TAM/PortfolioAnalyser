@@ -707,6 +707,204 @@ def render_how_it_works_section():
         """, unsafe_allow_html=True)
 
 
+def render_methodology_section():
+    """Render the methodology section showing analysis frameworks"""
+    
+    st.markdown("""
+    <div style="text-align: center; max-width: 800px; margin: 60px auto 40px auto; padding: 0 20px;">
+        <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">
+            Our Methodology
+        </div>
+        <h2 style="font-size: 36px; font-weight: 800; color: #1a1a2e; line-height: 1.2; margin-bottom: 16px;">
+            Comprehensive Investment Analysis Framework
+        </h2>
+        <p style="font-size: 18px; color: #666; line-height: 1.6;">
+            Our analysis combines Value Investing principles from Benjamin Graham and Warren Buffett 
+            with Growth Investing methodologies using quantitative financial data
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">📊</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Value Investing Framework</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.8;">
+                <p style="margin: 8px 0;">• P/E Ratio Analysis (vs Industry & Historical)</p>
+                <p style="margin: 8px 0;">• Price-to-Book Value Assessment</p>
+                <p style="margin: 8px 0;">• Dividend Yield Evaluation</p>
+                <p style="margin: 8px 0;">• Debt-to-Equity Ratio Check</p>
+                <p style="margin: 8px 0;">• Margin of Safety Calculation</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">🚀</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Growth Investing Framework</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.8;">
+                <p style="margin: 8px 0;">• Revenue Growth Rate Analysis</p>
+                <p style="margin: 8px 0;">• EPS Growth Trajectory</p>
+                <p style="margin: 8px 0;">• Price Momentum (52-week performance)</p>
+                <p style="margin: 8px 0;">• Relative Strength vs Benchmark</p>
+                <p style="margin: 8px 0;">• PEG Ratio Evaluation</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">🎯</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Recommendation Logic</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.8;">
+                <p style="margin: 8px 0;">• Combined Value + Growth Scores</p>
+                <p style="margin: 8px 0;">• BUY/HOLD/SELL Signal Generation</p>
+                <p style="margin: 8px 0;">• Sector-Relative Comparison</p>
+                <p style="margin: 8px 0;">• Risk-Adjusted Recommendations</p>
+                <p style="margin: 8px 0;">• Alternative Stock Suggestions</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 280px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">⚖️</div>
+            <div style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;">Rebalancing Strategy</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.8;">
+                <p style="margin: 8px 0;">• Sector Allocation Optimization</p>
+                <p style="margin: 8px 0;">• Risk Profile Matching</p>
+                <p style="margin: 8px 0;">• Concentration Risk Reduction</p>
+                <p style="margin: 8px 0;">• Target Weight Recommendations</p>
+                <p style="margin: 8px 0;">• Tax-Efficient Rebalancing Tips</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+def render_metrics_section():
+    """Render the metrics section showing all available metrics"""
+    
+    st.markdown("""
+    <div style="background: linear-gradient(180deg, #f8faff 0%, #fff 100%); padding: 60px 20px; margin: 40px 0; border-radius: 24px;">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto 40px auto;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+                font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">
+                50+ Metrics
+            </div>
+            <h2 style="font-size: 36px; font-weight: 800; color: #1a1a2e; line-height: 1.2; margin-bottom: 16px;">
+                Comprehensive Metrics You'll Get
+            </h2>
+            <p style="font-size: 18px; color: #666; line-height: 1.6;">
+                10-layer institutional-grade analysis with detailed metrics across every dimension
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 24px;">
+            <div style="font-size: 18px; font-weight: 700; color: #667eea; margin-bottom: 16px;">📈 Performance Metrics</div>
+            <div style="font-size: 14px; color: #666; line-height: 2;">
+                <p style="margin: 4px 0;">• Total Portfolio Return %</p>
+                <p style="margin: 4px 0;">• Absolute Gain/Loss (₹)</p>
+                <p style="margin: 4px 0;">• Win Rate (% stocks profitable)</p>
+                <p style="margin: 4px 0;">• Best & Worst Performers</p>
+                <p style="margin: 4px 0;">• All-Time High Analysis</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 24px;">
+            <div style="font-size: 18px; font-weight: 700; color: #667eea; margin-bottom: 16px;">🎯 Risk Metrics</div>
+            <div style="font-size: 14px; color: #666; line-height: 2;">
+                <p style="margin: 4px 0;">• Portfolio Beta</p>
+                <p style="margin: 4px 0;">• Sharpe Ratio</p>
+                <p style="margin: 4px 0;">• Sortino Ratio</p>
+                <p style="margin: 4px 0;">• Maximum Drawdown</p>
+                <p style="margin: 4px 0;">• Historical Volatility</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 24px;">
+            <div style="font-size: 18px; font-weight: 700; color: #667eea; margin-bottom: 16px;">🏛️ Structural Analysis</div>
+            <div style="font-size: 14px; color: #666; line-height: 2;">
+                <p style="margin: 4px 0;">• Sector Allocation %</p>
+                <p style="margin: 4px 0;">• Market Cap Distribution</p>
+                <p style="margin: 4px 0;">• Concentration Risk Score</p>
+                <p style="margin: 4px 0;">• Diversification Grade</p>
+                <p style="margin: 4px 0;">• Single Stock Exposure</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 24px;">
+            <div style="font-size: 18px; font-weight: 700; color: #667eea; margin-bottom: 16px;">🧠 Behavioral Metrics</div>
+            <div style="font-size: 14px; color: #666; line-height: 2;">
+                <p style="margin: 4px 0;">• Behavior Score (0-100)</p>
+                <p style="margin: 4px 0;">• Average Holding Period</p>
+                <p style="margin: 4px 0;">• Recency Bias Detection</p>
+                <p style="margin: 4px 0;">• Loss Aversion Analysis</p>
+                <p style="margin: 4px 0;">• Investment Discipline</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 24px;">
+            <div style="font-size: 18px; font-weight: 700; color: #667eea; margin-bottom: 16px;">📊 Benchmark Comparison</div>
+            <div style="font-size: 14px; color: #666; line-height: 2;">
+                <p style="margin: 4px 0;">• Alpha vs NIFTY 50</p>
+                <p style="margin: 4px 0;">• Sector Heatmap</p>
+                <p style="margin: 4px 0;">• Overweight/Underweight</p>
+                <p style="margin: 4px 0;">• Style Drift Analysis</p>
+                <p style="margin: 4px 0;">• Relative Performance</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 24px;">
+            <div style="font-size: 18px; font-weight: 700; color: #667eea; margin-bottom: 16px;">💰 Tax & Advanced</div>
+            <div style="font-size: 14px; color: #666; line-height: 2;">
+                <p style="margin: 4px 0;">• STCG/LTCG Classification</p>
+                <p style="margin: 4px 0;">• Estimated Tax Liability</p>
+                <p style="margin: 4px 0;">• Portfolio Health Score</p>
+                <p style="margin: 4px 0;">• Tail Risk Exposure</p>
+                <p style="margin: 4px 0;">• Scenario Analysis</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
 def render_upload_section(authenticated, analyze_callback):
     """Render the upload section for authenticated users"""
     if authenticated:
