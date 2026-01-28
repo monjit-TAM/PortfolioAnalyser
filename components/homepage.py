@@ -447,202 +447,264 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
 
 
 def render_features_section():
-    """Render the features section with modern cards"""
+    """Render the features section with modern cards using Streamlit columns"""
     
     st.markdown("""
-    <div class="section-header">
-        <div class="section-tag">Why Choose Alphalens</div>
-        <h2 class="section-title">A Smart Tool To Optimize<br>Your Investment Strategy</h2>
-        <p class="section-subtitle">
+    <div style="text-align: center; max-width: 700px; margin: 60px auto 50px auto; padding: 0 20px;">
+        <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">
+            Why Choose Alphalens
+        </div>
+        <h2 style="font-size: 36px; font-weight: 800; color: #1a1a2e; line-height: 1.2; margin-bottom: 16px;">
+            A Smart Tool To Optimize Your Investment Strategy
+        </h2>
+        <p style="font-size: 18px; color: #666; line-height: 1.6;">
             A quick scan detects any mistakes in your Stock Selection, 
             Behavioral Biases, and Capital Allocations
         </p>
     </div>
+    """, unsafe_allow_html=True)
     
-    <div class="feature-grid">
-        <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <div class="feature-title">Performance Analytics</div>
-            <div class="feature-desc">
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 220px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">📈</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Performance Analytics</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.7;">
                 Track your portfolio's performance with detailed metrics including returns, 
                 volatility, Sharpe ratio, and benchmark comparisons against NIFTY 50.
             </div>
         </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">🎯</div>
-            <div class="feature-title">Risk Assessment</div>
-            <div class="feature-desc">
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 220px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">🎯</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Risk Assessment</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.7;">
                 Understand your risk exposure with concentration analysis, sector allocation, 
                 and tail risk metrics to build a more resilient portfolio.
             </div>
         </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">🧠</div>
-            <div class="feature-title">Behavioral Insights</div>
-            <div class="feature-desc">
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 220px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">🧠</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Behavioral Insights</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.7;">
                 Identify behavioral biases affecting your investment decisions and get 
                 personalized recommendations to overcome them.
             </div>
         </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">💡</div>
-            <div class="feature-title">AI Recommendations</div>
-            <div class="feature-desc">
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col4, col5, col6 = st.columns(3)
+    
+    with col4:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 220px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">💡</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">AI Recommendations</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.7;">
                 Receive data-driven BUY, HOLD, or SELL recommendations based on 
                 Value and Growth investing frameworks.
             </div>
         </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">⚖️</div>
-            <div class="feature-title">Portfolio Rebalancing</div>
-            <div class="feature-desc">
+        """, unsafe_allow_html=True)
+    
+    with col5:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 220px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">⚖️</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Portfolio Rebalancing</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.7;">
                 Get intelligent suggestions to rebalance your portfolio based on your 
                 risk tolerance and investment goals.
             </div>
         </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">💰</div>
-            <div class="feature-title">Tax Impact Analysis</div>
-            <div class="feature-desc">
+        """, unsafe_allow_html=True)
+    
+    with col6:
+        st.markdown("""
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 20px; padding: 32px; min-height: 220px;">
+            <div style="font-size: 40px; margin-bottom: 16px;">💰</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Tax Impact Analysis</div>
+            <div style="font-size: 15px; color: #666; line-height: 1.7;">
                 Understand the tax implications of your holdings with STCG/LTCG 
                 classification and estimated tax liability calculations.
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 
 def render_insights_section():
-    """Render the insights alternating section"""
+    """Render the insights alternating section using Streamlit columns"""
     
-    st.markdown("""
-    <div class="insights-section">
-        <div class="insight-content">
-            <span class="insight-tag">📊 Post-Analysis</span>
-            <h3 class="insight-title">Automate Your<br>Portfolio Review</h3>
-            <p class="insight-desc">
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div style="padding: 20px;">
+            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">📊 Post-Analysis</span>
+            <h3 style="font-size: 32px; font-weight: 800; color: #1a1a2e; line-height: 1.25; margin-bottom: 16px;">Automate Your Portfolio Review</h3>
+            <p style="font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 24px;">
                 A post-analysis of your investments is important as you look to refine 
                 and update your trading strategies. Now you can streamline your analysis 
                 and correct mistakes in your strategy.
             </p>
-            <ul class="insight-list">
-                <li><span class="insight-check">✓</span> Track historical performance over time</li>
-                <li><span class="insight-check">✓</span> Identify winning and losing patterns</li>
-                <li><span class="insight-check">✓</span> Measure sector-wise contributions</li>
-            </ul>
-        </div>
-        <div class="insight-image">
-            <div class="insight-visual">
-                <div style="font-size: 80px; text-align: center;">📉📈</div>
-                <div style="text-align: center; color: #666; margin-top: 16px;">
-                    Interactive Performance Charts
-                </div>
+            <div style="font-size: 15px; color: #444;">
+                <p style="margin: 10px 0;">✅ Track historical performance over time</p>
+                <p style="margin: 10px 0;">✅ Identify winning and losing patterns</p>
+                <p style="margin: 10px 0;">✅ Measure sector-wise contributions</p>
             </div>
         </div>
-    </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
+            <div style="background: white; border-radius: 16px; padding: 30px; width: 100%; text-align: center;">
+                <div style="font-size: 60px;">📉📈</div>
+                <div style="color: #666; margin-top: 16px;">Interactive Performance Charts</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    <div class="insights-section" style="direction: rtl;">
-        <div class="insight-image" style="direction: ltr;">
-            <div class="insight-visual">
-                <div style="font-size: 80px; text-align: center;">🎯🧠</div>
-                <div style="text-align: center; color: #666; margin-top: 16px;">
-                    Risk Radar Analysis
-                </div>
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    col3, col4 = st.columns(2)
+    with col3:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
+            <div style="background: white; border-radius: 16px; padding: 30px; width: 100%; text-align: center;">
+                <div style="font-size: 60px;">🎯🧠</div>
+                <div style="color: #666; margin-top: 16px;">Risk Radar Analysis</div>
             </div>
         </div>
-        <div class="insight-content" style="direction: ltr;">
-            <span class="insight-tag">🧠 Behavioral</span>
-            <h3 class="insight-title">Know Your<br>Investment Biases</h3>
-            <p class="insight-desc">
+        """, unsafe_allow_html=True)
+    with col4:
+        st.markdown("""
+        <div style="padding: 20px;">
+            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">🧠 Behavioral</span>
+            <h3 style="font-size: 32px; font-weight: 800; color: #1a1a2e; line-height: 1.25; margin-bottom: 16px;">Know Your Investment Biases</h3>
+            <p style="font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 24px;">
                 Behavioral biases can lead to suboptimal decisions and eat away your returns. 
                 With us, you get to know your biases and minimize their effects on your portfolio.
             </p>
-            <ul class="insight-list">
-                <li><span class="insight-check">✓</span> Concentration bias detection</li>
-                <li><span class="insight-check">✓</span> Loss aversion analysis</li>
-                <li><span class="insight-check">✓</span> Recency bias identification</li>
-            </ul>
+            <div style="font-size: 15px; color: #444;">
+                <p style="margin: 10px 0;">✅ Concentration bias detection</p>
+                <p style="margin: 10px 0;">✅ Loss aversion analysis</p>
+                <p style="margin: 10px 0;">✅ Recency bias identification</p>
+            </div>
         </div>
-    </div>
+        """, unsafe_allow_html=True)
     
-    <div class="insights-section">
-        <div class="insight-content">
-            <span class="insight-tag">💡 Actionable</span>
-            <h3 class="insight-title">Get Precise<br>Investment Guidance</h3>
-            <p class="insight-desc">
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    col5, col6 = st.columns(2)
+    with col5:
+        st.markdown("""
+        <div style="padding: 20px;">
+            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">💡 Actionable</span>
+            <h3 style="font-size: 32px; font-weight: 800; color: #1a1a2e; line-height: 1.25; margin-bottom: 16px;">Get Precise Investment Guidance</h3>
+            <p style="font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 24px;">
                 Our AI-powered algorithms diagnose your portfolio and provide solutions 
                 to the problems. You also get precise guidance on What, When and How Much 
                 to buy, sell or hold.
             </p>
-            <ul class="insight-list">
-                <li><span class="insight-check">✓</span> Value & Growth perspectives</li>
-                <li><span class="insight-check">✓</span> Alternative stock suggestions</li>
-                <li><span class="insight-check">✓</span> Rebalancing recommendations</li>
-            </ul>
-        </div>
-        <div class="insight-image">
-            <div class="insight-visual">
-                <div style="font-size: 80px; text-align: center;">💡📋</div>
-                <div style="text-align: center; color: #666; margin-top: 16px;">
-                    AI-Powered Recommendations
-                </div>
+            <div style="font-size: 15px; color: #444;">
+                <p style="margin: 10px 0;">✅ Value & Growth perspectives</p>
+                <p style="margin: 10px 0;">✅ Alternative stock suggestions</p>
+                <p style="margin: 10px 0;">✅ Rebalancing recommendations</p>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+    with col6:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 300px;">
+            <div style="background: white; border-radius: 16px; padding: 30px; width: 100%; text-align: center;">
+                <div style="font-size: 60px;">💡📋</div>
+                <div style="color: #666; margin-top: 16px;">AI-Powered Recommendations</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def render_how_it_works_section():
-    """Render the how it works section with steps"""
+    """Render the how it works section with steps using Streamlit columns"""
     
     st.markdown("""
-    <div class="steps-section">
-        <div class="section-header">
-            <div class="section-tag">How It Works</div>
-            <h2 class="section-title">It's Simple and Easy to Use</h2>
-            <p class="section-subtitle">
+    <div style="background: linear-gradient(180deg, #f8faff 0%, #fff 100%); padding: 60px 20px; margin: 40px 0; border-radius: 24px;">
+        <div style="text-align: center; max-width: 700px; margin: 0 auto 50px auto;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+                font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">
+                How It Works
+            </div>
+            <h2 style="font-size: 36px; font-weight: 800; color: #1a1a2e; line-height: 1.2; margin-bottom: 16px;">
+                It's Simple and Easy to Use
+            </h2>
+            <p style="font-size: 18px; color: #666; line-height: 1.6;">
                 Get started in minutes with just 3 simple steps
             </p>
         </div>
-        
-        <div class="steps-container">
-            <div class="step-card">
-                <div class="step-number-circle">1</div>
-                <div class="step-icon">📤</div>
-                <div class="step-title">Upload Portfolio</div>
-                <div class="step-desc">
-                    Upload your portfolio CSV file with stock names, buy prices, 
-                    dates, and quantities
-                </div>
-            </div>
-            
-            <div class="step-card">
-                <div class="step-number-circle">2</div>
-                <div class="step-icon">⚡</div>
-                <div class="step-title">Instant Analysis</div>
-                <div class="step-desc">
-                    Our engine fetches live prices and runs 10+ layers of 
-                    comprehensive analysis
-                </div>
-            </div>
-            
-            <div class="step-card">
-                <div class="step-number-circle">3</div>
-                <div class="step-icon">📊</div>
-                <div class="step-title">Get Insights</div>
-                <div class="step-desc">
-                    View detailed reports, recommendations, and download 
-                    comprehensive PDF reports
-                </div>
-            </div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="text-align: center; padding: 20px;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                font-weight: 800; font-size: 24px; margin: 0 auto 20px auto; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">1</div>
+            <div style="font-size: 48px; margin-bottom: 16px;">📤</div>
+            <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px;">Upload Portfolio</div>
+            <div style="font-size: 14px; color: #888; line-height: 1.6;">
+                Upload your portfolio CSV file with stock names, buy prices, 
+                dates, and quantities
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; padding: 20px;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                font-weight: 800; font-size: 24px; margin: 0 auto 20px auto; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">2</div>
+            <div style="font-size: 48px; margin-bottom: 16px;">⚡</div>
+            <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px;">Instant Analysis</div>
+            <div style="font-size: 14px; color: #888; line-height: 1.6;">
+                Our engine fetches live prices and runs 10+ layers of 
+                comprehensive analysis
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="text-align: center; padding: 20px;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                font-weight: 800; font-size: 24px; margin: 0 auto 20px auto; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">3</div>
+            <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+            <div style="font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px;">Get Insights</div>
+            <div style="font-size: 14px; color: #888; line-height: 1.6;">
+                View detailed reports, recommendations, and download 
+                comprehensive PDF reports
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def render_upload_section(authenticated, analyze_callback):

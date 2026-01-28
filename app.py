@@ -201,35 +201,79 @@ def main():
     add_footer()
 
 def render_top_header():
-    """Render compact top header with logo on left, auth buttons center-right, and alpha symbol on right for symmetry"""
-    col_logo, col_spacer, col_auth, col_alpha = st.columns([1.2, 1.8, 1.5, 0.5])
+    """Render top header with logo, navigation menu, and auth buttons"""
+    
+    st.markdown("""
+    <style>
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            justify-content: center;
+        }
+        .nav-link {
+            color: #333;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        .nav-link:hover {
+            color: #667eea;
+        }
+        .login-btn {
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .signup-btn {
+            background: #1e3a5f;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    col_logo, col_menu, col_auth = st.columns([1.2, 2.5, 1.3])
     
     with col_logo:
-        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=260)
+        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=220)
+    
+    with col_menu:
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 35px; justify-content: center; padding-top: 15px;">
+            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Features</span>
+            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Pricing</span>
+            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Partner with Us</span>
+            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">About ▾</span>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col_auth:
-        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         if st.session_state.authenticated:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', 'User')
-            if st.session_state.user.get('is_admin'):
-                c1, c2, c3, c4 = st.columns([1.5, 1, 1, 1])
-            else:
-                c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
+            c1, c2, c3 = st.columns([1.2, 1, 1])
             with c1:
-                st.markdown(f"<div style='text-align: right; padding-top: 5px; color: #28a745; font-weight: 600;'>✅ {user_name[:12]}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align: center; padding-top: 5px; color: #28a745; font-weight: 600; font-size: 13px;'>✅ {user_name[:10]}</div>", unsafe_allow_html=True)
             with c2:
-                if st.button("💎 Premium", key="premium_top", use_container_width=True):
+                if st.button("💎", key="premium_top", help="Premium"):
                     st.session_state.show_subscription = True
                     st.session_state.show_admin = False
                     st.rerun()
             with c3:
-                if st.session_state.user.get('is_admin'):
-                    if st.button("📊 Admin", key="admin_top", use_container_width=True):
-                        st.session_state.show_admin = True
-                        st.session_state.show_subscription = False
-                        st.rerun()
-            with c4:
-                if st.button("🚪 Logout", key="logout_top", use_container_width=True):
+                if st.button("🚪", key="logout_top", help="Logout"):
                     st.session_state.authenticated = False
                     st.session_state.user = None
                     st.session_state.portfolio_data = None
@@ -248,15 +292,9 @@ def render_top_header():
                     st.session_state.show_signup = True
                     st.rerun()
     
-    with col_alpha:
-        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
-        st.markdown("""
-        <div style='text-align: right;'>
-            <span style='font-size: 48px; font-weight: 800; color: #e31837; font-family: Georgia, serif;'>α</span>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<hr style='margin: 5px 0 15px 0; border: none; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="height: 3px; background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%); margin: 10px 0 20px 0; border-radius: 2px;"></div>
+    """, unsafe_allow_html=True)
 
 def render_auth_header():
     with st.sidebar:
