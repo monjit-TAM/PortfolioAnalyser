@@ -297,10 +297,11 @@ def render_top_header():
     col_logo, col_menu, col_auth = st.columns([1.2, 2.5, 1.3])
     
     with col_logo:
-        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=200)
+        st.markdown("<div style='padding-top: 6px;'></div>", unsafe_allow_html=True)
+        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=180)
     
     with col_menu:
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
         m1, m2, m3, m4 = st.columns(4)
         with m1:
             if st.button("Features", key="nav_features", use_container_width=True):
@@ -1810,26 +1811,28 @@ You are advised to **consult a SEBI-registered investment advisor** before makin
 
 def add_footer():
     """Add footer with disclaimer and company details"""
-    st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 8px;'>
-        <p style='font-size: 12px; color: #666; margin-bottom: 10px;'>
-            <strong>Disclaimer:</strong> The information provided in this portfolio analysis is for informational purposes only 
-            and should not be considered as financial advice. Investment decisions should be made after careful consideration 
-            of your financial situation and in consultation with a qualified financial advisor. Past performance is not 
-            indicative of future results.
-        </p>
-        <hr style='margin: 15px 0; border: 0; border-top: 1px solid #ddd;'>
-        <p style='font-size: 13px; color: #333; margin-bottom: 5px;'>
-            <strong>Alphalens</strong> is a product of <strong>Edhaz Financial Services Private Limited</strong>
-        </p>
-        <p style='font-size: 12px; color: #666; margin-bottom: 5px;'>
-            Registered Office: Alpine Eco, Doddenekkundi, K R Puram Hobli, Bangalore 560037 | Phone: 9029129102
-        </p>
-        <p style='font-size: 12px; color: #666;'>
-            📧 <a href='mailto:hello@thealphamarket.com' style='color: #FF6B35; text-decoration: none;'>hello@thealphamarket.com</a> | 
-            📞 <a href='tel:+919108967788' style='color: #FF6B35; text-decoration: none;'>+91-91089 67788</a>
-        </p>
+    <div style='background: linear-gradient(180deg, #f8faff 0%, #eef2f7 100%); padding: 50px 40px; margin-top: 60px; border-top: 1px solid #e5e7eb;'>
+        <div style='max-width: 900px; margin: 0 auto; text-align: center;'>
+            <p style='font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 24px;'>
+                <strong>Disclaimer:</strong> The information provided is for informational purposes only 
+                and should not be considered financial advice. Please consult a qualified financial advisor 
+                before making investment decisions. Past performance does not guarantee future results.
+            </p>
+            <div style='border-top: 1px solid #ddd; padding-top: 24px; margin-top: 24px;'>
+                <p style='font-size: 16px; color: #1a1a2e; font-weight: 600; margin-bottom: 8px;'>
+                    Alphalens by Edhaz Financial Services Private Limited
+                </p>
+                <p style='font-size: 14px; color: #666; margin-bottom: 12px;'>
+                    Alpine Eco, Doddenekkundi, K R Puram Hobli, Bangalore 560037
+                </p>
+                <p style='font-size: 14px; color: #666;'>
+                    <a href='mailto:hello@thealphamarket.com' style='color: #667eea; text-decoration: none;'>hello@thealphamarket.com</a>
+                    <span style='margin: 0 12px; color: #ccc;'>|</span>
+                    <a href='tel:+919108967788' style='color: #667eea; text-decoration: none;'>+91-91089 67788</a>
+                </p>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
