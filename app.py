@@ -251,16 +251,14 @@ def render_top_header():
     
     st.markdown("""
     <style>
-        /* Header container with white background and shadow */
-        section[data-testid="stSidebar"] + div > div:first-child {
-            background: white !important;
+        /* Header container with peach/salmon background like thealphamarket */
+        .stApp > header {
+            background: linear-gradient(90deg, #fff5f0 0%, #ffe8dc 100%) !important;
         }
-        .header-wrapper {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            padding: 8px 0;
-            margin: -1rem -4rem 20px -4rem;
-            border-bottom: 1px solid #eef2f7;
+        [data-testid="stAppViewContainer"] > div:first-child {
+            background: linear-gradient(90deg, #fff5f0 0%, #ffe8dc 100%);
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0d4c4;
         }
         /* Style nav buttons */
         .nav-btn button {
@@ -273,19 +271,19 @@ def render_top_header():
             box-shadow: none !important;
         }
         .nav-btn button:hover {
-            color: #667eea !important;
+            color: #e74c3c !important;
             background: transparent !important;
         }
         /* Style auth buttons */
         .auth-login button {
             background: white !important;
-            border: 1px solid #1e3a5f !important;
-            color: #1e3a5f !important;
+            border: 1px solid #333 !important;
+            color: #333 !important;
             border-radius: 6px !important;
             font-weight: 500 !important;
         }
         .auth-signup button {
-            background: #1e3a5f !important;
+            background: #e74c3c !important;
             border: none !important;
             color: white !important;
             border-radius: 6px !important;
@@ -294,14 +292,13 @@ def render_top_header():
     </style>
     """, unsafe_allow_html=True)
     
-    col_logo, col_menu, col_auth = st.columns([1.2, 2.5, 1.3])
+    col_logo, col_menu, col_auth = st.columns([1.5, 2.5, 1])
     
     with col_logo:
-        st.markdown("<div style='padding-top: 6px;'></div>", unsafe_allow_html=True)
-        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=180)
+        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=160)
     
     with col_menu:
-        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         m1, m2, m3, m4 = st.columns(4)
         with m1:
             if st.button("Features", key="nav_features", use_container_width=True):

@@ -561,82 +561,106 @@ def render_insights_section():
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    st.markdown("""
+    <div style="text-align: center; max-width: 800px; margin: 0 auto 40px auto; padding: 0 20px;">
+        <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px;">Post-Analysis</span>
+        <h3 style="font-size: 32px; font-weight: 700; color: #1a1a2e; line-height: 1.3; margin-bottom: 18px;">Review Your Portfolio Performance</h3>
+        <p style="font-size: 18px; color: #555; line-height: 1.8; margin-bottom: 24px;">
+            See how your investments performed over time. Identify what worked and refine your strategy for better returns.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("""
-        <div style="padding: 20px;">
-            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">Post-Analysis</span>
-            <h3 style="font-size: 28px; font-weight: 700; color: #1a1a2e; line-height: 1.3; margin-bottom: 14px;">Review Your Portfolio Performance</h3>
-            <p style="font-size: 15px; color: #666; line-height: 1.7; margin-bottom: 20px;">
-                See how your investments performed over time. Identify what worked and refine your strategy.
-            </p>
-            <div style="font-size: 14px; color: #444;">
-                <p style="margin: 8px 0;">✓ Historical performance tracking</p>
-                <p style="margin: 8px 0;">✓ Win/loss pattern identification</p>
-                <p style="margin: 8px 0;">✓ Sector-wise contributions</p>
-            </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Performance Charts</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Track historical returns</div>
         </div>
         """, unsafe_allow_html=True)
     with col2:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 50px; display: flex; align-items: center; justify-content: center; min-height: 240px;">
-            <div style="text-align: center;">
-                <div style="color: rgba(255,255,255,0.95); font-size: 20px; font-weight: 600;">Performance Charts</div>
-            </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Risk Radar</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Assess portfolio risk</div>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col3, col4 = st.columns(2)
     with col3:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 50px; display: flex; align-items: center; justify-content: center; min-height: 240px;">
-            <div style="text-align: center;">
-                <div style="color: rgba(255,255,255,0.95); font-size: 20px; font-weight: 600;">Risk Radar Analysis</div>
-            </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Sector Analysis</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Measure contributions</div>
         </div>
         """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="text-align: center; max-width: 800px; margin: 0 auto 40px auto; padding: 0 20px;">
+        <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px;">Behavioral</span>
+        <h3 style="font-size: 32px; font-weight: 700; color: #1a1a2e; line-height: 1.3; margin-bottom: 18px;">Understand Your Investment Biases</h3>
+        <p style="font-size: 18px; color: #555; line-height: 1.8; margin-bottom: 24px;">
+            Behavioral biases can hurt your returns. We help you spot them and make smarter investment decisions.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col4, col5, col6 = st.columns(3)
     with col4:
         st.markdown("""
-        <div style="padding: 20px;">
-            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">Behavioral</span>
-            <h3 style="font-size: 28px; font-weight: 700; color: #1a1a2e; line-height: 1.3; margin-bottom: 14px;">Understand Your Investment Biases</h3>
-            <p style="font-size: 15px; color: #666; line-height: 1.7; margin-bottom: 20px;">
-                Behavioral biases can hurt your returns. We help you spot them and make better decisions.
-            </p>
-            <div style="font-size: 14px; color: #444;">
-                <p style="margin: 8px 0;">✓ Concentration bias detection</p>
-                <p style="margin: 8px 0;">✓ Loss aversion analysis</p>
-                <p style="margin: 8px 0;">✓ Recency bias alerts</p>
-            </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Concentration Bias</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Detect over-allocation</div>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col5, col6 = st.columns(2)
     with col5:
         st.markdown("""
-        <div style="padding: 20px;">
-            <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">Actionable</span>
-            <h3 style="font-size: 28px; font-weight: 700; color: #1a1a2e; line-height: 1.3; margin-bottom: 14px;">Get Clear Investment Guidance</h3>
-            <p style="font-size: 15px; color: #666; line-height: 1.7; margin-bottom: 20px;">
-                Know exactly what to buy, hold, or sell based on value and growth analysis.
-            </p>
-            <div style="font-size: 14px; color: #444;">
-                <p style="margin: 8px 0;">✓ Value & Growth perspectives</p>
-                <p style="margin: 8px 0;">✓ Alternative stock suggestions</p>
-                <p style="margin: 8px 0;">✓ Rebalancing recommendations</p>
-            </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Loss Aversion</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Holding losers too long</div>
         </div>
         """, unsafe_allow_html=True)
     with col6:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 50px; display: flex; align-items: center; justify-content: center; min-height: 240px;">
-            <div style="text-align: center;">
-                <div style="color: rgba(255,255,255,0.95); font-size: 20px; font-weight: 600;">Expert Recommendations</div>
-            </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Recency Bias</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Chasing recent trends</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="text-align: center; max-width: 800px; margin: 0 auto 40px auto; padding: 0 20px;">
+        <span style="display: inline-block; background: #f0f4ff; color: #667eea; padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px;">Actionable</span>
+        <h3 style="font-size: 32px; font-weight: 700; color: #1a1a2e; line-height: 1.3; margin-bottom: 18px;">Get Clear Investment Guidance</h3>
+        <p style="font-size: 18px; color: #555; line-height: 1.8; margin-bottom: 24px;">
+            Know exactly what to buy, hold, or sell based on comprehensive value and growth analysis.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col7, col8, col9 = st.columns(3)
+    with col7:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Value Investing</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Fundamental analysis</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col8:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Growth Investing</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">Momentum signals</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col9:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px 30px; text-align: center; min-height: 180px;">
+            <div style="color: rgba(255,255,255,0.95); font-size: 18px; font-weight: 600; margin-bottom: 12px;">Recommendations</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 15px;">BUY/HOLD/SELL signals</div>
         </div>
         """, unsafe_allow_html=True)
 
