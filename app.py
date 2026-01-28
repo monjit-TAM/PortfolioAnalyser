@@ -197,6 +197,8 @@ def main():
         st.session_state.show_signup = False
     if 'show_admin' not in st.session_state:
         st.session_state.show_admin = False
+    if 'nav_section' not in st.session_state:
+        st.session_state.nav_section = None
     if 'uploaded_file_name' not in st.session_state:
         st.session_state.uploaded_file_name = None
     if 'show_subscription' not in st.session_state:
@@ -269,13 +271,40 @@ def render_top_header():
     
     with col_menu:
         st.markdown("""
-        <div style="display: flex; align-items: center; gap: 35px; justify-content: center; padding-top: 15px;">
-            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Features</span>
-            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Methodology</span>
-            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">Partner with Us</span>
-            <span style="color: #333; font-size: 15px; font-weight: 500; cursor: pointer;">About ▾</span>
-        </div>
+        <style>
+            div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {
+                background: transparent !important;
+                border: none !important;
+                color: #333 !important;
+                font-size: 15px !important;
+                font-weight: 500 !important;
+                padding: 8px 16px !important;
+                box-shadow: none !important;
+            }
+            div[data-testid="stHorizontalBlock"] > div:nth-child(2) button:hover {
+                color: #667eea !important;
+                background: transparent !important;
+            }
+        </style>
         """, unsafe_allow_html=True)
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+            if st.button("Features", key="nav_features", use_container_width=True):
+                st.session_state.nav_section = "features"
+                st.rerun()
+        with m2:
+            if st.button("Methodology", key="nav_methodology", use_container_width=True):
+                st.session_state.nav_section = "methodology"
+                st.rerun()
+        with m3:
+            if st.button("Partner with Us", key="nav_partner", use_container_width=True):
+                st.session_state.nav_section = "partner"
+                st.rerun()
+        with m4:
+            if st.button("About", key="nav_about", use_container_width=True):
+                st.session_state.nav_section = "about"
+                st.rerun()
     
     with col_auth:
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
@@ -1264,6 +1293,105 @@ def render_ai_assistant():
                 st.session_state.ai_chat_history.append({"role": "assistant", "content": response})
             st.rerun()
 
+def render_partner_section():
+    """Render Partner with Us section"""
+    st.markdown("""
+    <div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 42px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px;">Partner with Us</h1>
+            <p style="font-size: 18px; color: #666; line-height: 1.6;">
+                Join hands with Alphalens to revolutionize portfolio analytics for Indian investors
+            </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 40px;">
+            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
+                <div style="font-size: 36px; margin-bottom: 16px;">🏦</div>
+                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Broking Partners</h3>
+                <p style="color: #666; line-height: 1.7;">Integrate Alphalens into your platform to provide clients with advanced portfolio analytics and recommendations.</p>
+            </div>
+            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
+                <div style="font-size: 36px; margin-bottom: 16px;">💼</div>
+                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Wealth Advisors</h3>
+                <p style="color: #666; line-height: 1.7;">Use our white-label solution to offer institutional-grade analysis to your high-net-worth clients.</p>
+            </div>
+            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
+                <div style="font-size: 36px; margin-bottom: 16px;">🎓</div>
+                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">Educational Institutions</h3>
+                <p style="color: #666; line-height: 1.7;">Partner with us to teach investment analysis and portfolio management to finance students.</p>
+            </div>
+            <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 32px;">
+                <div style="font-size: 36px; margin-bottom: 16px;">🤝</div>
+                <h3 style="font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;">API Integration</h3>
+                <p style="color: #666; line-height: 1.7;">Access our analytics engine via API to build custom solutions for your specific requirements.</p>
+            </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px; text-align: center;">
+            <h2 style="color: white; font-size: 28px; font-weight: 700; margin-bottom: 16px;">Ready to Partner?</h2>
+            <p style="color: rgba(255,255,255,0.9); font-size: 16px; margin-bottom: 24px;">Contact us at <strong>partners@thealphamarket.com</strong></p>
+            <p style="color: rgba(255,255,255,0.8); font-size: 14px;">We'll get back to you within 24 hours</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def render_about_section():
+    """Render About section"""
+    st.markdown("""
+    <div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 42px; font-weight: 800; color: #1a1a2e; margin-bottom: 16px;">About Alphalens</h1>
+            <p style="font-size: 18px; color: #666; line-height: 1.6;">
+                By Edhaz Financial Services - Empowering Indian Investors with Data-Driven Insights
+            </p>
+        </div>
+        
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 40px; margin-bottom: 32px;">
+            <h2 style="font-size: 24px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px;">Our Mission</h2>
+            <p style="color: #555; font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
+                At Alphalens, we believe every investor deserves access to institutional-grade portfolio analytics. 
+                Our mission is to democratize sophisticated investment analysis tools that were previously available 
+                only to large financial institutions and wealthy individuals.
+            </p>
+            <p style="color: #555; font-size: 16px; line-height: 1.8;">
+                We combine decades of investment research with cutting-edge technology to provide 
+                actionable insights that help you make informed decisions about your portfolio.
+            </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px;">
+            <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">50+</div>
+                <div style="color: #666; font-size: 14px;">Metrics Analyzed</div>
+            </div>
+            <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">10</div>
+                <div style="color: #666; font-size: 14px;">Analysis Layers</div>
+            </div>
+            <div style="background: #f8faff; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 36px; color: #667eea; font-weight: 800; margin-bottom: 8px;">2</div>
+                <div style="color: #666; font-size: 14px;">Investment Frameworks</div>
+            </div>
+        </div>
+        
+        <div style="background: #fff; border: 1px solid #eef2f7; border-radius: 16px; padding: 40px;">
+            <h2 style="font-size: 24px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px;">Contact Us</h2>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                <div>
+                    <p style="color: #888; font-size: 13px; margin-bottom: 4px;">Email</p>
+                    <p style="color: #333; font-size: 16px; font-weight: 600;">hello@thealphamarket.com</p>
+                </div>
+                <div>
+                    <p style="color: #888; font-size: 13px; margin-bottom: 4px;">Location</p>
+                    <p style="color: #333; font-size: 16px; font-weight: 600;">Mumbai, India</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 def display_welcome_screen():
     """Display modern, portfoliosmith-style welcome screen"""
     
@@ -1279,6 +1407,30 @@ def display_welcome_screen():
     
     render_top_header()
     
+    # Handle navigation sections
+    if st.session_state.nav_section == "partner":
+        render_partner_section()
+        if st.button("← Back to Home", key="back_from_partner"):
+            st.session_state.nav_section = None
+            st.rerun()
+        return
+    
+    if st.session_state.nav_section == "about":
+        render_about_section()
+        if st.button("← Back to Home", key="back_from_about"):
+            st.session_state.nav_section = None
+            st.rerun()
+        return
+    
+    if st.session_state.nav_section == "methodology":
+        from components.methodology import Methodology
+        methodology = Methodology()
+        methodology.render()
+        if st.button("← Back to Home", key="back_from_methodology"):
+            st.session_state.nav_section = None
+            st.rerun()
+        return
+    
     def show_signup():
         st.session_state.show_signup = True
         st.rerun()
@@ -1293,6 +1445,10 @@ def display_welcome_screen():
         show_signup_callback=show_signup,
         analyze_callback=None
     )
+    
+    # For Features nav, just scroll to homepage (features are already on homepage)
+    if st.session_state.nav_section == "features":
+        st.session_state.nav_section = None
     
     render_methodology_section()
     render_metrics_section()
