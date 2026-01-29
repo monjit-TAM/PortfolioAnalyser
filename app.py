@@ -106,7 +106,7 @@ You are strongly advised to **consult a qualified, SEBI-registered investment ad
 def main():
     st.set_page_config(
         page_title="Alphalens Portfolio Analyzer",
-        page_icon="α",
+        page_icon="attached_assets/Screenshot_2026-01-29_at_5.07.59_PM-removebg-preview_1769686716431.png",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
@@ -174,6 +174,25 @@ def main():
         }
         /* Hide loading screen logo */
         [data-testid="stAppViewBlockContainer"] > [data-testid="stVerticalBlock"]:first-child::before {
+            display: none !important;
+        }
+        /* Hide Streamlit loading animation and logo on page load */
+        .stApp > div:first-child > div:first-child,
+        [data-testid="stAppLoadingIndicator"],
+        .stProgress,
+        div[class*="stSpinner"],
+        div[class*="stLoader"],
+        .st-emotion-cache-z5fcl4,
+        [data-testid="stMarkdownContainer"] img[src*="streamlit"],
+        [data-testid="stImage"] img[src*="streamlit"],
+        img[alt*="Streamlit"],
+        div[data-testid="stStatusWidget"] {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        /* Override any Streamlit logo in header */
+        .stApp header img,
+        header[data-testid="stHeader"] img {
             display: none !important;
         }
         
