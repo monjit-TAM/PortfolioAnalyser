@@ -106,7 +106,7 @@ You are strongly advised to **consult a qualified, SEBI-registered investment ad
 def main():
     st.set_page_config(
         page_title="Alphalens Portfolio Analyzer",
-        page_icon="📊",
+        page_icon="α",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
