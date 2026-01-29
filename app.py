@@ -308,13 +308,21 @@ def render_top_header():
         with col_nav:
             n1, n2, n3, n4 = st.columns(4)
             with n1:
-                st.button("Features", key="nav_features", use_container_width=True)
+                if st.button("Features", key="nav_features", use_container_width=True):
+                    st.session_state.nav_section = "features"
+                    st.rerun()
             with n2:
-                st.button("Methodology", key="nav_methodology", use_container_width=True)
+                if st.button("Methodology", key="nav_methodology", use_container_width=True):
+                    st.session_state.nav_section = "methodology"
+                    st.rerun()
             with n3:
-                st.button("About", key="nav_about", use_container_width=True)
+                if st.button("About", key="nav_about", use_container_width=True):
+                    st.session_state.nav_section = "about"
+                    st.rerun()
             with n4:
-                st.button("Partnership", key="nav_partner", use_container_width=True)
+                if st.button("Partnership", key="nav_partner", use_container_width=True):
+                    st.session_state.nav_section = "partner"
+                    st.rerun()
         
         with col_cta:
             if st.button("Analyze Portfolio", key="cta_analyze", use_container_width=True, type="primary"):
