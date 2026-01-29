@@ -45,6 +45,40 @@ The backend consists of core services:
 7.  **Advanced Metrics Calculator:** Provides 10-layer institutional-grade analysis including structural diagnostics, style analysis, concentration risk, volatility metrics, behavior analysis, drift analysis, overlap detection, return attribution, liquidity risk, tail risk, macro sensitivity, health score, and scenario analysis.
 8.  **Corporate Actions Manager:** Adjusts buy prices and quantities for bonus issues and stock splits to ensure accurate performance calculations.
 
+### REST API Architecture (FastAPI)
+
+The FastAPI REST API provides programmatic access for broker platform integration:
+
+**API Location:** `/api/` directory, runs on port 8000
+**Documentation:** `/docs` (Swagger UI) or `/redoc` (ReDoc)
+
+**Router Modules:**
+- `api/routers/auth.py` - Authentication endpoints (login, signup, token refresh, API keys)
+- `api/routers/portfolio.py` - Portfolio analysis (upload CSV, analyze, quick-analyze)
+- `api/routers/recommendations.py` - Investment recommendations (value/growth analysis)
+- `api/routers/advanced_metrics.py` - 10-layer metrics, health score, risk radar, tax impact
+- `api/routers/rebalancing.py` - Rebalancing suggestions, concentration alerts
+- `api/routers/websocket.py` - Real-time portfolio price updates (JWT authenticated)
+
+**Authentication:**
+- JWT Bearer tokens for user sessions (30-minute expiry)
+- API keys for programmatic access by broker platforms
+- WebSocket connections require JWT token as query parameter
+
+**Key Endpoints:**
+- `POST /api/v1/auth/login` - User login, returns JWT token
+- `POST /api/v1/auth/signup` - User registration
+- `POST /api/v1/portfolio/analyze` - Full portfolio analysis
+- `GET /api/v1/recommendations/{portfolio_id}` - Get recommendations
+- `GET /api/v1/metrics/{portfolio_id}/full` - All 10 layers of analysis
+- `GET /api/v1/metrics/{portfolio_id}/tax-impact` - Tax classification
+- `WS /api/v1/ws/portfolio/{client_id}?token=<jwt>` - Real-time updates
+
+**Scalability Notes:**
+- Designed for 1000+ daily users
+- For horizontal scaling, integrate Redis pub/sub for WebSocket connections
+- Rate limiting: 100 req/min standard, 1000 req/min premium
+
 ### Data Storage Solutions
 
 User authentication details, dynamic stock symbols, aliases, market indices, sectors, alternative stock suggestions, and rebalancing strategies are stored in a PostgreSQL database. User portfolio data for analysis is processed in-memory using Pandas DataFrames and Streamlit's `session_state`.
