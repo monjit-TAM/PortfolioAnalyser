@@ -177,7 +177,6 @@ def main():
             display: none !important;
         }
         /* Hide Streamlit loading animation and logo on page load */
-        .stApp > div:first-child > div:first-child,
         [data-testid="stAppLoadingIndicator"],
         .stProgress,
         div[class*="stSpinner"],
