@@ -25,26 +25,26 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         }
         
         .hero-title-bold {
-            font-size: 48px;
+            font-size: 52px;
             font-weight: 800;
             color: #111827;
             line-height: 1.1;
             letter-spacing: -1.5px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
         @media (max-width: 768px) {
             .hero-title-bold {
-                font-size: 32px;
+                font-size: 36px;
             }
         }
         
         .hero-subtitle-light {
-            font-size: 18px;
+            font-size: 20px;
             color: #6b7280;
             line-height: 1.6;
-            max-width: 500px;
-            margin: 0 auto 32px auto;
+            max-width: 520px;
+            margin: 0 auto 36px auto;
             font-weight: 400;
         }
         
@@ -70,28 +70,29 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         .tagline-section {
             text-align: center;
             padding: 60px 24px;
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
         }
         
         .tagline-text {
-            font-size: 20px;
+            font-size: 22px;
             color: #4b5563;
             line-height: 1.5;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             font-weight: 400;
         }
         
         .tagline-bold {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 700;
             color: #111827;
         }
         
-        /* Section Styling */
+        /* Section Styling - Remove gray background */
         .section-wrapper {
             padding: 60px 24px;
-            background: #f9fafb;
+            background: #ffffff;
+            border-top: 1px solid #f3f4f6;
         }
         
         .section-wrapper-white {
@@ -100,37 +101,37 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         }
         
         .section-label-small {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             text-align: center;
         }
         
         .section-heading {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             color: #111827;
             text-align: center;
-            margin-bottom: 48px;
+            margin-bottom: 50px;
             letter-spacing: -0.5px;
         }
         
-        /* Process Cards */
+        /* Process Cards - Bigger icons and fonts */
         .process-cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-            max-width: 800px;
+            gap: 40px;
+            max-width: 850px;
             margin: 0 auto;
         }
         
         @media (max-width: 768px) {
             .process-cards {
                 grid-template-columns: 1fr;
-                gap: 24px;
+                gap: 32px;
             }
         }
         
@@ -139,36 +140,36 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         }
         
         .process-card-icon {
-            width: 56px;
-            height: 56px;
-            background: #e5e7eb;
-            border-radius: 12px;
+            width: 72px;
+            height: 72px;
+            background: #f3f4f6;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 16px auto;
-            font-size: 24px;
+            margin: 0 auto 20px auto;
+            font-size: 32px;
         }
         
         .process-card-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #111827;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         
         .process-card-desc {
-            font-size: 14px;
+            font-size: 16px;
             color: #6b7280;
             line-height: 1.5;
         }
         
-        /* Feature Cards */
+        /* Feature Cards - Bigger fonts */
         .feature-cards-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            max-width: 700px;
+            gap: 24px;
+            max-width: 750px;
             margin: 0 auto;
         }
         
@@ -181,77 +182,80 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         .feature-card-item {
             background: #ffffff;
             border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 24px;
+            border-radius: 12px;
+            padding: 28px;
         }
         
         .feature-card-heading {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: #111827;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         
         .feature-card-text {
-            font-size: 14px;
+            font-size: 15px;
             color: #6b7280;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         
-        /* CTA Section */
-        .cta-section-dark {
+        /* CTA Section - Full dark block with button inside */
+        .cta-section-full {
             text-align: center;
-            padding: 60px 24px;
+            padding: 70px 24px;
             background: #111827;
-            border-radius: 0;
+            margin-top: 40px;
         }
         
         .cta-heading {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             color: #ffffff;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
         
         .cta-subtext {
-            font-size: 16px;
+            font-size: 18px;
             color: #9ca3af;
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
         
-        .cta-button-wrapper {
-            text-align: center;
-        }
-        
-        .cta-btn-light {
+        .cta-button {
             display: inline-block;
             background: #ffffff;
             color: #111827;
-            padding: 14px 28px;
+            padding: 16px 36px;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
             border: none;
+            transition: all 0.2s ease;
         }
         
-        /* Footer */
+        .cta-button:hover {
+            background: #f3f4f6;
+            transform: translateY(-1px);
+        }
+        
+        /* Footer - Seamless with CTA */
         .footer-section {
             text-align: center;
-            padding: 32px 24px;
+            padding: 40px 24px;
             background: #111827;
+            border-top: 1px solid #1f2937;
         }
         
         .footer-brand {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #ffffff;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         
         .footer-text {
-            font-size: 13px;
+            font-size: 14px;
             color: #6b7280;
         }
     </style>
@@ -277,7 +281,7 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
             if st.button("Analyze My Portfolio", type="primary", use_container_width=True, key="hero_start"):
                 show_signup_callback()
     
-    # Hero Image - Smaller and more proportionate
+    # Hero Image
     st.markdown("""
     <div class="hero-image-wrapper">
         <img src="https://images.unsplash.com/photo-1666537072157-440346cea066?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200" 
@@ -331,7 +335,7 @@ def render_insights_section():
 
 
 def render_how_it_works_section():
-    """Render the how it works section"""
+    """Render the how it works section - no gray background"""
     
     st.markdown("""
     <div class="section-wrapper" id="how-it-works">
@@ -374,37 +378,24 @@ def render_upload_section(authenticated, analyze_callback):
 
 
 def render_cta_section(authenticated, show_signup_callback):
-    """Render CTA section with button inside dark area"""
+    """Render CTA section as a dark card"""
     
-    # CTA with button inside the dark section using HTML
-    if not authenticated:
-        st.markdown("""
-        <div class="cta-section-dark">
-            <h2 class="cta-heading">Ready to see the full picture?</h2>
-            <p class="cta-subtext">Start your free analysis today.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns([1.5, 1, 1.5])
-        with col2:
-            if st.button("Get Started Free", type="primary", use_container_width=True, key="cta_signup"):
-                show_signup_callback()
-    else:
-        st.markdown("""
-        <div class="cta-section-dark">
-            <h2 class="cta-heading">Ready to analyze your portfolio?</h2>
-            <p class="cta-subtext">Upload your holdings to get started.</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="max-width: 800px; margin: 60px auto; padding: 60px 40px; background: #111827; border-radius: 16px; text-align: center;">
+        <h2 style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 14px 0;">Ready to see the full picture?</h2>
+        <p style="font-size: 18px; color: #9ca3af; margin: 0 0 32px 0;">Start your free analysis today.</p>
+        <a href="#" onclick="window.scrollTo(0,0); return false;" style="display: inline-block; background: #ffffff; color: #111827; padding: 16px 36px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; transition: all 0.2s;">Get Started Free</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def render_footer():
     """Render footer"""
     
     st.markdown("""
-    <div class="footer-section">
-        <div class="footer-brand">Alphalens</div>
-        <p class="footer-text">© 2026 Edhaz Financial Services. All rights reserved.</p>
+    <div style="text-align: center; padding: 40px 24px; margin-top: 40px; border-top: 1px solid #e5e7eb;">
+        <div style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 8px;">Alphalens</div>
+        <p style="font-size: 14px; color: #6b7280; margin: 0;">© 2026 Edhaz Financial Services. All rights reserved.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -413,12 +404,12 @@ def render_csv_requirements():
     """Render CSV requirements section"""
     
     st.markdown("""
-    <div style="max-width: 550px; margin: 40px auto; padding: 28px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
-        <h3 style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 14px;">CSV Format Requirements</h3>
-        <p style="font-size: 13px; color: #6b7280; line-height: 1.5; margin-bottom: 14px;">
+    <div style="max-width: 550px; margin: 40px auto; padding: 28px; background: #ffffff; border-radius: 10px; border: 1px solid #e5e7eb;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 14px;">CSV Format Requirements</h3>
+        <p style="font-size: 14px; color: #6b7280; line-height: 1.5; margin-bottom: 14px;">
             Your CSV file should contain the following columns:
         </p>
-        <ul style="font-size: 13px; color: #4b5563; line-height: 1.8; padding-left: 18px; margin: 0;">
+        <ul style="font-size: 14px; color: #4b5563; line-height: 1.8; padding-left: 18px; margin: 0;">
             <li><strong>Stock Name</strong> - Name or symbol of the stock</li>
             <li><strong>Buy Date</strong> - Purchase date (DD-MM-YYYY)</li>
             <li><strong>Buy Price</strong> - Price per share at purchase</li>
