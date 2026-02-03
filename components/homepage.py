@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 def render_modern_homepage(authenticated, show_login_callback, show_signup_callback, analyze_callback):
-    """Render minimalist, bold homepage design with proper spacing"""
+    """Render minimalist, bold homepage design"""
     
     st.markdown("""
     <style>
@@ -46,6 +46,7 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
             max-width: 520px;
             margin: 0 auto 36px auto;
             font-weight: 400;
+            text-align: center;
         }
         
         /* Hero Image */
@@ -88,11 +89,10 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
             color: #111827;
         }
         
-        /* Section Styling - Remove gray background */
+        /* Section Styling */
         .section-wrapper {
-            padding: 60px 24px;
-            background: #ffffff;
-            border-top: 1px solid #f3f4f6;
+            padding: 80px 24px;
+            background: #fafafa;
         }
         
         .section-wrapper-white {
@@ -103,7 +103,7 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         .section-label-small {
             font-size: 13px;
             font-weight: 600;
-            color: #9ca3af;
+            color: #6366f1;
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 14px;
@@ -115,56 +115,133 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
             font-weight: 700;
             color: #111827;
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 16px;
             letter-spacing: -0.5px;
         }
         
-        /* Process Cards - Bigger icons and fonts */
-        .process-cards {
+        .section-subheading {
+            font-size: 18px;
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        /* Process Steps - With numbered circles */
+        .process-steps {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
-            max-width: 850px;
+            gap: 48px;
+            max-width: 900px;
             margin: 0 auto;
         }
         
         @media (max-width: 768px) {
-            .process-cards {
+            .process-steps {
                 grid-template-columns: 1fr;
-                gap: 32px;
+                gap: 40px;
             }
         }
         
-        .process-card-item {
+        .process-step {
             text-align: center;
         }
         
-        .process-card-icon {
-            width: 72px;
-            height: 72px;
-            background: #f3f4f6;
-            border-radius: 16px;
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
             margin: 0 auto 20px auto;
-            font-size: 32px;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
         }
         
-        .process-card-title {
+        .step-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .step-title {
             font-size: 20px;
             font-weight: 700;
             color: #111827;
             margin-bottom: 10px;
         }
         
-        .process-card-desc {
-            font-size: 16px;
+        .step-desc {
+            font-size: 15px;
             color: #6b7280;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         
-        /* Feature Cards - Bigger fonts */
+        /* Investment Guidance Section */
+        .guidance-section {
+            padding: 80px 24px;
+            background: #ffffff;
+        }
+        
+        .guidance-heading {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        
+        .guidance-subheading {
+            font-size: 18px;
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .guidance-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 768px) {
+            .guidance-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .guidance-card {
+            background: linear-gradient(135deg, #c9726c 0%, #b85c55 100%);
+            border-radius: 16px;
+            padding: 40px 28px;
+            text-align: center;
+            color: white;
+        }
+        
+        .guidance-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .guidance-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .guidance-card-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Feature Cards */
         .feature-cards-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -199,64 +276,15 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
             line-height: 1.6;
         }
         
-        /* CTA Section - Full dark block with button inside */
-        .cta-section-full {
-            text-align: center;
-            padding: 70px 24px;
-            background: #111827;
-            margin-top: 40px;
+        /* Red button styling for Streamlit */
+        .stButton > button[kind="primary"] {
+            background-color: #dc2626 !important;
+            border-color: #dc2626 !important;
         }
         
-        .cta-heading {
-            font-size: 32px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 14px;
-        }
-        
-        .cta-subtext {
-            font-size: 18px;
-            color: #9ca3af;
-            margin-bottom: 32px;
-        }
-        
-        .cta-button {
-            display: inline-block;
-            background: #ffffff;
-            color: #111827;
-            padding: 16px 36px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-        }
-        
-        .cta-button:hover {
-            background: #f3f4f6;
-            transform: translateY(-1px);
-        }
-        
-        /* Footer - Seamless with CTA */
-        .footer-section {
-            text-align: center;
-            padding: 40px 24px;
-            background: #111827;
-            border-top: 1px solid #1f2937;
-        }
-        
-        .footer-brand {
-            font-size: 20px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 8px;
-        }
-        
-        .footer-text {
-            font-size: 14px;
-            color: #6b7280;
+        .stButton > button[kind="primary"]:hover {
+            background-color: #b91c1c !important;
+            border-color: #b91c1c !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -271,7 +299,7 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
     </div>
     """, unsafe_allow_html=True)
     
-    # CTA Button
+    # CTA Button - Now Red
     col1, col2, col3 = st.columns([1.5, 1, 1.5])
     with col2:
         if authenticated:
@@ -330,32 +358,59 @@ def render_features_section():
 
 
 def render_insights_section():
-    """Not used in minimal design"""
-    pass
+    """Render Investment Guidance section with 3 coral/red cards"""
+    
+    st.markdown("""
+    <div class="guidance-section">
+        <h2 class="guidance-heading">Get Clear Investment Guidance</h2>
+        <p class="guidance-subheading">Know exactly what to buy, hold, or sell based on comprehensive value and growth analysis.</p>
+        <div class="guidance-cards">
+            <div class="guidance-card">
+                <div class="guidance-icon">💎</div>
+                <div class="guidance-card-title">Value Investing</div>
+                <div class="guidance-card-desc">Fundamental analysis</div>
+            </div>
+            <div class="guidance-card">
+                <div class="guidance-icon">🚀</div>
+                <div class="guidance-card-title">Growth Investing</div>
+                <div class="guidance-card-desc">Momentum signals</div>
+            </div>
+            <div class="guidance-card">
+                <div class="guidance-icon">💡</div>
+                <div class="guidance-card-title">Recommendations</div>
+                <div class="guidance-card-desc">BUY/HOLD/SELL signals</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def render_how_it_works_section():
-    """Render the how it works section - no gray background"""
+    """Render the how it works section with numbered circles and icons"""
     
     st.markdown("""
     <div class="section-wrapper" id="how-it-works">
-        <div class="section-label-small">The Process</div>
-        <h2 class="section-heading">How It Works</h2>
-        <div class="process-cards">
-            <div class="process-card-item">
-                <div class="process-card-icon">🔗</div>
-                <div class="process-card-title">Connect</div>
-                <div class="process-card-desc">Securely link your brokerage account.</div>
+        <div class="section-label-small">How It Works</div>
+        <h2 class="section-heading">It's Simple and Easy to Use</h2>
+        <p class="section-subheading">Get started in minutes with just 3 simple steps</p>
+        <div class="process-steps">
+            <div class="process-step">
+                <div class="step-number">1</div>
+                <div class="step-icon">📤</div>
+                <div class="step-title">Upload Portfolio</div>
+                <div class="step-desc">Upload your portfolio CSV file with stock names, buy prices, dates, and quantities</div>
             </div>
-            <div class="process-card-item">
-                <div class="process-card-icon">🔍</div>
-                <div class="process-card-title">X-Ray</div>
-                <div class="process-card-desc">Our algorithms scan for hidden risks and correlations.</div>
+            <div class="process-step">
+                <div class="step-number">2</div>
+                <div class="step-icon">⚡</div>
+                <div class="step-title">Instant Analysis</div>
+                <div class="step-desc">Our engine fetches live prices and runs 10+ layers of comprehensive analysis</div>
             </div>
-            <div class="process-card-item">
-                <div class="process-card-icon">📈</div>
-                <div class="process-card-title">Optimize</div>
-                <div class="process-card-desc">Get actionable insights to rebalance and grow.</div>
+            <div class="process-step">
+                <div class="step-number">3</div>
+                <div class="step-icon">📊</div>
+                <div class="step-title">Get Insights</div>
+                <div class="step-desc">View detailed reports, recommendations, and download comprehensive PDF reports</div>
             </div>
         </div>
     </div>
@@ -384,7 +439,7 @@ def render_cta_section(authenticated, show_signup_callback):
     <div style="max-width: 800px; margin: 60px auto; padding: 60px 40px; background: #111827; border-radius: 16px; text-align: center;">
         <h2 style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 14px 0;">Ready to see the full picture?</h2>
         <p style="font-size: 18px; color: #9ca3af; margin: 0 0 32px 0;">Start your free analysis today.</p>
-        <a href="#" onclick="window.scrollTo(0,0); return false;" style="display: inline-block; background: #ffffff; color: #111827; padding: 16px 36px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; transition: all 0.2s;">Get Started Free</a>
+        <a href="#" onclick="window.scrollTo(0,0); return false;" style="display: inline-block; background: #dc2626; color: #ffffff; padding: 16px 36px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; transition: all 0.2s;">Get Started Free</a>
     </div>
     """, unsafe_allow_html=True)
 
