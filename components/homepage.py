@@ -295,9 +295,9 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
     
     # Hero Section
     st.markdown("""
-    <div class="hero-section-minimal">
-        <h1 class="hero-title-bold">Investing is Chaotic.<br>Find Your Focus.</h1>
-        <p class="hero-subtitle-light">
+    <div style="text-align: center; padding: 60px 24px 40px 24px; max-width: 800px; margin: 0 auto;">
+        <h1 style="font-size: 52px; font-weight: 800; color: #111827; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 24px; text-align: center;">Investing is Chaotic.<br>Find Your Focus.</h1>
+        <p style="font-size: 20px; color: #6b7280; line-height: 1.6; max-width: 520px; margin: 0 auto 36px auto; font-weight: 400; text-align: center;">
             Alphalens brings professional-grade portfolio analysis to individual investors. See what others miss.
         </p>
     </div>
@@ -365,9 +365,9 @@ def render_insights_section():
     """Render Investment Guidance section with 3 coral/red cards"""
     
     st.markdown("""
-    <div class="guidance-section">
-        <h2 class="guidance-heading">Get Clear Investment Guidance</h2>
-        <p class="guidance-subheading">Know exactly what to buy, hold, or sell based on comprehensive value and growth analysis.</p>
+    <div style="padding: 80px 24px; background: #ffffff; text-align: center;">
+        <h2 style="font-size: 32px; font-weight: 700; color: #111827; text-align: center; margin-bottom: 12px;">Get Clear Investment Guidance</h2>
+        <p style="font-size: 18px; color: #6b7280; text-align: center; margin-bottom: 48px; max-width: 600px; margin-left: auto; margin-right: auto;">Know exactly what to buy, hold, or sell based on comprehensive value and growth analysis.</p>
         <div class="guidance-cards">
             <div class="guidance-card">
                 <div class="guidance-icon">💎</div>
