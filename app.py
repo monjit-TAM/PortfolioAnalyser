@@ -314,7 +314,7 @@ def render_top_header():
     """, unsafe_allow_html=True)
     
     with st.container(border=True):
-        col_logo, col_nav, col_cta, col_auth = st.columns([1.5, 3.5, 1.2, 1.8])
+        col_logo, col_nav, col_cta, col_auth = st.columns([1.0, 4.2, 1.2, 1.6])
         
         with col_logo:
             st.markdown("""
@@ -324,7 +324,7 @@ def render_top_header():
             """, unsafe_allow_html=True)
         
         with col_nav:
-            n1, n2, n3, n4 = st.columns(4)
+            n1, n2, n3, n4 = st.columns([1, 1.3, 1, 1.2])
             with n1:
                 if st.button("Features", key="nav_features", use_container_width=True):
                     st.session_state.nav_section = "features"

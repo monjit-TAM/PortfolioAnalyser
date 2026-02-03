@@ -46,7 +46,9 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
             max-width: 520px;
             margin: 0 auto 36px auto;
             font-weight: 400;
-            text-align: center;
+            text-align: center !important;
+            width: 100%;
+            display: block;
         }
         
         /* Hero Image */
@@ -183,6 +185,7 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         .guidance-section {
             padding: 80px 24px;
             background: #ffffff;
+            text-align: center;
         }
         
         .guidance-heading {
@@ -196,11 +199,12 @@ def render_modern_homepage(authenticated, show_login_callback, show_signup_callb
         .guidance-subheading {
             font-size: 18px;
             color: #6b7280;
-            text-align: center;
+            text-align: center !important;
             margin-bottom: 48px;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
+            display: block;
         }
         
         .guidance-cards {
