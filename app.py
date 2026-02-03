@@ -250,6 +250,8 @@ def main():
         st.session_state.show_subscription = False
     if 'razorpay_order' not in st.session_state:
         st.session_state.razorpay_order = None
+    if 'show_upload_page' not in st.session_state:
+        st.session_state.show_upload_page = False
     
     if st.session_state.show_subscription and st.session_state.authenticated:
         display_subscription_page()
@@ -259,6 +261,8 @@ def main():
         display_analysis()
     elif st.session_state.portfolio_data is not None:
         display_portfolio_preview()
+    elif st.session_state.authenticated and st.session_state.show_upload_page:
+        display_upload_page()
     else:
         display_welcome_screen()
     
@@ -344,7 +348,10 @@ def render_top_header():
         
         with col_cta:
             if st.button("Analyze Portfolio", key="cta_analyze", use_container_width=True, type="primary"):
-                if not st.session_state.authenticated:
+                if st.session_state.authenticated:
+                    st.session_state.show_upload_page = True
+                    st.rerun()
+                else:
                     st.session_state.show_login = True
                     st.rerun()
         
@@ -463,6 +470,7 @@ def display_login_modal():
                                 'is_admin': result.get('is_admin', False)
                             }
                             st.session_state.show_login = False
+                            st.session_state.show_upload_page = True
                             st.success("Login successful!")
                             st.rerun()
                         else:
@@ -521,6 +529,7 @@ def display_signup_modal():
                                 'is_admin': False
                             }
                             st.session_state.show_signup = False
+                            st.session_state.show_upload_page = True
                             st.success("Account created successfully!")
                             st.rerun()
                         else:
@@ -1606,6 +1615,85 @@ def render_about_section():
             <p style="color: #333; font-size: 16px; font-weight: 600;">Mumbai, India</p>
         </div>
         """, unsafe_allow_html=True)
+
+
+def display_upload_page():
+    """Display dedicated upload page for authenticated users"""
+    render_top_header()
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([0.2, 2.6, 0.2])
+    with col2:
+        st.markdown("""
+        <div style='text-align: center; padding: 40px 0 20px 0;'>
+            <h1 style='font-size: 36px; font-weight: 700; color: #111827; margin-bottom: 12px;'>Analyze Your Portfolio</h1>
+            <p style='font-size: 18px; color: #6b7280;'>Upload your portfolio CSV file to get comprehensive analysis and insights.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); 
+                    padding: 24px; border-radius: 16px; border: 1px solid #c8e6c9; 
+                    margin-bottom: 24px; text-align: center;'>
+            <p style='color: #2e7d32; margin: 0; font-size: 18px; font-weight: 600;'>
+                ✅ You're logged in! Upload your portfolio to begin analysis.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        uploaded_file = st.file_uploader(
+            "Upload your portfolio CSV",
+            type=['csv'],
+            help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity"
+        )
+        
+        if uploaded_file is not None:
+            try:
+                portfolio_df = pd.read_csv(uploaded_file)
+                required_columns = ['Stock Name', 'Buy Price', 'Buy Date', 'Quantity']
+                missing_columns = [col for col in required_columns if col not in portfolio_df.columns]
+                
+                if missing_columns:
+                    st.error(f"Missing required columns: {', '.join(missing_columns)}")
+                else:
+                    portfolio_df['Buy Date'] = pd.to_datetime(portfolio_df['Buy Date'])
+                    portfolio_df['Buy Price'] = pd.to_numeric(portfolio_df['Buy Price'], errors='coerce')
+                    portfolio_df['Quantity'] = pd.to_numeric(portfolio_df['Quantity'], errors='coerce')
+                    portfolio_df = portfolio_df.dropna()
+                    
+                    if len(portfolio_df) == 0:
+                        st.error("No valid data found in the uploaded file. Please check the format.")
+                    else:
+                        st.session_state.portfolio_data = portfolio_df
+                        st.session_state.uploaded_file_name = uploaded_file.name
+                        st.success(f"Successfully loaded {len(portfolio_df)} stocks from your portfolio!")
+                        st.rerun()
+            except Exception as e:
+                st.error(f"Error reading file: {str(e)}")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style='background: #f9fafb; padding: 24px; border-radius: 12px; border: 1px solid #e5e7eb;'>
+            <h3 style='font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 14px;'>CSV Format Requirements</h3>
+            <p style='font-size: 14px; color: #6b7280; line-height: 1.5; margin-bottom: 14px;'>
+                Your CSV file should contain the following columns:
+            </p>
+            <ul style='font-size: 14px; color: #4b5563; line-height: 1.8; padding-left: 18px; margin: 0;'>
+                <li><strong>Stock Name</strong> - Name or symbol of the stock</li>
+                <li><strong>Buy Date</strong> - Purchase date (DD-MM-YYYY)</li>
+                <li><strong>Buy Price</strong> - Price per share at purchase</li>
+                <li><strong>Quantity</strong> - Number of shares</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("← Back to Home", use_container_width=True):
+            st.session_state.show_upload_page = False
+            st.rerun()
 
 
 def display_welcome_screen():
