@@ -1749,7 +1749,7 @@ def display_welcome_screen():
     
     render_cta_section(st.session_state.authenticated, show_signup)
     
-    render_csv_requirements()
+    render_footer()
 
 def display_portfolio_preview():
     """Display portfolio preview after upload"""
