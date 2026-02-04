@@ -22,7 +22,7 @@ class Methodology:
 8. Rebalancing Strategy Framework
 9. Risk Metrics & Correlation
 10. Limitations & Disclaimers
-11. **Advanced Portfolio Metrics** (NEW)
+11. **Advanced Portfolio Metrics**
     - Structural Diagnostics
     - Style Analysis
     - Concentration Risk
@@ -36,6 +36,8 @@ class Methodology:
     - Macro Sensitivity
     - Health Score
     - Scenario Analysis
+12. **Dividend Yield Metrics** (NEW)
+13. **Tax Implication Metrics** (NEW)
         """)
         
         st.divider()
@@ -519,6 +521,132 @@ Scenarios:
 - Midcaps correct 20%
 - Banking drops 15%""", language=None)
         st.info("Scenario analysis uses historical betas to project potential losses. Actual results may differ.")
+        
+        st.divider()
+        
+        # Section 12: Dividend Yield Metrics
+        st.subheader("12. Dividend Yield Metrics")
+        
+        st.write("Dividend yield analysis helps income-focused investors understand the cash flow potential of their portfolio.")
+        
+        st.markdown("**12.1 Stock Dividend Yield**")
+        st.code("""Dividend Yield % = (Annual Dividend per Share ÷ Current Stock Price) × 100
+
+Data Source: Yahoo Finance (dividendYield or trailingAnnualDividendYield)
+Fallback: dividendRate ÷ currentPrice""", language=None)
+        st.write("Shows the percentage return from dividends alone, regardless of capital appreciation. Higher yield means more dividend income per rupee invested.")
+        
+        st.markdown("**12.2 Portfolio Dividend Yield (Weighted Average)**")
+        st.code("""Portfolio Dividend Yield = Σ(Stock Dividend Yield × Stock Weight) 
+
+Where:
+  Stock Weight = Stock Current Value ÷ Total Portfolio Value""", language=None)
+        st.write("The weighted average dividend yield of your entire portfolio, giving more weight to larger holdings.")
+        
+        st.markdown("**12.3 Annual Dividend Income**")
+        st.code("""Per Stock Annual Dividend = Current Value × (Dividend Yield ÷ 100)
+Total Annual Dividend = Σ(Per Stock Annual Dividend)""", language=None)
+        st.write("Estimated annual dividend income in rupees based on current holdings and dividend yields.")
+        
+        st.markdown("**12.4 Dividend Yield Interpretation**")
+        st.markdown("""
+| Dividend Yield | Interpretation | Typical Sectors |
+|----------------|----------------|-----------------|
+| **> 4%** | High yield - attractive for income investors | PSU Banks, Utilities, Coal India |
+| **2-4%** | Moderate yield - balanced income + growth | Private Banks, FMCG, IT |
+| **0-2%** | Low yield - growth-focused stocks | New-age tech, Pharma, Capital goods |
+| **0%** | No dividend - reinvesting all profits | Startups, High-growth companies |
+        """)
+        
+        st.markdown("**12.5 Key Considerations**")
+        st.info("""
+**Why Dividend Yield Matters:**
+- Provides regular income without selling shares
+- Indicates management's confidence in cash flows
+- High-yield stocks often have lower volatility
+- Dividends are taxed at slab rates (not LTCG rates)
+
+**Caveats:**
+- Very high yields (>8%) may indicate distressed stocks with falling prices
+- Dividend history is not guaranteed for the future
+- Some companies have irregular dividend policies
+        """)
+        
+        st.divider()
+        
+        # Section 13: Tax Implication Metrics
+        st.subheader("13. Tax Implication Metrics")
+        
+        st.write("Tax calculations help you understand the potential tax liability if you were to sell your entire portfolio today. These are estimates based on Union Budget 2024 rates.")
+        
+        st.markdown("**13.1 Holding Period Classification**")
+        st.code("""Short-Term: Stocks held for less than 12 months
+Long-Term: Stocks held for 12 months or more
+
+Classification Date Check:
+  Days Held = Today's Date - Buy Date
+  If Days Held < 365 → Short-Term
+  If Days Held ≥ 365 → Long-Term""", language=None)
+        
+        st.markdown("**13.2 Short-Term Capital Gains Tax (STCG)**")
+        st.code("""STCG Rate = 20% (as per Union Budget 2024)
+
+STCG Tax = Σ(Short-Term Gains) × 0.20
+
+Note: Only positive gains are taxed. 
+      Short-term losses can offset short-term gains.""", language=None)
+        st.write("Applicable to profits from stocks held less than 1 year. This is taxed at a flat 20% rate.")
+        
+        st.markdown("**13.3 Long-Term Capital Gains Tax (LTCG)**")
+        st.code("""LTCG Rate = 12.5% (as per Union Budget 2024)
+LTCG Exemption = ₹1,25,000 per financial year
+
+LTCG Tax = Max(0, (Long-Term Gains - 1,25,000)) × 0.125
+
+Note: First ₹1.25 lakh of LTCG is tax-free.
+      Long-term losses can offset long-term gains.""", language=None)
+        st.write("Applicable to profits from stocks held 1 year or more. The first ₹1.25 lakh is exempt from tax.")
+        
+        st.markdown("**13.4 Securities Transaction Tax (STT)**")
+        st.code("""STT on Sell = Current Value × 0.001 (0.1%)
+
+STT is charged on the sell-side value of equity delivery trades.
+This is already deducted by the broker at the time of sale.""", language=None)
+        st.write("STT is a transaction cost, not an income tax. It is paid regardless of profit or loss.")
+        
+        st.markdown("**13.5 Other Transaction Costs (Estimated)**")
+        st.code("""Stamp Duty ≈ Current Value × 0.00015 (0.015%)
+SEBI Charges ≈ Current Value × 0.000001
+Exchange Charges ≈ Current Value × 0.0000345
+
+These are approximate charges that vary by broker and exchange.""", language=None)
+        
+        st.markdown("**13.6 Total Tax Liability Summary**")
+        st.code("""Total Tax & Costs = STCG Tax + LTCG Tax + STT + Other Costs
+
+Example:
+  Portfolio Value: ₹10,00,000
+  Short-Term Gains: ₹50,000 → STCG Tax: ₹10,000
+  Long-Term Gains: ₹2,00,000 → LTCG Tax: (2,00,000 - 1,25,000) × 12.5% = ₹9,375
+  STT: ₹10,00,000 × 0.1% = ₹1,000
+  
+  Total: ₹10,000 + ₹9,375 + ₹1,000 = ₹20,375""", language=None)
+        
+        st.markdown("**13.7 Important Tax Considerations**")
+        st.warning("""
+**Key Points:**
+- Tax estimates assume **full portfolio liquidation** on the current date
+- Actual tax depends on when you sell and in which financial year
+- LTCG exemption (₹1.25L) resets each financial year
+- You can use tax-loss harvesting: sell loss-making stocks to offset gains
+- Consult a qualified tax advisor for personalized tax planning
+
+**What's NOT Included:**
+- Dividend tax (taxed at your income tax slab rate)
+- Securities in different demat accounts
+- Corporate action adjustments already made to buy price
+- Surcharge and cess (applicable for high-income individuals)
+        """)
         
         st.divider()
         
