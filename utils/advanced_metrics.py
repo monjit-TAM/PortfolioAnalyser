@@ -842,13 +842,30 @@ class AdvancedMetricsCalculator:
                 'tax_implication': 'LTCG' if is_long_term and gain_loss > 0 else ('STCG' if gain_loss > 0 else 'Loss')
             })
         
-        stcg_tax_rate = 0.15
-        ltcg_tax_rate = 0.10
-        ltcg_exemption = 100000
+        stcg_tax_rate = 0.20
+        ltcg_tax_rate = 0.125
+        ltcg_exemption = 125000
         
         estimated_stcg_tax = short_term_gains * stcg_tax_rate
         taxable_ltcg = max(0, long_term_gains - ltcg_exemption)
         estimated_ltcg_tax = taxable_ltcg * ltcg_tax_rate
+        
+        total_portfolio_value = portfolio_df['Current Value'].sum() if 'Current Value' in portfolio_df.columns else 0
+        total_investment = portfolio_df['Investment Value'].sum() if 'Investment Value' in portfolio_df.columns else 0
+        
+        stt_sell_rate = 0.001
+        stt_on_sell = total_portfolio_value * stt_sell_rate
+        
+        stamp_duty_rate = 0.00015
+        stamp_duty = total_investment * stamp_duty_rate
+        
+        transaction_charges_rate = 0.0000345
+        transaction_charges = (total_investment + total_portfolio_value) * transaction_charges_rate
+        
+        sebi_charges_rate = 0.000001
+        sebi_charges = (total_investment + total_portfolio_value) * sebi_charges_rate
+        
+        total_transaction_costs = stt_on_sell + stamp_duty + transaction_charges + sebi_charges
         
         return {
             'total_unrealized_gain': round(short_term_gains + long_term_gains, 2),
@@ -861,6 +878,12 @@ class AdvancedMetricsCalculator:
             'estimated_ltcg_tax': round(estimated_ltcg_tax, 2),
             'total_estimated_tax': round(estimated_stcg_tax + estimated_ltcg_tax, 2),
             'ltcg_exemption_remaining': round(max(0, ltcg_exemption - long_term_gains), 2),
+            'stt_on_sell': round(stt_on_sell, 2),
+            'stamp_duty': round(stamp_duty, 2),
+            'transaction_charges': round(transaction_charges, 2),
+            'sebi_charges': round(sebi_charges, 2),
+            'total_transaction_costs': round(total_transaction_costs, 2),
+            'total_tax_and_costs': round(estimated_stcg_tax + estimated_ltcg_tax + total_transaction_costs, 2),
             'stock_breakdown': stock_breakdown,
-            'tax_note': 'Tax calculations are estimates based on current Indian tax laws. STCG: 15%, LTCG: 10% above ₹1L exemption.'
+            'tax_note': 'Tax rates as per Union Budget 2024: STCG: 20%, LTCG: 12.5% above ₹1.25L exemption. STT: 0.1% on sell value.'
         }

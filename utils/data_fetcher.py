@@ -293,6 +293,24 @@ class DataFetcher:
             base_name = self.symbol_aliases[base_name]
         return self.sector_mapping.get(base_name, 'Others')
     
+    def get_dividend_yield(self, stock_name):
+        """Get dividend yield for a stock from yfinance"""
+        try:
+            symbol = self.get_stock_symbol(stock_name)
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+            dividend_yield = info.get('dividendYield', 0) or info.get('trailingAnnualDividendYield', 0)
+            if dividend_yield:
+                return round(dividend_yield * 100, 2)
+            dividend_rate = info.get('dividendRate', 0) or info.get('trailingAnnualDividendRate', 0)
+            current_price = info.get('regularMarketPrice') or info.get('currentPrice', 0)
+            if dividend_rate and current_price:
+                return round((dividend_rate / current_price) * 100, 2)
+            return 0.0
+        except Exception as e:
+            print(f"Error fetching dividend for {stock_name}: {e}")
+            return 0.0
+    
     def _init_twelve_data(self):
         if self._twelve_data_initialized:
             return self._twelve_data_client

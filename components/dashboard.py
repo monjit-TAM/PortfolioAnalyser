@@ -10,8 +10,10 @@ class Dashboard:
         
         summary = analysis_results['portfolio_summary']
         stock_performance = pd.DataFrame(analysis_results['stock_performance'])
+        dividend_metrics = analysis_results.get('dividend_metrics', {})
         
         self.render_executive_summary(summary, portfolio_data)
+        self.render_dividend_and_tax_metrics(dividend_metrics, summary)
         self.render_concentration_alerts(portfolio_data, summary)
         self.render_contribution_waterfall(stock_performance)
         self.render_performance_charts(summary, stock_performance, analysis_results)
@@ -79,6 +81,99 @@ class Dashboard:
                 st.metric("Profitable", f"{summary['profitable_stocks']} / {summary.get('total_stocks', len(portfolio_data))}")
         
         st.markdown("---")
+    
+    def render_dividend_and_tax_metrics(self, dividend_metrics, summary):
+        """Render Dividend Yield and Tax Implication metrics"""
+        
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #0d4f36 0%, #1a7a52 100%); 
+                    border-radius: 12px; padding: 25px; margin-bottom: 20px; 
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);'>
+            <h2 style='color: #fff; margin: 0 0 20px 0; font-size: 24px;'>💰 Dividend & Tax Metrics</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col_div, col_tax = st.columns(2)
+        
+        with col_div:
+            st.markdown("""
+            <div style='background: #f0fdf4; border-radius: 10px; padding: 20px; border: 1px solid #86efac;'>
+                <h3 style='color: #166534; margin: 0 0 15px 0; font-size: 18px;'>📈 Dividend Yield Analysis</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            portfolio_yield = dividend_metrics.get('portfolio_dividend_yield', 0)
+            annual_dividend = dividend_metrics.get('total_annual_dividend', 0)
+            highest_yield_stock = dividend_metrics.get('highest_yield_stock', 'N/A')
+            highest_yield_value = dividend_metrics.get('highest_yield_value', 0)
+            dividend_stocks = dividend_metrics.get('dividend_paying_stocks', 0)
+            non_dividend = dividend_metrics.get('non_dividend_stocks', 0)
+            
+            c1, c2 = st.columns(2)
+            with c1:
+                st.metric("Portfolio Yield", f"{portfolio_yield:.2f}%", 
+                         help="Weighted average dividend yield of your portfolio")
+                st.metric("Dividend Stocks", f"{dividend_stocks}", 
+                         help="Number of stocks paying dividends")
+            with c2:
+                st.metric("Annual Dividend", f"₹{annual_dividend:,.0f}",
+                         help="Expected annual dividend income")
+                st.metric("Non-Dividend", f"{non_dividend}",
+                         help="Stocks not paying dividends")
+            
+            if highest_yield_stock != 'N/A':
+                st.info(f"🏆 Highest Yield: **{highest_yield_stock}** at **{highest_yield_value:.2f}%**")
+        
+        with col_tax:
+            st.markdown("""
+            <div style='background: #fef2f2; border-radius: 10px; padding: 20px; border: 1px solid #fecaca;'>
+                <h3 style='color: #991b1b; margin: 0 0 15px 0; font-size: 18px;'>📋 Tax Implications (If Sold Today)</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            from utils.advanced_metrics import AdvancedMetricsCalculator
+            try:
+                calculator = AdvancedMetricsCalculator()
+                if hasattr(st.session_state, 'analysis_results') and st.session_state.analysis_results:
+                    stock_df = pd.DataFrame(st.session_state.analysis_results.get('stock_performance', []))
+                    if not stock_df.empty:
+                        tax_data = calculator.calculate_tax_impact(stock_df)
+                    else:
+                        tax_data = self._get_default_tax_data()
+                else:
+                    tax_data = self._get_default_tax_data()
+            except Exception:
+                tax_data = self._get_default_tax_data()
+            
+            c1, c2 = st.columns(2)
+            with c1:
+                st.metric("STCG Tax (20%)", f"₹{tax_data.get('estimated_stcg_tax', 0):,.0f}",
+                         help="Short-term capital gains tax on holdings < 1 year")
+                st.metric("LTCG Tax (12.5%)", f"₹{tax_data.get('estimated_ltcg_tax', 0):,.0f}",
+                         help="Long-term capital gains tax above ₹1.25L exemption")
+            with c2:
+                st.metric("STT on Sell", f"₹{tax_data.get('stt_on_sell', 0):,.0f}",
+                         help="Securities Transaction Tax (0.1% on sell value)")
+                st.metric("Total Tax Liability", f"₹{tax_data.get('total_tax_and_costs', 0):,.0f}",
+                         help="Total estimated taxes and transaction costs if entire portfolio is sold")
+            
+            ltcg_remaining = tax_data.get('ltcg_exemption_remaining', 0)
+            if ltcg_remaining > 0:
+                st.success(f"✅ LTCG Exemption Available: ₹{ltcg_remaining:,.0f}")
+            else:
+                st.warning(f"⚠️ LTCG exemption fully utilized")
+        
+        st.caption("*Tax estimates assume full portfolio liquidation. Based on Union Budget 2024 rates. Consult a tax advisor for personalized advice.*")
+        st.markdown("---")
+    
+    def _get_default_tax_data(self):
+        """Return default tax data when calculation fails"""
+        return {
+            'short_term_gains': 0, 'long_term_gains': 0,
+            'estimated_stcg_tax': 0, 'estimated_ltcg_tax': 0,
+            'stt_on_sell': 0, 'total_tax_and_costs': 0,
+            'ltcg_exemption_remaining': 125000
+        }
     
     def calculate_health_score(self, summary, portfolio_data):
         """Calculate portfolio health score based on multiple factors"""

@@ -91,19 +91,48 @@ class PortfolioAnalyzer:
         portfolio_df['Category'] = portfolio_df['Stock Name'].apply(self.data_fetcher.get_stock_category)
         portfolio_df['Sector'] = portfolio_df['Stock Name'].apply(self.data_fetcher.get_stock_sector)
         
+        # Add dividend yield for each stock
+        portfolio_df['Dividend Yield'] = portfolio_df['Stock Name'].apply(self.data_fetcher.get_dividend_yield)
+        portfolio_df['Annual Dividend'] = portfolio_df['Current Value'] * (portfolio_df['Dividend Yield'] / 100)
+        
         # Calculate all-time highs since purchase
         portfolio_df['All Time High Since Purchase'] = self.calculate_ath_since_purchase(portfolio_df, historical_data)
         portfolio_df['Potential Gain from ATH'] = ((portfolio_df['All Time High Since Purchase'] - portfolio_df['Buy Price']) / portfolio_df['Buy Price']) * 100
         
+        # Calculate dividend metrics
+        total_annual_dividend = portfolio_df['Annual Dividend'].sum()
+        current_value_total = portfolio_df['Current Value'].sum()
+        portfolio_dividend_yield = (total_annual_dividend / current_value_total * 100) if current_value_total > 0 else 0
+        
         # Portfolio summary
         results['portfolio_summary'] = {
             'total_investment': portfolio_df['Investment Value'].sum(),
-            'current_value': portfolio_df['Current Value'].sum(),
+            'current_value': current_value_total,
             'total_gain_loss': portfolio_df['Absolute Gain/Loss'].sum(),
             'total_gain_loss_percentage': (portfolio_df['Absolute Gain/Loss'].sum() / portfolio_df['Investment Value'].sum()) * 100,
             'number_of_stocks': len(portfolio_df),
             'profitable_stocks': len(portfolio_df[portfolio_df['Absolute Gain/Loss'] > 0]),
             'loss_making_stocks': len(portfolio_df[portfolio_df['Absolute Gain/Loss'] < 0])
+        }
+        
+        # Dividend metrics - guard against all-zero/NaN yields
+        dividend_paying_stocks = portfolio_df[portfolio_df['Dividend Yield'] > 0]
+        if len(dividend_paying_stocks) > 0:
+            highest_yield_idx = dividend_paying_stocks['Dividend Yield'].idxmax()
+            highest_yield_stock = dividend_paying_stocks.loc[highest_yield_idx, 'Stock Name']
+            highest_yield_value = round(dividend_paying_stocks['Dividend Yield'].max(), 2)
+        else:
+            highest_yield_stock = 'N/A'
+            highest_yield_value = 0
+        
+        results['dividend_metrics'] = {
+            'portfolio_dividend_yield': round(portfolio_dividend_yield, 2),
+            'total_annual_dividend': round(total_annual_dividend, 2),
+            'highest_yield_stock': highest_yield_stock,
+            'highest_yield_value': highest_yield_value,
+            'dividend_paying_stocks': len(dividend_paying_stocks),
+            'non_dividend_stocks': len(portfolio_df[portfolio_df['Dividend Yield'] == 0]),
+            'stock_dividends': portfolio_df[['Stock Name', 'Dividend Yield', 'Annual Dividend', 'Current Value']].to_dict('records')
         }
         
         # Sector analysis
