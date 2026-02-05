@@ -40,6 +40,51 @@ def init_database():
             print(f"Database initialization failed: {e}")
     return False
 
+def render_zerodha_status():
+    """Render Zerodha connection status in sidebar"""
+    api_key = os.environ.get('ZERODHA_API_KEY')
+    access_token = os.environ.get('ZERODHA_ACCESS_TOKEN')
+    
+    if not api_key:
+        return
+    
+    st.markdown("---")
+    st.markdown("**📈 Data Source**")
+    
+    if access_token:
+        st.success("🟢 Zerodha Connected")
+    else:
+        with st.expander("⚠️ Zerodha Login Required"):
+            st.caption("Live prices require daily login")
+            
+            try:
+                from kiteconnect import KiteConnect
+                kite = KiteConnect(api_key=api_key)
+                login_url = kite.login_url()
+                
+                st.markdown(f"**Step 1:** [Click here to login]({login_url})")
+                st.caption("After login, copy the `request_token` from URL")
+                
+                request_token = st.text_input("Step 2: Paste token", key="zerodha_token", label_visibility="visible")
+                
+                if st.button("Connect", key="zerodha_connect"):
+                    if request_token:
+                        try:
+                            api_secret = os.environ.get('ZERODHA_API_SECRET')
+                            data = kite.generate_session(request_token, api_secret=api_secret)
+                            token = data['access_token']
+                            st.success("Connected! Add this secret:")
+                            st.code(f"ZERODHA_ACCESS_TOKEN={token}", language=None)
+                            st.info("Add above as a secret, then refresh")
+                        except Exception as e:
+                            st.error(f"Failed: {str(e)[:50]}")
+                    else:
+                        st.warning("Enter the request token first")
+            except Exception as e:
+                st.error("Zerodha setup incomplete")
+        
+        st.caption("Using: Yahoo Finance (backup)")
+
 def render_disclaimer_overlay(section_type):
     """Render disclaimer as an overlay on top of blurred content preview"""
     
@@ -408,6 +453,9 @@ def render_auth_header():
                 st.session_state.analysis_complete = False
                 st.session_state.show_admin = False
                 st.rerun()
+            
+            # Zerodha connection status
+            render_zerodha_status()
         else:
             st.markdown("""
             <div style='background: linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px;'>
