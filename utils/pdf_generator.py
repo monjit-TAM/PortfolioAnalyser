@@ -348,95 +348,67 @@ class PDFReportGenerator:
         elements.append(rec_summary_table)
         elements.append(Spacer(1, 10))
         
-        # Value Perspective Recommendations - Detailed
+        # Value Perspective Recommendations
         elements.append(Paragraph("📈 Value Investing Perspective", self.subheading_style))
         elements.append(Spacer(1, 10))
         
-        value_rec_data = [['Stock', 'Action', 'Key Metrics', 'Rationale']]
+        value_rec_data = [['Stock', 'Action', 'Key Rationale']]
         
         for rec in recommendations:
             value_persp = rec.get('value_analysis', {})
             if value_persp:
                 value_action = value_persp.get('recommendation', 'HOLD')
                 
-                # Build metrics string with P/E, P/B, Dividend Yield
-                metrics_parts = []
-                pe = value_persp.get('pe_ratio')
-                pb = value_persp.get('pb_ratio')
-                div_yield = value_persp.get('dividend_yield')
-                
-                if pe: metrics_parts.append(f"P/E: {pe:.1f}")
-                if pb: metrics_parts.append(f"P/B: {pb:.2f}")
-                if div_yield: metrics_parts.append(f"Div: {div_yield:.1f}%")
-                
-                metrics_text = ", ".join(metrics_parts) if metrics_parts else "N/A"
-                
-                # Get all rationale points
+                # Get rationale - truncate to fit in table
                 rationale = value_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = "; ".join([r[:50] for r in rationale[:2]])
+                    rationale_text = rationale[0][:70] if len(rationale[0]) > 70 else rationale[0]
                 else:
                     rationale_text = 'Analysis based on fundamentals'
                 
                 value_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     value_action,
-                    metrics_text,
                     rationale_text
                 ])
         
         if len(value_rec_data) > 1:
             value_rec_table = self.create_card_table(
                 value_rec_data,
-                col_widths=[1.2*inch, 0.8*inch, 1.5*inch, 3.3*inch],
+                col_widths=[1.5*inch, 0.8*inch, 4.5*inch],
                 header_color=colors.HexColor('#2980b9')
             )
             elements.append(value_rec_table)
             elements.append(Spacer(1, 10))
         
-        # Growth Perspective Recommendations - Detailed
+        # Growth Perspective Recommendations
         elements.append(Paragraph("🚀 Growth Investing Perspective", self.subheading_style))
         elements.append(Spacer(1, 10))
         
-        growth_rec_data = [['Stock', 'Action', 'Key Metrics', 'Rationale']]
+        growth_rec_data = [['Stock', 'Action', 'Key Rationale']]
         
         for rec in recommendations:
             growth_persp = rec.get('growth_analysis', {})
             if growth_persp:
                 growth_action = growth_persp.get('recommendation', 'HOLD')
                 
-                # Build metrics string with growth indicators
-                metrics_parts = []
-                rev_growth = growth_persp.get('revenue_growth')
-                earn_growth = growth_persp.get('earnings_growth')
-                roe = growth_persp.get('roe')
-                momentum = growth_persp.get('momentum_52w')
-                
-                if rev_growth: metrics_parts.append(f"Rev: {rev_growth:+.1f}%")
-                if earn_growth: metrics_parts.append(f"EPS: {earn_growth:+.1f}%")
-                if roe: metrics_parts.append(f"ROE: {roe:.1f}%")
-                if momentum: metrics_parts.append(f"Mom: {momentum:+.1f}%")
-                
-                metrics_text = ", ".join(metrics_parts[:3]) if metrics_parts else "N/A"
-                
-                # Get all rationale points
+                # Get rationale - truncate to fit in table
                 rationale = growth_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = "; ".join([r[:50] for r in rationale[:2]])
+                    rationale_text = rationale[0][:70] if len(rationale[0]) > 70 else rationale[0]
                 else:
                     rationale_text = 'Analysis based on growth metrics'
                 
                 growth_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     growth_action,
-                    metrics_text,
                     rationale_text
                 ])
         
         if len(growth_rec_data) > 1:
             growth_rec_table = self.create_card_table(
                 growth_rec_data,
-                col_widths=[1.2*inch, 0.8*inch, 1.5*inch, 3.3*inch],
+                col_widths=[1.5*inch, 0.8*inch, 4.5*inch],
                 header_color=colors.HexColor('#16a085')
             )
             elements.append(growth_rec_table)
@@ -876,9 +848,9 @@ class PDFReportGenerator:
             # Add value labels on bars
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height,
+                ax.text(bar.get_x() + bar.get_width()/2., height * 0.5,
                        f'{int(height)}',
-                       ha='center', va='bottom', fontsize=12, fontweight='bold')
+                       ha='center', va='center', fontsize=12, fontweight='bold', color='white')
             
             ax.set_title('Stock Performance Distribution', fontsize=14, fontweight='bold', pad=15)
             ax.set_ylabel('Number of Stocks', fontsize=11)
@@ -910,12 +882,12 @@ class PDFReportGenerator:
             
             bars = ax.bar(categories, values, color=colors, width=0.5)
             
-            # Add value labels on bars
+            # Add value labels inside bars
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height,
+                ax.text(bar.get_x() + bar.get_width()/2., height * 0.5,
                        f'₹{height:,.0f}',
-                       ha='center', va='bottom', fontsize=11, fontweight='bold')
+                       ha='center', va='center', fontsize=10, fontweight='bold', color='white')
             
             ax.set_title('Investment vs Current Portfolio Value', fontsize=14, fontweight='bold', pad=15)
             ax.set_ylabel('Amount (₹)', fontsize=11)
@@ -1015,13 +987,15 @@ class PDFReportGenerator:
         
         bars = ax.bar(sector_data['Sector'], sector_data['Sector Return %'], color=colors_bar, width=0.6)
         
-        # Add value labels on bars
+        # Add value labels inside bars for cleaner look
         for bar, value in zip(bars, sector_data['Sector Return %']):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{value:+.2f}%',
-                   ha='center', va='bottom' if height >= 0 else 'top',
-                   fontsize=10, fontweight='bold')
+            label_y = height * 0.5 if abs(height) > 2 else height
+            va = 'center' if abs(height) > 2 else ('bottom' if height >= 0 else 'top')
+            ax.text(bar.get_x() + bar.get_width()/2., label_y,
+                   f'{value:+.1f}%',
+                   ha='center', va=va,
+                   fontsize=8, fontweight='bold', color='white' if abs(height) > 2 else 'black')
         
         ax.set_title('Sector-wise Returns (%)', fontsize=14, fontweight='bold', pad=15)
         ax.set_xlabel('Sector', fontsize=11)
@@ -1029,6 +1003,8 @@ class PDFReportGenerator:
         ax.grid(axis='y', alpha=0.3, linestyle='--')
         ax.set_axisbelow(True)
         ax.axhline(y=0, color='black', linestyle='-', linewidth=0.8)
+        max_val = max(abs(sector_data['Sector Return %'].max()), abs(sector_data['Sector Return %'].min()))
+        ax.set_ylim(-max_val * 1.15, max_val * 1.15)
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
         
@@ -1261,13 +1237,13 @@ class PDFReportGenerator:
         bars1 = ax.bar(x - width/2, current_values, width, label='Current Allocation', color='#3498db')
         bars2 = ax.bar(x + width/2, target_values, width, label='Target Allocation', color='#27ae60')
         
-        # Add value labels
+        # Add value labels inside bars
         for bars in [bars1, bars2]:
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height,
+                ax.text(bar.get_x() + bar.get_width()/2., height * 0.5,
                        f'{height:.1f}%',
-                       ha='center', va='bottom', fontsize=9, fontweight='bold')
+                       ha='center', va='center', fontsize=8, fontweight='bold', color='white')
         
         ax.set_title('Current vs Target Allocation', fontsize=14, fontweight='bold', pad=15)
         ax.set_xlabel('Category', fontsize=11)
