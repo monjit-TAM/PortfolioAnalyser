@@ -115,7 +115,7 @@ class PDFReportGenerator:
         # COVER PAGE
         # ====================
         try:
-            logo = Image("attached_assets/Alphalens_1760976199318.png", width=4.5*inch, height=1.7*inch)
+            logo = Image("attached_assets/alphalens-high-resolution-logo_1770288055113.png", width=4.5*inch, height=1.2*inch)
             logo.hAlign = 'CENTER'
             elements.append(logo)
             elements.append(Spacer(1, 10))

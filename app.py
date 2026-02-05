@@ -387,7 +387,7 @@ def render_top_header():
 
 def render_auth_header():
     with st.sidebar:
-        st.image("attached_assets/AlphaMarket_(2)_1767079367380.png", width=250)
+        st.image("attached_assets/alphalens-high-resolution-logo_1770288055113.png", width=250)
         st.markdown("---")
         
         if st.session_state.authenticated:
