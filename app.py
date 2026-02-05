@@ -972,13 +972,30 @@ def display_analysis():
                 try:
                     pdf_gen = PDFReportGenerator()
                     filename = f"portfolio_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                    
+                    # Get dividend metrics and tax data for PDF
+                    dividend_metrics = st.session_state.analysis_results.get('dividend_metrics', {})
+                    
+                    # Calculate tax data
+                    from utils.advanced_metrics import AdvancedMetricsCalculator
+                    tax_data = None
+                    try:
+                        calculator = AdvancedMetricsCalculator()
+                        stock_df = pd.DataFrame(st.session_state.analysis_results.get('stock_performance', []))
+                        if not stock_df.empty:
+                            tax_data = calculator.calculate_tax_impact(stock_df)
+                    except:
+                        pass
+                    
                     pdf_gen.generate_report(
                         st.session_state.analysis_results,
                         st.session_state.portfolio_data,
                         st.session_state.recommendations,
                         filename,
                         st.session_state.historical_data,
-                        st.session_state.current_data
+                        st.session_state.current_data,
+                        dividend_metrics,
+                        tax_data
                     )
                     
                     # Read the generated PDF

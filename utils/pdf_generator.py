@@ -96,17 +96,17 @@ class PDFReportGenerator:
         ]))
         return table
 
-    def generate_report(self, analysis_results, portfolio_data, recommendations, filename="portfolio_report.pdf", historical_data=None, current_data=None):
+    def generate_report(self, analysis_results, portfolio_data, recommendations, filename="portfolio_report.pdf", historical_data=None, current_data=None, dividend_metrics=None, tax_data=None):
         """Generate comprehensive PDF report with all web data including historical performance, rebalancing, and customer profile"""
         
-        # Create PDF document
+        # Create PDF document with improved margins
         doc = SimpleDocTemplate(
             filename,
             pagesize=A4,
-            rightMargin=35,
-            leftMargin=35,
-            topMargin=35,
-            bottomMargin=50
+            rightMargin=40,
+            leftMargin=40,
+            topMargin=40,
+            bottomMargin=55
         )
         
         elements = []
@@ -118,17 +118,17 @@ class PDFReportGenerator:
             logo = Image("attached_assets/Alphalens_1760976199318.png", width=4.5*inch, height=1.7*inch)
             logo.hAlign = 'CENTER'
             elements.append(logo)
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
         except:
             pass
         
         elements.append(Paragraph("Indian Stock Market", self.title_style))
         elements.append(Paragraph("Portfolio Analysis Report", self.title_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         report_date = datetime.now().strftime('%d %B %Y, %I:%M %p')
         elements.append(Paragraph(f"Generated on: {report_date}", self.subtitle_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Company footer on cover page
         footer_style = ParagraphStyle('Footer', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=9, textColor=colors.grey)
@@ -142,7 +142,7 @@ class PDFReportGenerator:
         # EXECUTIVE SUMMARY
         # ====================
         elements.append(Paragraph("📊 Executive Summary", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         summary = analysis_results['portfolio_summary']
         
@@ -159,7 +159,17 @@ class PDFReportGenerator:
         
         summary_table = self.create_card_table(summary_data, col_widths=[3.5*inch, 3*inch])
         elements.append(summary_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 15))
+        
+        # ====================
+        # DIVIDEND YIELD METRICS
+        # ====================
+        self._create_dividend_section(dividend_metrics, elements)
+        
+        # ====================
+        # TAX IMPLICATIONS
+        # ====================
+        self._create_tax_section(tax_data, analysis_results, elements)
         
         # ====================
         # PERFORMANCE OVERVIEW with CHARTS
@@ -172,7 +182,7 @@ class PDFReportGenerator:
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("📋 Detailed Portfolio Holdings", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         stock_performance = pd.DataFrame(analysis_results['stock_performance'])
         
@@ -194,7 +204,7 @@ class PDFReportGenerator:
         
         holdings_table = self.create_card_table(
             holdings_data, 
-            col_widths=[1.1*inch, 0.9*inch, 0.5*inch, 0.8*inch, 0.8*inch, 0.9*inch, 0.9*inch, 0.8*inch, 0.8*inch]
+            col_widths=[1.0*inch, 0.85*inch, 0.4*inch, 0.7*inch, 0.7*inch, 0.85*inch, 0.85*inch, 0.75*inch, 0.7*inch]
         )
         elements.append(holdings_table)
         
@@ -206,7 +216,7 @@ class PDFReportGenerator:
         
         # Detailed Sector Table
         elements.append(Paragraph("📋 Detailed Sector Breakdown", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         sector_analysis = pd.DataFrame(analysis_results['sector_analysis'])
         
@@ -229,14 +239,14 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#9b59b6')
         )
         elements.append(sector_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # ====================
         # CATEGORY ANALYSIS
         # ====================
         if 'category_analysis' in analysis_results and len(analysis_results['category_analysis']) > 0:
             elements.append(Paragraph("📊 Category Analysis (Large/Mid/Small Cap)", self.subheading_style))
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
             
             category_analysis = pd.DataFrame(analysis_results['category_analysis'])
             
@@ -258,7 +268,7 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#27ae60')
             )
             elements.append(category_table)
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
         
         # ====================
         # BENCHMARK COMPARISON
@@ -266,7 +276,7 @@ class PDFReportGenerator:
         if 'benchmark_comparison' in analysis_results:
             elements.append(PageBreak())
             elements.append(Paragraph("📊 Benchmark Comparison", self.heading_style))
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
             
             benchmark = analysis_results['benchmark_comparison']
             
@@ -290,7 +300,7 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#e67e22')
             )
             elements.append(benchmark_table)
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
         
         # ====================
         # BENCHMARK COMPARISON
@@ -306,7 +316,7 @@ class PDFReportGenerator:
         
         # Add Recommendation Distribution Chart
         self._create_recommendation_charts(recommendations, elements)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Summary count
         buy_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'BUY')
@@ -326,11 +336,11 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#f39c12')
         )
         elements.append(rec_summary_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Value Perspective Recommendations
         elements.append(Paragraph("📈 Value Investing Perspective", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         value_rec_data = [['Stock', 'Action', 'Key Rationale']]
         
@@ -358,11 +368,11 @@ class PDFReportGenerator:
                 header_color=colors.HexColor('#2980b9')
             )
             elements.append(value_rec_table)
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
         
         # Growth Perspective Recommendations
         elements.append(Paragraph("🚀 Growth Investing Perspective", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         growth_rec_data = [['Stock', 'Action', 'Key Rationale']]
         
@@ -396,11 +406,11 @@ class PDFReportGenerator:
         # ====================
         elements.append(PageBreak())
         elements.append(Paragraph("🏆 Performance Highlights", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Top 5 performers
         elements.append(Paragraph("Top 5 Performers", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         top_performers = stock_performance.nlargest(5, 'Percentage Gain/Loss')
         top_data = [['Stock', 'Investment', 'Current Value', 'Gain/Loss', 'Return %']]
@@ -420,11 +430,11 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#27ae60')
         )
         elements.append(top_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Worst 5 performers
         elements.append(Paragraph("Worst 5 Performers", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         worst_performers = stock_performance.nsmallest(5, 'Percentage Gain/Loss')
         worst_data = [['Stock', 'Investment', 'Current Value', 'Gain/Loss', 'Return %']]
@@ -454,7 +464,7 @@ class PDFReportGenerator:
             
             # Additional textual summary
             elements.append(Paragraph("📋 Performance Summary Table", self.subheading_style))
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
             
             # Calculate historical metrics
             portfolio_history = self._calculate_portfolio_history(portfolio_data, historical_data)
@@ -493,7 +503,7 @@ class PDFReportGenerator:
         
         # Additional Sector Rebalancing if needed
         elements.append(Paragraph("📊 Sector Rebalancing Analysis", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Keep minimal sector rebalancing table
         strategy = 'Balanced'
@@ -504,7 +514,7 @@ class PDFReportGenerator:
         }
         
         elements.append(Paragraph(f"📊 Recommended Strategy: {strategy}", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Current vs Target Allocation
         current_allocation = self._calculate_current_allocation(analysis_results)
@@ -529,11 +539,11 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#9b59b6')
         )
         elements.append(allocation_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Rebalancing Actions
         elements.append(Paragraph("💡 Recommended Actions", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         rebalancing_actions = self._generate_rebalancing_actions(
             current_allocation, target_allocation, 
@@ -567,7 +577,7 @@ class PDFReportGenerator:
         
         # Additional Portfolio Details
         elements.append(Paragraph("📊 Additional Portfolio Details", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         summary = analysis_results['portfolio_summary']
         portfolio_size = summary['current_value']
@@ -620,11 +630,11 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#1abc9c')
         )
         elements.append(profile_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Investment Style Analysis
         elements.append(Paragraph("🎯 Investment Style Analysis", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Analyze based on recommendations
         value_oriented = sum(1 for rec in recommendations if rec.get('value_analysis', {}).get('recommendation') == 'BUY')
@@ -654,11 +664,11 @@ class PDFReportGenerator:
             header_color=colors.HexColor('#34495e')
         )
         elements.append(style_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Portfolio Health Score
         elements.append(Paragraph("💯 Portfolio Health Score", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         health_score = self._calculate_health_score(analysis_results, recommendations)
         
@@ -691,38 +701,84 @@ class PDFReportGenerator:
         elements.append(health_table)
         
         # ====================
-        # DISCLAIMER & FOOTER
+        # COMPREHENSIVE DISCLAIMER & FOOTER
         # ====================
         elements.append(PageBreak())
-        elements.append(Paragraph("⚠️ Disclaimer", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Paragraph("⚠️ Important Disclaimers", self.heading_style))
+        elements.append(Spacer(1, 12))
         
-        disclaimer_text = """
+        # General Disclaimer
+        elements.append(Paragraph("General Disclaimer", self.subheading_style))
+        elements.append(Spacer(1, 8))
+        
+        general_disclaimer = """
         This portfolio analysis report is generated for informational purposes only and should not be construed as financial, 
         investment, tax, or legal advice. The information contained in this report is based on historical data and current market 
-        conditions, which are subject to change without notice. Past performance is not indicative of future results.
+        conditions, which are subject to change without notice. <b>Past performance is not indicative of future results.</b>
         <br/><br/>
         All investments involve risk, including the potential loss of principal. The analysis, recommendations, and insights provided 
         in this report are based on quantitative analysis and do not account for all market factors, individual circumstances, or 
-        personal financial situations. Individual stock recommendations reflect statistical analysis and market trends but should not 
-        be considered as guarantees of future performance.
-        <br/><br/>
-        Before making any investment decisions, we strongly recommend consulting with a qualified financial advisor who can assess 
-        your individual financial situation, risk tolerance, and investment objectives. The value and growth perspectives presented 
-        in this report represent different investment strategies and should be evaluated in the context of your overall portfolio 
-        strategy and financial goals.
-        <br/><br/>
-        Market conditions, economic factors, regulatory changes, and company-specific events can significantly impact stock 
-        performance. Diversification and regular portfolio review are essential components of sound investment management.
+        personal financial situations.
         """
+        elements.append(Paragraph(general_disclaimer, self.styles['Normal']))
+        elements.append(Spacer(1, 12))
         
-        disclaimer_para = Paragraph(disclaimer_text, self.styles['Normal'])
-        elements.append(disclaimer_para)
-        elements.append(Spacer(1, 3))
+        # Investment Disclaimer
+        elements.append(Paragraph("Investment Risk Disclaimer", self.subheading_style))
+        elements.append(Spacer(1, 8))
+        
+        investment_disclaimer = """
+        Individual stock recommendations in this report reflect statistical analysis and market trends but should not be considered 
+        as guarantees of future performance. Before making any investment decisions, we strongly recommend consulting with a 
+        SEBI-registered investment advisor who can assess your individual financial situation, risk tolerance, and investment objectives.
+        <br/><br/>
+        Market conditions, economic factors, regulatory changes, and company-specific events can significantly impact stock performance. 
+        Diversification and regular portfolio review are essential components of sound investment management.
+        """
+        elements.append(Paragraph(investment_disclaimer, self.styles['Normal']))
+        elements.append(Spacer(1, 12))
+        
+        # Tax Disclaimer
+        elements.append(Paragraph("Tax Disclaimer", self.subheading_style))
+        elements.append(Spacer(1, 8))
+        
+        tax_disclaimer = """
+        Tax calculations presented in this report are estimates based on prevailing tax rates as per Union Budget 2024. Actual tax 
+        liability may vary based on individual circumstances, applicable exemptions, and deductions. The LTCG exemption of ₹1.25 lakh 
+        applies annually and may change with future budgets.
+        <br/><br/>
+        <b>We strongly recommend consulting with a qualified Chartered Accountant or Tax Advisor for personalized tax planning advice.</b>
+        """
+        elements.append(Paragraph(tax_disclaimer, self.styles['Normal']))
+        elements.append(Spacer(1, 12))
+        
+        # Data Disclaimer
+        elements.append(Paragraph("Data Accuracy Disclaimer", self.subheading_style))
+        elements.append(Spacer(1, 8))
+        
+        data_disclaimer = """
+        Stock prices and market data are sourced from third-party providers and may be delayed or subject to errors. While we strive 
+        to provide accurate information, we do not guarantee the accuracy, completeness, or timeliness of any data presented. 
+        Dividend yields are based on trailing twelve-month data and may not reflect future dividend payments.
+        """
+        elements.append(Paragraph(data_disclaimer, self.styles['Normal']))
+        elements.append(Spacer(1, 12))
+        
+        # Regulatory Compliance
+        elements.append(Paragraph("Regulatory Compliance", self.subheading_style))
+        elements.append(Spacer(1, 8))
+        
+        regulatory_text = """
+        Alphalens is a portfolio analysis tool and does not provide investment advisory services as defined under SEBI (Investment 
+        Advisers) Regulations, 2013. We do not execute trades, manage portfolios, or provide personalized investment recommendations. 
+        All investment decisions are the sole responsibility of the user.
+        """
+        elements.append(Paragraph(regulatory_text, self.styles['Normal']))
+        elements.append(Spacer(1, 15))
         
         # Company footer
         elements.append(Paragraph("About Alphalens", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 8))
         
         company_text = """
         <b>Alphalens</b> is a comprehensive portfolio analysis platform developed by <b>Edhaz Financial Services Private Limited</b>. 
@@ -730,12 +786,23 @@ class PDFReportGenerator:
         dual-perspective recommendations, and comprehensive portfolio tracking.
         <br/><br/>
         <b>Registered Office:</b> Alpine Eco, Doddenekkundi, K R Puram Hobli, Bangalore 560037<br/>
+        <b>CIN:</b> [Company Identification Number]<br/>
         <b>Email:</b> hello@thealphamarket.com<br/>
-        <b>Phone:</b> +91-91089 67788
+        <b>Phone:</b> +91-91089 67788<br/>
+        <b>Website:</b> www.alphalens.in
         """
         
         company_para = Paragraph(company_text, self.styles['Normal'])
         elements.append(company_para)
+        elements.append(Spacer(1, 15))
+        
+        # Final note
+        report_footer = Paragraph(
+            f"<i>Report generated on {datetime.now().strftime('%d %B %Y at %I:%M %p')} IST. "
+            "This report is confidential and intended solely for the recipient.</i>",
+            ParagraphStyle('ReportFooter', parent=self.styles['Normal'], fontSize=9, textColor=colors.grey, alignment=TA_CENTER)
+        )
+        elements.append(report_footer)
         
         # Build PDF
         doc.build(elements)
@@ -750,7 +817,7 @@ class PDFReportGenerator:
         from reportlab.lib.utils import ImageReader
         
         elements.append(Paragraph("📈 Performance Overview", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         summary = analysis_results['portfolio_summary']
         
@@ -841,7 +908,7 @@ class PDFReportGenerator:
             return
         
         elements.append(Paragraph("🏭 Sector Analysis", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Sector Allocation Pie Chart
         fig, ax = plt.subplots(figsize=(7, 4))
@@ -910,7 +977,7 @@ class PDFReportGenerator:
         
         # Sector Insights
         elements.append(Paragraph("💡 Sector Insights", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         best_sector = sector_data.loc[sector_data['Sector Return %'].idxmax()]
         worst_sector = sector_data.loc[sector_data['Sector Return %'].idxmin()]
@@ -926,14 +993,14 @@ class PDFReportGenerator:
         
         insights_table = self.create_card_table(insights_data, col_widths=[2*inch, 4.5*inch])
         elements.append(insights_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Diversification Analysis
         num_sectors = len(sector_data)
         max_sector_pct = sector_data['Percentage of Portfolio'].max()
         
         elements.append(Paragraph("📊 Diversification Analysis", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         div_data = [
             ['Metric', 'Value', 'Assessment'],
@@ -945,11 +1012,11 @@ class PDFReportGenerator:
         
         div_table = self.create_card_table(div_data, col_widths=[2*inch, 1.5*inch, 2*inch])
         elements.append(div_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Sector Recommendations
         elements.append(Paragraph("💡 Sector Recommendations", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         rec_text = []
         if max_sector_pct > 40:
@@ -967,7 +1034,7 @@ class PDFReportGenerator:
         else:
             elements.append(Paragraph("• Your sector allocation is well-balanced", self.styles['Normal']))
         
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
     
     def _create_recommendation_charts(self, recommendations, elements):
         """Add Recommendation charts to PDF using matplotlib"""
@@ -987,7 +1054,7 @@ class PDFReportGenerator:
         # Recommendation Distribution Pie Chart
         if buy_count + hold_count + sell_count > 0:
             elements.append(Paragraph("📊 Recommendation Distribution", self.subheading_style))
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
             
             fig, ax = plt.subplots(figsize=(6, 3.5))
             values = [buy_count, hold_count, sell_count]
@@ -1024,7 +1091,7 @@ class PDFReportGenerator:
         from utils.data_fetcher import DataFetcher
         
         elements.append(Paragraph("📊 Benchmark Comparison", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         stock_performance = pd.DataFrame(analysis_results['stock_performance'])
         
@@ -1033,7 +1100,7 @@ class PDFReportGenerator:
         
         # Portfolio vs Market Indices
         elements.append(Paragraph("🎯 Portfolio vs Market Indices", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         portfolio_return = analysis_results['portfolio_summary']['total_gain_loss_percentage']
         
@@ -1069,11 +1136,11 @@ class PDFReportGenerator:
         
         bench_table = self.create_card_table(bench_data, col_widths=[2.5*inch, 1.5*inch, 2*inch])
         elements.append(bench_table)
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Benchmark Insights
         elements.append(Paragraph("💡 Benchmark Insights", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         insights = []
         nifty_return = benchmark_returns.get('NIFTY50', 0)
@@ -1090,20 +1157,20 @@ class PDFReportGenerator:
         for insight in insights:
             elements.append(Paragraph(insight, self.styles['Normal']))
         
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
     
     def _create_enhanced_rebalancing_section(self, analysis_results, current_data, elements):
         """Add enhanced Rebalancing section with charts and detailed actions to PDF"""
         elements.append(Paragraph("⚖️ Enhanced Portfolio Rebalancing", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Strategy description
         elements.append(Paragraph("📊 Recommended Strategy: Balanced", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         strategy_text = "The Balanced strategy allocates: 50% Large Cap (stability), 30% Mid Cap (growth), 20% Small Cap (high growth potential)"
         elements.append(Paragraph(strategy_text, self.styles['Normal']))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Current vs Target Allocation
         current_allocation = self._calculate_current_allocation(analysis_results)
@@ -1156,7 +1223,7 @@ class PDFReportGenerator:
         
         # Detailed Rebalancing Actions
         elements.append(Paragraph("📋 Detailed Rebalancing Actions", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         portfolio_value = analysis_results['portfolio_summary']['current_value']
         actions = self._generate_rebalancing_actions(current_allocation, target_allocation, portfolio_value, analysis_results)
@@ -1176,11 +1243,11 @@ class PDFReportGenerator:
         else:
             elements.append(Paragraph("Your portfolio allocation is well-balanced. No rebalancing needed.", self.styles['Normal']))
         
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Implementation Tips
         elements.append(Paragraph("💡 Implementation Tips", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         tips = [
             "• Rebalance gradually over 2-3 months to minimize market timing risk",
@@ -1193,12 +1260,12 @@ class PDFReportGenerator:
         for tip in tips:
             elements.append(Paragraph(tip, self.styles['Normal']))
         
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
     
     def _create_enhanced_customer_profile_section(self, analysis_results, recommendations, elements):
         """Add enhanced Customer Profile section with charts to PDF"""
         elements.append(Paragraph("👤 Enhanced Investment Profile", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         summary = analysis_results['portfolio_summary']
         sector_data = pd.DataFrame(analysis_results['sector_analysis'])
@@ -1206,7 +1273,7 @@ class PDFReportGenerator:
         
         # Investment Style Analysis
         elements.append(Paragraph("📊 Investment Style Analysis", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Calculate investment style
         value_count = sum(1 for rec in recommendations if rec.get('value_analysis', {}).get('action') == 'BUY')
@@ -1262,7 +1329,7 @@ class PDFReportGenerator:
             from reportlab.lib.utils import ImageReader
             
             elements.append(Paragraph("🏭 Sector Allocation Preferences", self.subheading_style))
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
             
             fig, ax = plt.subplots(figsize=(6, 3.5))
             colors = plt.cm.Pastel1(range(len(sector_data)))
@@ -1301,7 +1368,7 @@ class PDFReportGenerator:
             from reportlab.lib.utils import ImageReader
             
             elements.append(Paragraph("📈 Market Cap Allocation", self.subheading_style))
-            elements.append(Spacer(1, 3))
+            elements.append(Spacer(1, 10))
             
             fig, ax = plt.subplots(figsize=(6, 3.5))
             
@@ -1336,7 +1403,7 @@ class PDFReportGenerator:
         
         # Personalized Strategy Recommendations
         elements.append(Paragraph("💡 Personalized Strategy Recommendations", self.subheading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         portfolio_size = summary['current_value']
         num_stocks = summary['number_of_stocks']
@@ -1357,7 +1424,7 @@ class PDFReportGenerator:
         for rec in strategy_recs:
             elements.append(Paragraph(rec, self.styles['Normal']))
         
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
     
     def _create_historical_performance_charts(self, historical_data, portfolio_data, elements):
         """Add Historical Performance charts to PDF using matplotlib"""
@@ -1373,7 +1440,7 @@ class PDFReportGenerator:
             return
         
         elements.append(Paragraph("📈 Historical Performance Charts", self.heading_style))
-        elements.append(Spacer(1, 3))
+        elements.append(Spacer(1, 10))
         
         # Chart 1: Portfolio Value Over Time
         fig, ax = plt.subplots(figsize=(7, 3.5))
@@ -1605,3 +1672,124 @@ class PDFReportGenerator:
             score += 10
         
         return min(score, 100)
+    
+    def _create_dividend_section(self, dividend_metrics, elements):
+        """Add Dividend Yield Metrics section to PDF"""
+        if not dividend_metrics:
+            dividend_metrics = {
+                'portfolio_dividend_yield': 0,
+                'total_annual_dividend': 0,
+                'highest_yield_stock': 'N/A',
+                'highest_yield_value': 0,
+                'dividend_paying_stocks': 0,
+                'non_dividend_stocks': 0
+            }
+        
+        elements.append(Paragraph("💰 Dividend Yield Metrics", self.heading_style))
+        elements.append(Spacer(1, 10))
+        
+        portfolio_yield = dividend_metrics.get('portfolio_dividend_yield', 0)
+        annual_dividend = dividend_metrics.get('total_annual_dividend', 0)
+        highest_yield_stock = dividend_metrics.get('highest_yield_stock', 'N/A')
+        highest_yield_value = dividend_metrics.get('highest_yield_value', 0)
+        dividend_stocks = dividend_metrics.get('dividend_paying_stocks', 0)
+        non_dividend = dividend_metrics.get('non_dividend_stocks', 0)
+        
+        dividend_data = [
+            ['Metric', 'Value', 'Description'],
+            ['Portfolio Dividend Yield', f"{portfolio_yield:.2f}%", 'Weighted average dividend yield'],
+            ['Expected Annual Dividend', f"₹{annual_dividend:,.0f}", 'Projected yearly dividend income'],
+            ['Dividend-Paying Stocks', f"{dividend_stocks}", 'Stocks currently paying dividends'],
+            ['Non-Dividend Stocks', f"{non_dividend}", 'Stocks not paying dividends'],
+            ['Highest Yield Stock', f"{highest_yield_stock}", f"Yield: {highest_yield_value:.2f}%"]
+        ]
+        
+        dividend_table = self.create_card_table(
+            dividend_data,
+            col_widths=[2.2*inch, 1.5*inch, 2.8*inch],
+            header_color=colors.HexColor('#27ae60')
+        )
+        elements.append(dividend_table)
+        elements.append(Spacer(1, 15))
+    
+    def _create_tax_section(self, tax_data, analysis_results, elements):
+        """Add Tax Implications section to PDF"""
+        from utils.advanced_metrics import AdvancedMetricsCalculator
+        
+        # Calculate tax data if not provided
+        if not tax_data:
+            try:
+                calculator = AdvancedMetricsCalculator()
+                stock_df = pd.DataFrame(analysis_results.get('stock_performance', []))
+                if not stock_df.empty:
+                    tax_data = calculator.calculate_tax_impact(stock_df)
+                else:
+                    tax_data = self._get_default_tax_data()
+            except:
+                tax_data = self._get_default_tax_data()
+        
+        elements.append(Paragraph("📋 Tax Implications (If Portfolio Sold Today)", self.heading_style))
+        elements.append(Spacer(1, 10))
+        
+        # Main tax metrics
+        tax_metrics_data = [
+            ['Tax Category', 'Amount', 'Rate/Notes'],
+            ['Short-Term Capital Gains (STCG)', f"₹{tax_data.get('short_term_gains', 0):,.0f}", 'Holdings < 1 year'],
+            ['Long-Term Capital Gains (LTCG)', f"₹{tax_data.get('long_term_gains', 0):,.0f}", 'Holdings ≥ 1 year'],
+            ['Estimated STCG Tax', f"₹{tax_data.get('estimated_stcg_tax', 0):,.0f}", '20% flat rate'],
+            ['Estimated LTCG Tax', f"₹{tax_data.get('estimated_ltcg_tax', 0):,.0f}", '12.5% above ₹1.25L exemption'],
+            ['Total Estimated Tax', f"₹{tax_data.get('total_estimated_tax', 0):,.0f}", 'Combined tax liability']
+        ]
+        
+        tax_table = self.create_card_table(
+            tax_metrics_data,
+            col_widths=[2.5*inch, 1.8*inch, 2.2*inch],
+            header_color=colors.HexColor('#e74c3c')
+        )
+        elements.append(tax_table)
+        elements.append(Spacer(1, 12))
+        
+        # Transaction costs
+        elements.append(Paragraph("Transaction Costs & Charges", self.subheading_style))
+        elements.append(Spacer(1, 8))
+        
+        transaction_data = [
+            ['Charge Type', 'Amount', 'Rate'],
+            ['Securities Transaction Tax (STT)', f"₹{tax_data.get('stt_on_sell', 0):,.0f}", '0.1% on sell value'],
+            ['Stamp Duty', f"₹{tax_data.get('stamp_duty', 0):,.0f}", '0.015% on buy value'],
+            ['Exchange Transaction Charges', f"₹{tax_data.get('transaction_charges', 0):,.0f}", '0.00345%'],
+            ['SEBI Turnover Fee', f"₹{tax_data.get('sebi_charges', 0):,.0f}", '0.0001%'],
+            ['Total Transaction Costs', f"₹{tax_data.get('total_transaction_costs', 0):,.0f}", 'All charges combined']
+        ]
+        
+        transaction_table = self.create_card_table(
+            transaction_data,
+            col_widths=[2.5*inch, 1.8*inch, 2.2*inch],
+            header_color=colors.HexColor('#9b59b6')
+        )
+        elements.append(transaction_table)
+        elements.append(Spacer(1, 10))
+        
+        # Tax disclaimer
+        tax_disclaimer = Paragraph(
+            "<i>Note: Tax calculations are estimates based on Union Budget 2024 rates. LTCG exemption of ₹1.25 lakh applies annually. "
+            "Consult a qualified tax advisor for personalized advice.</i>",
+            ParagraphStyle('TaxDisclaimer', parent=self.styles['Normal'], fontSize=9, textColor=colors.grey)
+        )
+        elements.append(tax_disclaimer)
+        elements.append(Spacer(1, 15))
+    
+    def _get_default_tax_data(self):
+        """Return default tax data structure"""
+        return {
+            'short_term_gains': 0,
+            'long_term_gains': 0,
+            'estimated_stcg_tax': 0,
+            'estimated_ltcg_tax': 0,
+            'total_estimated_tax': 0,
+            'stt_on_sell': 0,
+            'stamp_duty': 0,
+            'transaction_charges': 0,
+            'sebi_charges': 0,
+            'total_transaction_costs': 0
+        }
