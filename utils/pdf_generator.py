@@ -352,6 +352,15 @@ class PDFReportGenerator:
         elements.append(Paragraph("📈 Value Investing Perspective", self.subheading_style))
         elements.append(Spacer(1, 10))
         
+        # Style for wrapping text in table cells
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=self.styles['Normal'],
+            fontSize=9,
+            leading=11,
+            wordWrap='CJK'
+        )
+        
         value_rec_data = [['Stock', 'Action', 'Key Rationale']]
         
         for rec in recommendations:
@@ -359,23 +368,24 @@ class PDFReportGenerator:
             if value_persp:
                 value_action = value_persp.get('recommendation', 'HOLD')
                 
-                # Get rationale - truncate to fit in table
+                # Get all rationale points and combine them
                 rationale = value_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = rationale[0][:70] if len(rationale[0]) > 70 else rationale[0]
+                    rationale_text = "; ".join(rationale[:3])
                 else:
                     rationale_text = 'Analysis based on fundamentals'
                 
+                # Use Paragraph for text wrapping
                 value_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     value_action,
-                    rationale_text
+                    Paragraph(rationale_text, cell_style)
                 ])
         
         if len(value_rec_data) > 1:
             value_rec_table = self.create_card_table(
                 value_rec_data,
-                col_widths=[1.5*inch, 0.8*inch, 4.5*inch],
+                col_widths=[1.3*inch, 0.7*inch, 4.8*inch],
                 header_color=colors.HexColor('#2980b9')
             )
             elements.append(value_rec_table)
@@ -392,23 +402,24 @@ class PDFReportGenerator:
             if growth_persp:
                 growth_action = growth_persp.get('recommendation', 'HOLD')
                 
-                # Get rationale - truncate to fit in table
+                # Get all rationale points and combine them
                 rationale = growth_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = rationale[0][:70] if len(rationale[0]) > 70 else rationale[0]
+                    rationale_text = "; ".join(rationale[:3])
                 else:
                     rationale_text = 'Analysis based on growth metrics'
                 
+                # Use Paragraph for text wrapping
                 growth_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     growth_action,
-                    rationale_text
+                    Paragraph(rationale_text, cell_style)
                 ])
         
         if len(growth_rec_data) > 1:
             growth_rec_table = self.create_card_table(
                 growth_rec_data,
-                col_widths=[1.5*inch, 0.8*inch, 4.5*inch],
+                col_widths=[1.3*inch, 0.7*inch, 4.8*inch],
                 header_color=colors.HexColor('#16a085')
             )
             elements.append(growth_rec_table)
