@@ -80,22 +80,50 @@ class PortfolioFileParser:
             
             identifier = str(identifier).strip().upper()
             
-            if self._is_isin(identifier):
-                if identifier in self.isin_mappings:
-                    return self.isin_mappings[identifier]['symbol']
-                return identifier
+            # Clean ISIN - remove special characters like *, $, !, @, etc.
+            cleaned = self._clean_isin(identifier)
+            
+            if self._is_isin(cleaned):
+                if cleaned in self.isin_mappings:
+                    return self.isin_mappings[cleaned]['symbol']
+                return cleaned
+            
+            # Check if it's a mutual fund (INF) or govt bond (IN00) - skip these
+            if self._is_mutual_fund(cleaned) or self._is_govt_bond(cleaned):
+                return None  # Will be filtered out in _clean_data
             
             return identifier
         
         df['Stock Name'] = df['Stock Name'].apply(convert_identifier)
         return df
     
+    def _clean_isin(self, value):
+        """Clean ISIN code by removing special characters"""
+        if not isinstance(value, str):
+            return value
+        # Remove common garbage characters: *, $, !, @, #, etc.
+        cleaned = re.sub(r'[^A-Z0-9]', '', value.upper())
+        return cleaned
+    
     def _is_isin(self, value):
-        """Check if value looks like an ISIN code"""
+        """Check if value looks like an ISIN code (stocks)"""
         if not isinstance(value, str):
             return False
         value = value.strip()
+        # Indian stock ISIN: INE + 9 alphanumeric chars
         return bool(re.match(r'^INE[A-Z0-9]{9}$', value))
+    
+    def _is_mutual_fund(self, value):
+        """Check if value is a mutual fund ISIN (starts with INF)"""
+        if not isinstance(value, str):
+            return False
+        return bool(re.match(r'^INF[A-Z0-9]{9}$', value))
+    
+    def _is_govt_bond(self, value):
+        """Check if value is a government bond (starts with IN0)"""
+        if not isinstance(value, str):
+            return False
+        return bool(re.match(r'^IN0[0-9]{9}$', value))
     
     def _clean_data(self, df):
         """Clean and validate data"""
