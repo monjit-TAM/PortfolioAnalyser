@@ -175,10 +175,21 @@ class DataFetcher:
         if stock_name.endswith(self.nse_suffix) or stock_name.endswith(self.bse_suffix):
             return stock_name
         
+        # Check alias with original name (including spaces)
         if stock_name in self.symbol_aliases:
             original_name = stock_name
             stock_name = self.symbol_aliases[stock_name]
             print(f"Symbol alias: {original_name} → {stock_name}")
+        else:
+            # Try normalized name (remove spaces) if no direct alias found
+            normalized_name = stock_name.replace(' ', '').replace('-', '')
+            if normalized_name in self.symbol_aliases:
+                original_name = stock_name
+                stock_name = self.symbol_aliases[normalized_name]
+                print(f"Symbol alias (normalized): {original_name} → {stock_name}")
+            elif normalized_name != stock_name:
+                # Use normalized name as symbol if different
+                stock_name = normalized_name
         
         nse_symbol = f"{stock_name}{self.nse_suffix}"
         try:
