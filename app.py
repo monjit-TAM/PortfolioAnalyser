@@ -1136,7 +1136,8 @@ def display_analysis():
     with tab9:
         if 'advanced_metrics' not in st.session_state:
             with st.spinner("Calculating advanced metrics..."):
-                metrics_calculator = AdvancedMetricsCalculator()
+                from utils.advanced_metrics import AdvancedMetricsCalculator as AMC
+                metrics_calculator = AMC()
                 
                 stock_perf = st.session_state.analysis_results.get('stock_performance', [])
                 portfolio_for_metrics = pd.DataFrame(stock_perf)

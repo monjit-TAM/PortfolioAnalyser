@@ -348,65 +348,95 @@ class PDFReportGenerator:
         elements.append(rec_summary_table)
         elements.append(Spacer(1, 10))
         
-        # Value Perspective Recommendations
+        # Value Perspective Recommendations - Detailed
         elements.append(Paragraph("📈 Value Investing Perspective", self.subheading_style))
         elements.append(Spacer(1, 10))
         
-        value_rec_data = [['Stock', 'Action', 'Key Rationale']]
+        value_rec_data = [['Stock', 'Action', 'Key Metrics', 'Rationale']]
         
         for rec in recommendations:
-            # Access the correct key: value_analysis
             value_persp = rec.get('value_analysis', {})
             if value_persp:
                 value_action = value_persp.get('recommendation', 'HOLD')
+                
+                # Build metrics string with P/E, P/B, Dividend Yield
+                metrics_parts = []
+                pe = value_persp.get('pe_ratio')
+                pb = value_persp.get('pb_ratio')
+                div_yield = value_persp.get('dividend_yield')
+                
+                if pe: metrics_parts.append(f"P/E: {pe:.1f}")
+                if pb: metrics_parts.append(f"P/B: {pb:.2f}")
+                if div_yield: metrics_parts.append(f"Div: {div_yield:.1f}%")
+                
+                metrics_text = ", ".join(metrics_parts) if metrics_parts else "N/A"
+                
+                # Get all rationale points
                 rationale = value_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = rationale[0][:80] + '...' if len(rationale[0]) > 80 else rationale[0]
+                    rationale_text = "; ".join([r[:50] for r in rationale[:2]])
                 else:
                     rationale_text = 'Analysis based on fundamentals'
                 
                 value_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     value_action,
+                    metrics_text,
                     rationale_text
                 ])
         
         if len(value_rec_data) > 1:
             value_rec_table = self.create_card_table(
                 value_rec_data,
-                col_widths=[1.5*inch, 1*inch, 4.3*inch],
+                col_widths=[1.2*inch, 0.8*inch, 1.5*inch, 3.3*inch],
                 header_color=colors.HexColor('#2980b9')
             )
             elements.append(value_rec_table)
             elements.append(Spacer(1, 10))
         
-        # Growth Perspective Recommendations
+        # Growth Perspective Recommendations - Detailed
         elements.append(Paragraph("🚀 Growth Investing Perspective", self.subheading_style))
         elements.append(Spacer(1, 10))
         
-        growth_rec_data = [['Stock', 'Action', 'Key Rationale']]
+        growth_rec_data = [['Stock', 'Action', 'Key Metrics', 'Rationale']]
         
         for rec in recommendations:
-            # Access the correct key: growth_analysis
             growth_persp = rec.get('growth_analysis', {})
             if growth_persp:
                 growth_action = growth_persp.get('recommendation', 'HOLD')
+                
+                # Build metrics string with growth indicators
+                metrics_parts = []
+                rev_growth = growth_persp.get('revenue_growth')
+                earn_growth = growth_persp.get('earnings_growth')
+                roe = growth_persp.get('roe')
+                momentum = growth_persp.get('momentum_52w')
+                
+                if rev_growth: metrics_parts.append(f"Rev: {rev_growth:+.1f}%")
+                if earn_growth: metrics_parts.append(f"EPS: {earn_growth:+.1f}%")
+                if roe: metrics_parts.append(f"ROE: {roe:.1f}%")
+                if momentum: metrics_parts.append(f"Mom: {momentum:+.1f}%")
+                
+                metrics_text = ", ".join(metrics_parts[:3]) if metrics_parts else "N/A"
+                
+                # Get all rationale points
                 rationale = growth_persp.get('rationale', [])
                 if isinstance(rationale, list) and len(rationale) > 0:
-                    rationale_text = rationale[0][:80] + '...' if len(rationale[0]) > 80 else rationale[0]
+                    rationale_text = "; ".join([r[:50] for r in rationale[:2]])
                 else:
                     rationale_text = 'Analysis based on growth metrics'
                 
                 growth_rec_data.append([
                     rec.get('stock_name', 'N/A'),
                     growth_action,
+                    metrics_text,
                     rationale_text
                 ])
         
         if len(growth_rec_data) > 1:
             growth_rec_table = self.create_card_table(
                 growth_rec_data,
-                col_widths=[1.5*inch, 1*inch, 4.3*inch],
+                col_widths=[1.2*inch, 0.8*inch, 1.5*inch, 3.3*inch],
                 header_color=colors.HexColor('#16a085')
             )
             elements.append(growth_rec_table)
