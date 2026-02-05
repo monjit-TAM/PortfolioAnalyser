@@ -25,6 +25,10 @@ class DataFetcher:
         
         self._twelve_data_client = None
         self._twelve_data_initialized = False
+        
+        self._zerodha_kite = None
+        self._zerodha_initialized = False
+        self._zerodha_instruments = None
     
     @property
     def symbol_aliases(self):
@@ -144,6 +148,73 @@ class DataFetcher:
             'HCLTECH': 'Technology',
         }
     
+    def init_zerodha(self):
+        """Initialize Zerodha Kite API client"""
+        if self._zerodha_initialized:
+            return True
+        
+        try:
+            api_key = os.environ.get('ZERODHA_API_KEY')
+            api_secret = os.environ.get('ZERODHA_API_SECRET')
+            access_token = os.environ.get('ZERODHA_ACCESS_TOKEN')
+            
+            if not api_key or not api_secret:
+                return False
+            
+            from kiteconnect import KiteConnect
+            self._zerodha_kite = KiteConnect(api_key=api_key)
+            
+            if access_token:
+                self._zerodha_kite.set_access_token(access_token)
+                self._zerodha_initialized = True
+                self._load_zerodha_instruments()
+                print("Zerodha Kite API initialized successfully")
+                return True
+            else:
+                print("Zerodha access token not set. Login required.")
+                return False
+                
+        except Exception as e:
+            print(f"Zerodha initialization failed: {e}")
+            return False
+    
+    def _load_zerodha_instruments(self):
+        """Load NSE instruments for symbol lookup"""
+        try:
+            if self._zerodha_kite and self._zerodha_initialized:
+                instruments = self._zerodha_kite.instruments("NSE")
+                self._zerodha_instruments = {i['tradingsymbol']: i for i in instruments}
+                print(f"Loaded {len(self._zerodha_instruments)} Zerodha instruments")
+        except Exception as e:
+            print(f"Failed to load Zerodha instruments: {e}")
+            self._zerodha_instruments = {}
+    
+    def get_zerodha_price(self, symbol):
+        """Get live price from Zerodha Kite API"""
+        if not self._zerodha_initialized:
+            self.init_zerodha()
+        
+        if not self._zerodha_kite or not self._zerodha_initialized:
+            return None
+            
+        try:
+            clean_symbol = symbol.replace('.NS', '').replace('.BO', '').replace('-', '')
+            
+            if self._zerodha_instruments and clean_symbol in self._zerodha_instruments:
+                instrument_token = self._zerodha_instruments[clean_symbol]['instrument_token']
+                quote = self._zerodha_kite.quote(f"NSE:{clean_symbol}")
+                if quote and f"NSE:{clean_symbol}" in quote:
+                    return quote[f"NSE:{clean_symbol}"]['last_price']
+            
+            quote = self._zerodha_kite.quote(f"NSE:{clean_symbol}")
+            if quote and f"NSE:{clean_symbol}" in quote:
+                return quote[f"NSE:{clean_symbol}"]['last_price']
+                
+        except Exception as e:
+            print(f"Zerodha price fetch error for {symbol}: {e}")
+        
+        return None
+    
     def init_truedata(self, symbols=None):
         if self._truedata_initialized:
             return True
@@ -163,6 +234,11 @@ class DataFetcher:
         return False
     
     def get_live_price(self, symbol):
+        """Get live price - Priority: Zerodha → TrueData → None (fallback to Yahoo)"""
+        zerodha_price = self.get_zerodha_price(symbol)
+        if zerodha_price:
+            return zerodha_price
+        
         if self._truedata_client and self._truedata_initialized:
             price = self._truedata_client.get_price(symbol)
             if price:
