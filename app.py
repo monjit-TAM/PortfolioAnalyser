@@ -454,8 +454,9 @@ def render_auth_header():
                 st.session_state.show_admin = False
                 st.rerun()
             
-            # Zerodha connection status
-            render_zerodha_status()
+            # Zerodha connection status - Admin only
+            if st.session_state.user.get('is_admin'):
+                render_zerodha_status()
         else:
             st.markdown("""
             <div style='background: linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px;'>
