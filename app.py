@@ -1643,32 +1643,28 @@ def display_upload_page():
         """, unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader(
-            "Upload your portfolio CSV",
-            type=['csv'],
-            help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity"
+            "Upload your portfolio (CSV or Excel)",
+            type=['csv', 'xlsx', 'xls'],
+            help="Upload a CSV or Excel file with columns: Stock Name/Symbol/ISIN, Buy Price, Buy Date, Quantity"
         )
         
         if uploaded_file is not None:
             try:
-                portfolio_df = pd.read_csv(uploaded_file)
-                required_columns = ['Stock Name', 'Buy Price', 'Buy Date', 'Quantity']
-                missing_columns = [col for col in required_columns if col not in portfolio_df.columns]
+                from utils.file_parser import PortfolioFileParser
+                parser = PortfolioFileParser()
+                portfolio_df = parser.parse_file(uploaded_file)
                 
-                if missing_columns:
-                    st.error(f"Missing required columns: {', '.join(missing_columns)}")
+                if len(portfolio_df) == 0:
+                    st.error("No valid data found in the uploaded file. Please check the format.")
                 else:
-                    portfolio_df['Buy Date'] = pd.to_datetime(portfolio_df['Buy Date'])
-                    portfolio_df['Buy Price'] = pd.to_numeric(portfolio_df['Buy Price'], errors='coerce')
-                    portfolio_df['Quantity'] = pd.to_numeric(portfolio_df['Quantity'], errors='coerce')
-                    portfolio_df = portfolio_df.dropna()
+                    unresolved = parser.get_unresolved_isins(portfolio_df)
+                    if unresolved:
+                        st.warning(f"Could not resolve ISIN codes: {', '.join(unresolved[:5])}{'...' if len(unresolved) > 5 else ''}")
                     
-                    if len(portfolio_df) == 0:
-                        st.error("No valid data found in the uploaded file. Please check the format.")
-                    else:
-                        st.session_state.portfolio_data = portfolio_df
-                        st.session_state.uploaded_file_name = uploaded_file.name
-                        st.success(f"Successfully loaded {len(portfolio_df)} stocks from your portfolio!")
-                        st.rerun()
+                    st.session_state.portfolio_data = portfolio_df
+                    st.session_state.uploaded_file_name = uploaded_file.name
+                    st.success(f"Successfully loaded {len(portfolio_df)} stocks from your portfolio!")
+                    st.rerun()
             except Exception as e:
                 st.error(f"Error reading file: {str(e)}")
         
@@ -1676,16 +1672,19 @@ def display_upload_page():
         
         st.markdown("""
         <div style='background: #f9fafb; padding: 24px; border-radius: 12px; border: 1px solid #e5e7eb;'>
-            <h3 style='font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 14px;'>CSV Format Requirements</h3>
+            <h3 style='font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 14px;'>File Format Requirements</h3>
             <p style='font-size: 14px; color: #6b7280; line-height: 1.5; margin-bottom: 14px;'>
-                Your CSV file should contain the following columns:
+                Upload a <strong>CSV</strong> or <strong>Excel (.xlsx)</strong> file with the following columns:
             </p>
             <ul style='font-size: 14px; color: #4b5563; line-height: 1.8; padding-left: 18px; margin: 0;'>
-                <li><strong>Stock Name</strong> - Name or symbol of the stock</li>
-                <li><strong>Buy Date</strong> - Purchase date (DD-MM-YYYY)</li>
+                <li><strong>Stock Name / Symbol / ISIN</strong> - Stock name, NSE symbol, or ISIN code</li>
+                <li><strong>Buy Date</strong> - Purchase date (YYYY-MM-DD or DD-MM-YYYY)</li>
                 <li><strong>Buy Price</strong> - Price per share at purchase</li>
                 <li><strong>Quantity</strong> - Number of shares</li>
             </ul>
+            <p style='font-size: 13px; color: #9ca3af; margin-top: 12px; margin-bottom: 0;'>
+                Column names are flexible (e.g., "Symbol", "ISIN", "Price", "Qty" are also accepted)
+            </p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1776,37 +1775,33 @@ def display_welcome_screen():
             """, unsafe_allow_html=True)
             
             uploaded_file = st.file_uploader(
-                "Upload your portfolio CSV",
-                type=['csv'],
-                help="Upload a CSV file with columns: Stock Name, Buy Price, Buy Date, Quantity"
+                "Upload your portfolio (CSV or Excel)",
+                type=['csv', 'xlsx', 'xls'],
+                help="Upload a CSV or Excel file with columns: Stock Name/Symbol/ISIN, Buy Price, Buy Date, Quantity"
             )
             
             if uploaded_file is not None:
                 try:
-                    portfolio_df = pd.read_csv(uploaded_file)
-                    required_columns = ['Stock Name', 'Buy Price', 'Buy Date', 'Quantity']
-                    missing_columns = [col for col in required_columns if col not in portfolio_df.columns]
+                    from utils.file_parser import PortfolioFileParser
+                    parser = PortfolioFileParser()
+                    portfolio_df = parser.parse_file(uploaded_file)
                     
-                    if missing_columns:
-                        st.error(f"Missing required columns: {', '.join(missing_columns)}")
+                    if len(portfolio_df) == 0:
+                        st.error("No valid data found in the uploaded file.")
                     else:
-                        portfolio_df['Buy Date'] = pd.to_datetime(portfolio_df['Buy Date'])
-                        portfolio_df['Buy Price'] = pd.to_numeric(portfolio_df['Buy Price'], errors='coerce')
-                        portfolio_df['Quantity'] = pd.to_numeric(portfolio_df['Quantity'], errors='coerce')
-                        portfolio_df = portfolio_df.dropna()
+                        unresolved = parser.get_unresolved_isins(portfolio_df)
+                        if unresolved:
+                            st.warning(f"Could not resolve ISIN codes: {', '.join(unresolved[:5])}{'...' if len(unresolved) > 5 else ''}")
                         
-                        if len(portfolio_df) == 0:
-                            st.error("No valid data found in the uploaded file.")
-                        else:
-                            st.success(f"✅ Successfully loaded {len(portfolio_df)} stocks")
-                            st.session_state.portfolio_data = portfolio_df
-                            st.session_state.uploaded_file_name = uploaded_file.name
+                        st.success(f"✅ Successfully loaded {len(portfolio_df)} stocks")
+                        st.session_state.portfolio_data = portfolio_df
+                        st.session_state.uploaded_file_name = uploaded_file.name
+                        
+                        if st.button("🚀 Analyze My Portfolio", type="primary", use_container_width=True):
+                            st.session_state.analysis_complete = False
+                            with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
+                                analyze_portfolio()
                             
-                            if st.button("🚀 Analyze My Portfolio", type="primary", use_container_width=True):
-                                st.session_state.analysis_complete = False
-                                with st.spinner("🔄 Fetching market data and analyzing portfolio..."):
-                                    analyze_portfolio()
-                                
                 except Exception as e:
                     st.error(f"Error reading file: {str(e)}")
         

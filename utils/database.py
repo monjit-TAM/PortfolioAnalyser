@@ -315,6 +315,20 @@ class Database:
         conn.close()
         return {row['alias']: row['symbol'] for row in results}
     
+    def get_isin_mappings(self):
+        """Get ISIN to stock symbol mappings"""
+        conn = self.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cur.execute("SELECT isin, symbol, company_name FROM isin_mappings")
+            results = cur.fetchall()
+            return {row['isin']: {'symbol': row['symbol'], 'name': row['company_name']} for row in results}
+        except Exception:
+            return {}
+        finally:
+            cur.close()
+            conn.close()
+    
     def get_market_indices(self):
         conn = self.get_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
