@@ -169,36 +169,51 @@ class RecommendationEngine:
         try:
             # Revenue Growth analysis
             revenue_growth = fundamentals.get('revenue_growth')
-            if revenue_growth:
+            if revenue_growth is not None:
                 if revenue_growth > 0.15:  # > 15%
                     analysis['score'] += 2
                     analysis['factors'].append(f"High revenue growth: {revenue_growth*100:.2f}%")
                     analysis['rationale'].append("Strong revenue growth indicates business expansion")
-                elif revenue_growth < 0:
+                elif revenue_growth > 0.05:  # 5-15% moderate growth
+                    analysis['rationale'].append(f"Moderate revenue growth of {revenue_growth*100:.1f}%")
+                elif revenue_growth >= 0:  # 0-5% low growth
+                    analysis['rationale'].append("Stable but low revenue growth")
+                else:  # Negative
                     analysis['score'] -= 1
                     analysis['factors'].append(f"Negative revenue growth: {revenue_growth*100:.2f}%")
+                    analysis['rationale'].append("Revenue decline signals business contraction")
             
             # Earnings Growth analysis
             earnings_growth = fundamentals.get('earnings_growth')
-            if earnings_growth:
+            if earnings_growth is not None:
                 if earnings_growth > 0.20:  # > 20%
                     analysis['score'] += 2
                     analysis['factors'].append(f"High earnings growth: {earnings_growth*100:.2f}%")
                     analysis['rationale'].append("Excellent earnings growth potential")
-                elif earnings_growth < 0:
+                elif earnings_growth > 0.10:  # 10-20% moderate
+                    analysis['rationale'].append(f"Solid earnings growth of {earnings_growth*100:.1f}%")
+                elif earnings_growth >= 0:  # 0-10%
+                    analysis['rationale'].append("Modest earnings growth trajectory")
+                else:  # Negative
                     analysis['score'] -= 1
                     analysis['factors'].append(f"Negative earnings growth: {earnings_growth*100:.2f}%")
+                    analysis['rationale'].append("Declining earnings raises growth concerns")
             
             # ROE analysis
             roe = fundamentals.get('roe')
-            if roe:
+            if roe is not None:
                 if roe > 0.20:  # > 20%
                     analysis['score'] += 1
                     analysis['factors'].append(f"High ROE: {roe*100:.2f}%")
                     analysis['rationale'].append("Efficient use of shareholder equity")
-                elif roe < 0.10:  # < 10%
+                elif roe > 0.12:  # 12-20% moderate
+                    analysis['rationale'].append(f"Acceptable ROE of {roe*100:.1f}%")
+                elif roe >= 0.10:  # 10-12%
+                    analysis['rationale'].append("ROE below industry average")
+                else:  # < 10%
                     analysis['score'] -= 1
                     analysis['factors'].append(f"Low ROE: {roe*100:.2f}%")
+                    analysis['rationale'].append("Poor capital efficiency limits growth")
             
             # Price momentum analysis
             fifty_two_week_high = fundamentals.get('fifty_two_week_high')
@@ -210,16 +225,25 @@ class RecommendationEngine:
                     analysis['score'] += 1
                     analysis['factors'].append("Near 52-week high - strong momentum")
                     analysis['rationale'].append("Stock showing strong price momentum")
+                elif price_from_high > 75:  # 75-90%
+                    analysis['rationale'].append(f"Trading at {price_from_high:.0f}% of 52-week high")
                 elif price_from_high < 70:  # More than 30% below 52-week high
                     analysis['score'] -= 1
                     analysis['factors'].append("Significantly below 52-week high")
+                    analysis['rationale'].append("Weak momentum - trading well below 52-week high")
             
             # Current performance analysis
             gain_loss = stock['Percentage Gain/Loss']
             if gain_loss > 30:
                 analysis['score'] += 1
                 analysis['rationale'].append("Strong performance indicates growth potential")
-            elif gain_loss < -30:
+            elif gain_loss > 10:
+                analysis['rationale'].append(f"Positive return of {gain_loss:.1f}% shows steady growth")
+            elif gain_loss >= 0:
+                analysis['rationale'].append("Flat performance - monitor for catalysts")
+            elif gain_loss > -30:
+                analysis['rationale'].append(f"Underperforming with {gain_loss:.1f}% loss")
+            else:
                 analysis['score'] -= 1
                 analysis['rationale'].append("Poor performance may indicate growth challenges")
             
