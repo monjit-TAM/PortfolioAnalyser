@@ -181,8 +181,8 @@ class DataFetcher:
             stock_name = self.symbol_aliases[stock_name]
             print(f"Symbol alias: {original_name} → {stock_name}")
         else:
-            # Try normalized name (remove spaces) if no direct alias found
-            normalized_name = stock_name.replace(' ', '').replace('-', '')
+            # Try normalized name (remove spaces only, keep hyphens for Yahoo Finance)
+            normalized_name = stock_name.replace(' ', '')
             if normalized_name in self.symbol_aliases:
                 original_name = stock_name
                 stock_name = self.symbol_aliases[normalized_name]
