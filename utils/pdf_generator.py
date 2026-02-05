@@ -14,53 +14,57 @@ class PDFReportGenerator:
     def __init__(self):
         self.styles = getSampleStyleSheet()
         
-        # Alphalens brand color
-        self.brand_color = colors.HexColor('#FF6B35')
-        self.light_bg = colors.HexColor('#FFF5F2')
+        # Alphalens brand colors - professional corporate palette
+        self.brand_color = colors.HexColor('#E84C3D')  # Coral red
+        self.brand_dark = colors.HexColor('#1E3A5F')   # Navy blue
+        self.light_bg = colors.HexColor('#FDF8F7')      # Light warm bg
+        self.accent_color = colors.HexColor('#2C3E50') # Dark slate
         
-        # Custom styles
+        # Custom styles - clean, corporate look
         self.title_style = ParagraphStyle(
             'CustomTitle',
             parent=self.styles['Heading1'],
-            fontSize=28,
+            fontSize=26,
             textColor=self.brand_color,
-            spaceAfter=15,
+            spaceAfter=12,
             alignment=TA_CENTER,
-            fontName='Helvetica-Bold'
+            fontName='Helvetica-Bold',
+            leading=32
         )
         
         self.subtitle_style = ParagraphStyle(
             'Subtitle',
             parent=self.styles['Normal'],
-            fontSize=14,
-            textColor=colors.HexColor('#666666'),
+            fontSize=12,
+            textColor=colors.HexColor('#555555'),
             alignment=TA_CENTER,
-            spaceAfter=30
+            spaceAfter=25,
+            leading=16
         )
         
         self.heading_style = ParagraphStyle(
             'CustomHeading',
             parent=self.styles['Heading2'],
-            fontSize=16,
+            fontSize=14,
             textColor=self.brand_color,
-            spaceAfter=12,
-            spaceBefore=18,
+            spaceAfter=10,
+            spaceBefore=16,
             fontName='Helvetica-Bold',
             borderWidth=0,
             borderColor=self.brand_color,
-            borderPadding=8,
+            borderPadding=6,
             backColor=self.light_bg,
-            leftIndent=8,
-            rightIndent=8
+            leftIndent=6,
+            rightIndent=6
         )
         
         self.subheading_style = ParagraphStyle(
             'CustomSubHeading',
             parent=self.styles['Heading3'],
-            fontSize=13,
-            textColor=colors.HexColor('#333333'),
-            spaceAfter=8,
-            spaceBefore=10,
+            fontSize=11,
+            textColor=self.accent_color,
+            spaceAfter=6,
+            spaceBefore=8,
             fontName='Helvetica-Bold'
         )
     
@@ -115,7 +119,13 @@ class PDFReportGenerator:
         # COVER PAGE
         # ====================
         try:
-            logo = Image("attached_assets/alphalens-high-resolution-logo_1770288055113.png", width=4.5*inch, height=1.2*inch)
+            from PIL import Image as PILImage
+            pil_img = PILImage.open("attached_assets/alphalens-high-resolution-logo_1770288055113.png")
+            orig_width, orig_height = pil_img.size
+            aspect_ratio = orig_height / orig_width
+            logo_width = 3.5*inch
+            logo_height = logo_width * aspect_ratio
+            logo = Image("attached_assets/alphalens-high-resolution-logo_1770288055113.png", width=logo_width, height=logo_height)
             logo.hAlign = 'CENTER'
             elements.append(logo)
             elements.append(Spacer(1, 10))
@@ -789,7 +799,7 @@ class PDFReportGenerator:
         <b>CIN:</b> [Company Identification Number]<br/>
         <b>Email:</b> hello@thealphamarket.com<br/>
         <b>Phone:</b> +91-91089 67788<br/>
-        <b>Website:</b> www.alphalens.in
+        <b>Website:</b> www.thealphalens.com
         """
         
         company_para = Paragraph(company_text, self.styles['Normal'])
@@ -910,26 +920,53 @@ class PDFReportGenerator:
         elements.append(Paragraph("🏭 Sector Analysis", self.heading_style))
         elements.append(Spacer(1, 10))
         
-        # Sector Allocation Pie Chart
-        fig, ax = plt.subplots(figsize=(7, 4))
+        # Sector Allocation Pie Chart - using legend to avoid overlapping
+        fig, ax = plt.subplots(figsize=(8, 4.5))
         colors = plt.cm.Set3(range(len(sector_data)))
         
+        # Group small sectors into "Others" to reduce clutter
+        values = sector_data['Current Value'].values
+        labels = sector_data['Sector'].values
+        total = sum(values)
+        
+        # Keep sectors > 3% individually, group rest as Others
+        filtered_values = []
+        filtered_labels = []
+        others_value = 0
+        for val, lbl in zip(values, labels):
+            if (val / total * 100) >= 3:
+                filtered_values.append(val)
+                filtered_labels.append(lbl)
+            else:
+                others_value += val
+        
+        if others_value > 0:
+            filtered_values.append(others_value)
+            filtered_labels.append('Others')
+        
+        colors = plt.cm.Set3(range(len(filtered_values)))
+        
         wedges, texts, autotexts = ax.pie(
-            sector_data['Current Value'],
-            labels=sector_data['Sector'],
+            filtered_values,
+            labels=None,  # No labels on pie
             autopct='%1.1f%%',
             colors=colors,
             startangle=90,
-            textprops={'fontsize': 10}
+            pctdistance=0.75,
+            textprops={'fontsize': 8}
         )
         
-        # Make percentage text bold
+        # Make percentage text bold and visible
         for autotext in autotexts:
-            autotext.set_color('white')
+            autotext.set_color('black')
             autotext.set_fontweight('bold')
-            autotext.set_fontsize(9)
+            autotext.set_fontsize(8)
         
-        ax.set_title('Sector Allocation by Value', fontsize=14, fontweight='bold', pad=15)
+        # Add legend on the right side
+        ax.legend(wedges, filtered_labels, title="Sectors", loc="center left", 
+                  bbox_to_anchor=(1, 0.5), fontsize=8)
+        
+        ax.set_title('Sector Allocation by Value', fontsize=12, fontweight='bold', pad=10)
         plt.tight_layout()
         
         # Save to BytesIO
@@ -1321,7 +1358,7 @@ class PDFReportGenerator:
             elements.append(img)
             elements.append(Spacer(1, 5))
         
-        # Sector Preference Pie Chart using matplotlib
+        # Sector Preference Pie Chart using matplotlib with legend
         if not sector_data.empty:
             import matplotlib
             matplotlib.use('Agg')
@@ -1331,24 +1368,46 @@ class PDFReportGenerator:
             elements.append(Paragraph("🏭 Sector Allocation Preferences", self.subheading_style))
             elements.append(Spacer(1, 10))
             
-            fig, ax = plt.subplots(figsize=(6, 3.5))
-            colors = plt.cm.Pastel1(range(len(sector_data)))
+            # Group small sectors into Others
+            values = sector_data['Current Value'].values
+            labels_list = sector_data['Sector'].values
+            total = sum(values)
+            
+            filtered_values = []
+            filtered_labels = []
+            others_value = 0
+            for val, lbl in zip(values, labels_list):
+                if (val / total * 100) >= 3:
+                    filtered_values.append(val)
+                    filtered_labels.append(lbl)
+                else:
+                    others_value += val
+            
+            if others_value > 0:
+                filtered_values.append(others_value)
+                filtered_labels.append('Others')
+            
+            fig, ax = plt.subplots(figsize=(7, 4))
+            colors = plt.cm.Pastel1(range(len(filtered_values)))
             
             wedges, texts, autotexts = ax.pie(
-                sector_data['Current Value'],
-                labels=sector_data['Sector'],
+                filtered_values,
+                labels=None,
                 autopct='%1.1f%%',
                 colors=colors,
                 startangle=90,
-                textprops={'fontsize': 10}
+                pctdistance=0.75,
+                textprops={'fontsize': 8}
             )
             
             for autotext in autotexts:
                 autotext.set_color('black')
                 autotext.set_fontweight('bold')
-                autotext.set_fontsize(9)
+                autotext.set_fontsize(8)
             
-            ax.set_title('Sector Allocation', fontsize=14, fontweight='bold', pad=15)
+            ax.legend(wedges, filtered_labels, title="Sectors", loc="center left", 
+                      bbox_to_anchor=(1, 0.5), fontsize=8)
+            ax.set_title('Sector Allocation', fontsize=12, fontweight='bold', pad=10)
             plt.tight_layout()
             
             img_bytes = io.BytesIO()
@@ -1356,7 +1415,7 @@ class PDFReportGenerator:
             img_bytes.seek(0)
             plt.close()
             
-            img = Image(img_bytes, width=5*inch, height=2.6*inch)
+            img = Image(img_bytes, width=5.5*inch, height=3*inch)
             elements.append(img)
             elements.append(Spacer(1, 5))
         

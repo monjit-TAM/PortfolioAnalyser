@@ -321,11 +321,7 @@ def render_top_header():
         col_logo, col_nav, col_cta, col_auth = st.columns([1.0, 4.2, 1.2, 1.6])
         
         with col_logo:
-            st.markdown("""
-            <div style="padding: 5px 0; font-size: 26px; font-weight: 700; color: #333;">
-                <span style="color: #e74c3c;">α</span>lphalens
-            </div>
-            """, unsafe_allow_html=True)
+            st.image("attached_assets/alphalens-high-resolution-logo_1770288055113.png", width=160)
         
         with col_nav:
             n1, n2, n3, n4 = st.columns([1, 1.3, 1, 1.2])
