@@ -1682,7 +1682,7 @@ def render_about_section():
 
 def display_upload_page():
     """Display dedicated upload page for authenticated users"""
-    render_top_header()
+    render_auth_header()
     
     st.markdown("<br>", unsafe_allow_html=True)
     
