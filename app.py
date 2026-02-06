@@ -750,7 +750,7 @@ def display_admin_panel():
         
         st.markdown("---")
         
-        tab1, tab2, tab3 = st.tabs(["Users", "Portfolio History", "Activity Log"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Users", "Portfolio History", "Activity Log", "Zerodha API"])
         
         with tab1:
             st.subheader("Registered Users")
@@ -785,6 +785,75 @@ def display_admin_panel():
                 st.dataframe(activities_df[['email', 'activity_type', 'details', 'created_at']], use_container_width=True)
             else:
                 st.info("No activity recorded yet")
+        
+        with tab4:
+            st.subheader("Zerodha Kite API Configuration")
+            
+            api_key = os.environ.get('ZERODHA_API_KEY', '')
+            api_secret = os.environ.get('ZERODHA_API_SECRET', '')
+            access_token = os.environ.get('ZERODHA_ACCESS_TOKEN', '')
+            
+            st.markdown("##### Connection Status")
+            if access_token:
+                st.success("🟢 Zerodha API is connected and active")
+                st.caption("Access token expires daily at 6:00 AM IST. You'll need to reconnect each trading day.")
+            elif api_key:
+                st.warning("🟡 API Key configured but not connected. Complete login below.")
+            else:
+                st.error("🔴 Zerodha API not configured. Add ZERODHA_API_KEY and ZERODHA_API_SECRET as secrets.")
+            
+            st.markdown("---")
+            st.markdown("##### Data Source Priority")
+            st.markdown("""
+            | Priority | Source | Status |
+            |----------|--------|--------|
+            | 1 | Zerodha Kite API | {} |
+            | 2 | TrueData | {} |
+            | 3 | Twelve Data | {} |
+            | 4 | Alpha Vantage | {} |
+            | 5 | Yahoo Finance | Always available |
+            """.format(
+                "✅ Connected" if access_token else "❌ Not connected",
+                "✅ Configured" if os.environ.get('TRUEDATA_USERNAME') else "❌ Not configured",
+                "✅ Configured" if os.environ.get('TWELVE_DATA_API_KEY') else "❌ Not configured",
+                "✅ Configured" if os.environ.get('ALPHA_VANTAGE_API_KEY') else "❌ Not configured"
+            ))
+            
+            if api_key:
+                st.markdown("---")
+                st.markdown("##### Generate Access Token")
+                st.caption("SEBI regulations require daily login. Follow the steps below each trading day.")
+                
+                try:
+                    from kiteconnect import KiteConnect
+                    kite = KiteConnect(api_key=api_key)
+                    login_url = kite.login_url()
+                    
+                    st.markdown(f"**Step 1:** [Open Zerodha Login Page]({login_url})")
+                    st.caption("Login with your Zerodha credentials. After login, you'll be redirected to a URL containing the `request_token`.")
+                    
+                    request_token = st.text_input("**Step 2:** Paste the request_token from the redirect URL", key="zerodha_admin_token", placeholder="e.g. abc123xyz...")
+                    
+                    if st.button("🔗 Generate Access Token", key="zerodha_admin_connect", type="primary"):
+                        if request_token:
+                            try:
+                                data = kite.generate_session(request_token, api_secret=api_secret)
+                                token = data['access_token']
+                                st.success("✅ Access token generated successfully!")
+                                st.markdown("**Step 3:** Copy the value below and add it as a secret named `ZERODHA_ACCESS_TOKEN`:")
+                                st.code(token, language=None)
+                                st.info("Go to Secrets tab → Add `ZERODHA_ACCESS_TOKEN` → Paste the token above → Save. Then refresh the page.")
+                            except Exception as e:
+                                st.error(f"Failed to generate token: {str(e)}")
+                        else:
+                            st.warning("Please paste the request_token first")
+                except ImportError:
+                    st.error("kiteconnect package not installed")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+            else:
+                st.markdown("---")
+                st.info("To set up Zerodha, add these secrets in the Secrets tab: `ZERODHA_API_KEY` and `ZERODHA_API_SECRET`")
     except Exception as e:
         st.error(f"Error loading admin data: {str(e)}")
 
