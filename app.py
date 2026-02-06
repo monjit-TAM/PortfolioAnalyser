@@ -988,12 +988,22 @@ def display_analysis():
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     
     # User info and logout row
-    info_col, logout_col = st.columns([6, 1])
+    is_admin = st.session_state.user and st.session_state.user.get('is_admin')
+    if is_admin:
+        info_col, admin_col, logout_col = st.columns([5, 1, 1])
+    else:
+        info_col, logout_col = st.columns([6, 1])
     with info_col:
         user_name = ""
         if st.session_state.user:
             user_name = st.session_state.user.get('full_name') or st.session_state.user.get('email', '')
         st.markdown(f"**📅 Analysis Date:** {datetime.now().strftime('%B %d, %Y at %I:%M %p')} | **User:** {user_name}")
+    if is_admin:
+        with admin_col:
+            if st.button("⚙️ Admin", key="admin_analysis", help="Admin Panel"):
+                st.session_state.show_admin = True
+                st.session_state.analysis_complete = False
+                st.rerun()
     with logout_col:
         if st.button("🚪 Logout", key="logout_analysis", help="Sign out"):
             st.session_state.authenticated = False
@@ -1694,6 +1704,15 @@ def display_upload_page():
             <p style='font-size: 18px; color: #6b7280;'>Upload your portfolio CSV file to get comprehensive analysis and insights.</p>
         </div>
         """, unsafe_allow_html=True)
+        
+        is_admin = st.session_state.user and st.session_state.user.get('is_admin')
+        if is_admin:
+            admin_c1, admin_c2, admin_c3 = st.columns([2, 1, 2])
+            with admin_c2:
+                if st.button("⚙️ Admin Panel", key="admin_upload", use_container_width=True):
+                    st.session_state.show_admin = True
+                    st.session_state.show_upload_page = False
+                    st.rerun()
         
         st.markdown("""
         <div style='background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); 
