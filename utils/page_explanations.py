@@ -146,421 +146,617 @@ def _build_all_explanations(ctx):
     top_sector_name, top_sector_pct = c['top_sector_name'], c['top_sector_pct']
     num_sectors = c['num_sectors']
     gain_word = c['gain_word']
-    adv = c['advanced_metrics']
+    adv = c.get('advanced_metrics', {}) or {}
+    stock_perf = c.get('stock_perf', []) or []
     win_rate = (profitable / num_stocks * 100) if num_stocks > 0 else 0
 
-    health = _safe_get(adv, 'health_score', default={})
-    health_val = health.get('score', 'N/A') if isinstance(health, dict) else 'N/A'
+    health = _safe_get(adv, 'health_score', default={}) or {}
+    health_val = health.get('overall_score', health.get('score', 'N/A')) if isinstance(health, dict) else 'N/A'
     health_grade = health.get('grade', 'N/A') if isinstance(health, dict) else 'N/A'
-    concentration = _safe_get(adv, 'concentration', default={})
-    top1 = concentration.get('top1_pct', 0) if isinstance(concentration, dict) else 0
-    volatility = _safe_get(adv, 'volatility', default={})
+    health_components = health.get('component_scores', {}) if isinstance(health, dict) else {}
+    health_summary = health.get('summary', '') if isinstance(health, dict) else ''
+    concentration = _safe_get(adv, 'concentration', default={}) or {}
+    top1 = concentration.get('top1_exposure', concentration.get('top1_pct', 0)) if isinstance(concentration, dict) else 0
+    top3_exp = concentration.get('top3_exposure', 0) if isinstance(concentration, dict) else 0
+    top5_exp = concentration.get('top5_exposure', 0) if isinstance(concentration, dict) else 0
+    conc_score = concentration.get('concentration_score', 0) if isinstance(concentration, dict) else 0
+    conc_risk_level = concentration.get('risk_level', 'N/A') if isinstance(concentration, dict) else 'N/A'
+    single_stock_flags = concentration.get('single_stock_flags', []) if isinstance(concentration, dict) else []
+    sector_overexposure = concentration.get('sector_overexposure_flags', []) if isinstance(concentration, dict) else []
+    volatility = _safe_get(adv, 'volatility', default={}) or {}
     sharpe = volatility.get('sharpe_ratio', 'N/A') if isinstance(volatility, dict) else 'N/A'
+    sortino = volatility.get('sortino_ratio', 'N/A') if isinstance(volatility, dict) else 'N/A'
     max_dd = volatility.get('max_drawdown', 0) if isinstance(volatility, dict) else 0
-    tax_data = _safe_get(adv, 'tax_impact', default={})
-    stcg = tax_data.get('stcg_tax', 0) if isinstance(tax_data, dict) else 0
-    ltcg = tax_data.get('ltcg_tax', 0) if isinstance(tax_data, dict) else 0
+    hist_vol = volatility.get('historical_volatility', 0) if isinstance(volatility, dict) else 0
+    port_beta = volatility.get('portfolio_beta', 1.0) if isinstance(volatility, dict) else 1.0
+    downside_dev = volatility.get('downside_deviation', 0) if isinstance(volatility, dict) else 0
+    risk_class = volatility.get('risk_classification', 'N/A') if isinstance(volatility, dict) else 'N/A'
+    tax_data = _safe_get(adv, 'tax_impact', default={}) or {}
+    stcg_gains = tax_data.get('short_term_gains', 0) if isinstance(tax_data, dict) else 0
+    ltcg_gains = tax_data.get('long_term_gains', 0) if isinstance(tax_data, dict) else 0
+    stcg_losses = tax_data.get('short_term_losses', 0) if isinstance(tax_data, dict) else 0
+    ltcg_losses = tax_data.get('long_term_losses', 0) if isinstance(tax_data, dict) else 0
+    est_stcg_tax = tax_data.get('estimated_stcg_tax', 0) if isinstance(tax_data, dict) else 0
+    est_ltcg_tax = tax_data.get('estimated_ltcg_tax', 0) if isinstance(tax_data, dict) else 0
+    stt_sell = tax_data.get('stt_on_sell', 0) if isinstance(tax_data, dict) else 0
+    total_tax_costs = tax_data.get('total_tax_and_costs', 0) if isinstance(tax_data, dict) else 0
+    ltcg_exemption_rem = tax_data.get('ltcg_exemption_remaining', 0) if isinstance(tax_data, dict) else 0
+    style_data = _safe_get(adv, 'style', default={}) or {}
+    structural = _safe_get(adv, 'structural', default={}) or {}
+    behavior = _safe_get(adv, 'behavior', default={}) or {}
+    drift_data = _safe_get(adv, 'drift', default={}) or {}
+    overlap_data = _safe_get(adv, 'overlap', default={}) or {}
+    attribution = _safe_get(adv, 'attribution', default={}) or {}
+    liquidity_data = _safe_get(adv, 'liquidity', default={}) or {}
+    tail_risk_data = _safe_get(adv, 'tail_risk', default={}) or {}
+    macro_data = _safe_get(adv, 'macro', default={}) or {}
+    scenario_data = _safe_get(adv, 'scenario', default={}) or {}
+
+    perf_list = []
+    if stock_perf:
+        try:
+            perf_df = pd.DataFrame(stock_perf) if not isinstance(stock_perf, pd.DataFrame) else stock_perf
+            for _, row in perf_df.iterrows():
+                perf_list.append({
+                    'name': row.get('Stock Name', 'Unknown'),
+                    'buy': row.get('Buy Price', 0),
+                    'cur': row.get('Current Price', 0),
+                    'qty': row.get('Quantity', 0),
+                    'inv': row.get('Investment Value', 0),
+                    'curv': row.get('Current Value', 0),
+                    'gl': row.get('Absolute Gain/Loss', 0),
+                    'gl_pct': row.get('Percentage Gain/Loss', 0),
+                    'sector': row.get('Sector', 'N/A'),
+                    'category': row.get('Category', 'N/A'),
+                    'div_yield': row.get('Dividend Yield', 0),
+                    'annual_div': row.get('Annual Dividend', 0),
+                })
+        except:
+            pass
+    sorted_by_gl = sorted(perf_list, key=lambda x: float(x.get('gl_pct', 0) or 0), reverse=True)
+    top3_stocks = sorted_by_gl[:3] if len(sorted_by_gl) >= 3 else sorted_by_gl
+    bottom3_stocks = sorted_by_gl[-3:] if len(sorted_by_gl) >= 3 else sorted_by_gl
+
+    top3_gainers_str = "; ".join([f"{s['name']}: {_pct(s['gl_pct'])} (Invested {_fmt(s['inv'])}, Now {_fmt(s['curv'])}, Gain {_fmt(s['gl'])})" for s in top3_stocks]) if top3_stocks else "N/A"
+    bottom3_losers_str = "; ".join([f"{s['name']}: {_pct(s['gl_pct'])} (Invested {_fmt(s['inv'])}, Now {_fmt(s['curv'])}, Loss {_fmt(abs(s['gl']))})" for s in bottom3_stocks]) if bottom3_stocks else "N/A"
 
     sector_summary_parts = []
-    if c['sector_data']:
+    sector_perf_parts = []
+    all_sector_parts = []
+    best_sector = {'name': 'N/A', 'ret': -999}
+    worst_sector = {'name': 'N/A', 'ret': 999}
+    if c.get('sector_data'):
         try:
             sec_df = pd.DataFrame(c['sector_data']) if not isinstance(c['sector_data'], pd.DataFrame) else c['sector_data']
+            for _, row in sec_df.iterrows():
+                sname = row.get('Sector', 'Unknown')
+                spct = row.get('Percentage of Portfolio', 0)
+                sinv = row.get('Investment Value', 0)
+                scur = row.get('Current Value', 0)
+                sret = row.get('Sector Return %', 0)
+                sgl = row.get('Absolute Gain/Loss', 0)
+                all_sector_parts.append(f"{sname}: {spct:.1f}% of portfolio, Invested {_fmt(sinv)}, Current {_fmt(scur)}, Return {_pct(sret)}, P&L {_fmt(sgl)}")
+                if sret > best_sector['ret']:
+                    best_sector = {'name': sname, 'ret': sret, 'pct': spct, 'gl': sgl}
+                if sret < worst_sector['ret']:
+                    worst_sector = {'name': sname, 'ret': sret, 'pct': spct, 'gl': sgl}
             for _, row in sec_df.head(3).iterrows():
                 sector_summary_parts.append(f"{row.get('Sector', 'Unknown')} ({row.get('Percentage of Portfolio', 0):.1f}%)")
+            for _, row in sec_df.iterrows():
+                sector_perf_parts.append(f"{row.get('Sector', 'Unknown')}: {_pct(row.get('Sector Return %', 0))}")
         except:
             pass
     top_3_sectors = ", ".join(sector_summary_parts) if sector_summary_parts else "your various sectors"
+    all_sectors_str = " | ".join(all_sector_parts) if all_sector_parts else "No sector data available"
+    sector_perf_str = " | ".join(sector_perf_parts) if sector_perf_parts else "No sector performance data"
 
-    d = c.get('dividend_metrics', {})
-    div_yield = d.get('portfolio_dividend_yield', 0)
-    div_annual = d.get('total_annual_dividend', 0)
+    d = c.get('dividend_metrics', {}) or {}
+    div_yield = d.get('portfolio_dividend_yield', 0) or 0
+    div_annual = d.get('total_annual_dividend', 0) or 0
     div_stock = d.get('highest_yield_stock', 'N/A')
-    div_paying = d.get('dividend_paying_stocks', 0)
+    div_yield_val = d.get('highest_yield_value', 0) or 0
+    div_paying = d.get('dividend_paying_stocks', 0) or 0
+    non_div = d.get('non_dividend_stocks', 0) or 0
+    stock_dividends = d.get('stock_dividends', []) or []
+
+    div_stock_parts = []
+    for sd in stock_dividends[:5]:
+        if isinstance(sd, dict):
+            div_stock_parts.append(f"{sd.get('stock', 'Unknown')}: Yield {sd.get('yield', 0):.2f}%, Annual ₹{sd.get('annual_dividend', 0):,.0f}")
+
+    sample_stocks_str = ""
+    if len(perf_list) >= 2:
+        s1, s2 = perf_list[0], perf_list[1]
+        sample_stocks_str = f"For example, {s1['name']}: {s1['qty']:.0f} shares × ₹{s1['buy']:,.0f} = {_fmt(s1['inv'])}, and {s2['name']}: {s2['qty']:.0f} shares × ₹{s2['buy']:,.0f} = {_fmt(s2['inv'])}."
 
     e = {}
 
     e["dashboard_summary"] = (
-        f"Your portfolio of {num_stocks} stocks has a total investment of {_fmt(total_inv)} and is currently worth {_fmt(current_val)}. "
-        f"You have {gain_word} {_fmt(abs(total_gl))} ({_pct(total_gl_pct)}). "
-        f"{profitable} out of {num_stocks} stocks are in profit and {loss_making} are in loss. "
-        f"Your best performer is {top_name} ({_pct(top_return)}) and your weakest is {worst_name} ({_pct(worst_return)})."
+        f"Your portfolio of {num_stocks} stocks has a total investment of {_fmt(total_inv)} and is currently valued at {_fmt(current_val)}. "
+        f"Calculation: Gain/Loss = Current Value − Investment = {_fmt(current_val)} − {_fmt(total_inv)} = {_fmt(total_gl)} ({_pct(total_gl_pct)}). "
+        f"Win Rate: {profitable} out of {num_stocks} stocks are profitable ({win_rate:.1f}% win rate), while {loss_making} are in loss. "
+        f"Top performer: {top_name} at {_pct(top_return)}; Worst performer: {worst_name} at {_pct(worst_return)}. "
+        f"Your portfolio spans {num_sectors} sectors, led by {top_sector_name} at {top_sector_pct:.1f}% allocation. "
+        f"Top 3 gainers: {top3_gainers_str}. "
+        f"Portfolio Health Score: {health_val}/100 (Grade {health_grade})."
     )
     e["portfolio_health_score"] = (
-        f"Your portfolio health score is a single number (0-100) that grades your overall portfolio quality. It considers multiple factors: "
-        f"your diversification across {num_sectors} sectors, your overall return of {_pct(total_gl_pct)}, "
-        f"your win rate ({profitable} out of {num_stocks} stocks are profitable = {win_rate:.0f}% win rate), "
-        f"and how well-balanced your sector allocation is. "
-        f"A score above 75 means your portfolio is healthy and well-structured. A score between 50-75 means there's room to improve. "
-        f"Below 50 means your portfolio needs significant attention - perhaps too concentrated in one sector, too many loss-making stocks, "
-        f"or insufficient diversification. Think of it like a health check-up report for your investments."
+        f"Your portfolio health score is {health_val}/100 (Grade {health_grade}). "
+        f"The score is computed using a weighted formula: Score = Diversification(25%) + Risk(25%) + Liquidity(20%) + Behavior(15%) + Style Balance(15%). "
+        f"Component breakdown — Diversification: {health_components.get('diversification', 'N/A')}/100, Risk: {health_components.get('risk', 'N/A')}/100, "
+        f"Liquidity: {health_components.get('liquidity', 'N/A')}/100, Behavior: {health_components.get('behavior', 'N/A')}/100, Style Balance: {health_components.get('style_balance', 'N/A')}/100. "
+        f"Weighted Score = ({health_components.get('diversification', 0)}×0.25) + ({health_components.get('risk', 0)}×0.25) + ({health_components.get('liquidity', 0)}×0.20) + ({health_components.get('behavior', 0)}×0.15) + ({health_components.get('style_balance', 0)}×0.15) = {health_val}. "
+        f"{health_summary} "
+        f"A score above 75 means your portfolio is healthy and well-structured; 50-75 means room for improvement; below 50 needs significant attention."
     )
     e["total_investment"] = (
-        f"This is the total money you originally spent to buy all {num_stocks} stocks in your portfolio - currently {_fmt(total_inv)}. "
-        f"This is your 'cost basis' or the starting point to measure whether you're making or losing money. "
-        f"For example, if you bought 100 shares of a stock at ₹200 each, that contributes ₹20,000 to your total investment. "
-        f"This number doesn't change with market movements - it only changes if you buy or sell stocks."
+        f"Your total investment (cost basis) across all {num_stocks} stocks is {_fmt(total_inv)}. "
+        f"This is the sum of (Quantity × Buy Price) for each stock in your portfolio. "
+        f"{sample_stocks_str} "
+        f"This number represents your starting point — it only changes when you buy or sell stocks, not with daily market movements. "
+        f"Your average investment per stock is approximately {_fmt(total_inv / num_stocks if num_stocks > 0 else 0)}."
     )
     e["current_value"] = (
-        f"This is what all your {num_stocks} stocks are worth right now at current market prices - {_fmt(current_val)}. "
-        + (f"Since this is {_fmt(abs(current_val - total_inv))} MORE than what you invested ({_fmt(total_inv)}), "
-           f"you're sitting on a profit of {_pct(total_gl_pct)}. "
-           f"If you sold everything today, you would receive approximately {_fmt(current_val)} (before taxes and charges)."
+        f"Your {num_stocks} stocks are currently worth {_fmt(current_val)} at today's market prices. "
+        f"Calculation: Difference = {_fmt(current_val)} − {_fmt(total_inv)} = {_fmt(total_gl)} ({_pct(total_gl_pct)}). "
+        + (f"You are sitting on an unrealized profit of {_fmt(abs(total_gl))}. If you sold everything today, you would receive approximately {_fmt(current_val)} before taxes and brokerage charges (estimated tax + costs: {_fmt(total_tax_costs)})."
            if current_val >= total_inv else
-           f"Since this is {_fmt(abs(total_inv - current_val))} LESS than what you invested ({_fmt(total_inv)}), "
-           f"you're currently at a loss of {_pct(abs(total_gl_pct))}. "
-           f"However, this is an 'unrealized' loss - meaning you haven't actually lost money until you sell.")
+           f"You are currently at an unrealized loss of {_fmt(abs(total_gl))}. This loss is only 'on paper' — you haven't actually lost money until you sell. Markets recover over time; evaluate each stock's fundamentals before deciding.")
     )
     e["total_gain_loss"] = (
-        f"You have {gain_word} {_fmt(abs(total_gl))} overall ({_pct(total_gl_pct)}). "
-        f"This is the difference between what your stocks are worth now ({_fmt(current_val)}) and what you paid ({_fmt(total_inv)}). "
-        f"Your biggest winner is {top_name} which has returned {_pct(top_return)}, and your biggest drag is {worst_name} at {_pct(worst_return)}. "
-        f"Out of {num_stocks} stocks, {profitable} are making money and {loss_making} are in loss. "
-        f"Remember: gains/losses are 'unrealized' until you actually sell the stocks. "
-        + (f"If you hold profitable stocks for more than 1 year, you pay only 10% LTCG tax (above ₹1 lakh gain). "
-           f"Selling within 1 year means 15% STCG tax." if total_gl > 0 else
-           f"Tax benefit: Losses can be set off against gains to reduce your tax liability.")
+        f"Total P&L = Current Value − Investment = {_fmt(current_val)} − {_fmt(total_inv)} = {_fmt(total_gl)} ({_pct(total_gl_pct)}). "
+        f"Top 3 gainers: {top3_gainers_str}. "
+        f"Bottom 3 performers: {bottom3_losers_str}. "
+        f"Out of {num_stocks} stocks, {profitable} are in profit and {loss_making} are in loss (win rate: {win_rate:.1f}%). "
+        + (f"Tax note: STCG gains of {_fmt(stcg_gains)} taxed at 20%, LTCG gains of {_fmt(ltcg_gains)} taxed at 12.5% above ₹1.25L exemption. Losses ({_fmt(stcg_losses + ltcg_losses)}) can be set off against gains."
+           if total_gl > 0 else
+           f"Tax benefit: Your losses of {_fmt(abs(total_gl))} can be set off against any capital gains to reduce tax liability.")
     )
     e["return_percentage"] = (
-        f"Your overall portfolio return is {_pct(total_gl_pct)}. This tells you how much your money has grown (or shrunk) as a percentage. "
-        f"For comparison: a bank Fixed Deposit gives about 6-7% per year, a Nifty 50 index fund historically gives 12-14% per year. "
-        + (f"Your portfolio is {'outperforming' if total_gl_pct > 14 else 'performing in line with' if total_gl_pct > 7 else 'underperforming compared to'} the market average. "
+        f"Your portfolio return is {_pct(total_gl_pct)}. Calculation: Return = (Current Value − Investment) / Investment × 100 = ({_fmt(current_val)} − {_fmt(total_inv)}) / {_fmt(total_inv)} × 100 = {_pct(total_gl_pct)}. "
+        f"Benchmark comparison: Bank FD ~7%/year, Nifty 50 index ~12-14%/year historically. "
+        + (f"Your portfolio is {'outperforming the Nifty 50 benchmark — excellent stock selection' if total_gl_pct > 14 else 'performing in line with the market average' if total_gl_pct > 7 else 'underperforming compared to a simple Nifty 50 index fund — consider reviewing your stock picks'}. "
            if total_gl_pct != 0 else "")
-        + f"Important: Compare your return with the time period - a 20% return in 3 months is excellent, but 20% in 5 years is below average."
+        + f"Context matters: a {_pct(total_gl_pct)} return in 6 months is {'excellent' if total_gl_pct > 10 else 'good' if total_gl_pct > 5 else 'modest'}, but over 3 years would be {'below average' if total_gl_pct < 20 else 'reasonable'}."
     )
     e["stock_performance_table"] = (
-        f"This table lists all {num_stocks} stocks with detailed performance data for each one. "
-        f"It shows: Buy Price (what you paid per share), Current Price (what it's worth now), Quantity (shares you hold), "
-        f"Investment Value (total cost), Current Value (total worth), and Gain/Loss (both in ₹ and %). "
-        f"Currently {profitable} stocks are in profit (green) and {loss_making} stocks are in loss (red). "
-        f"Pay special attention to {worst_name} ({_pct(worst_return)}) - if the loss is significant, evaluate whether to hold or cut losses. "
-        f"Also watch {top_name} ({_pct(top_return)}) - consider booking partial profits if it has become too large a portion of your portfolio."
+        f"This table details all {num_stocks} stocks: Buy Price, Current Price, Quantity, Investment Value, Current Value, Absolute Gain/Loss, and Percentage Gain/Loss. "
+        f"Currently {profitable} stocks are in profit (green) and {loss_making} are in loss (red). "
+        f"Your best pick: {top_name} bought at ₹{top3_stocks[0]['buy']:,.0f}, now ₹{top3_stocks[0]['cur']:,.0f}, returning {_pct(top_return)} on {_fmt(top3_stocks[0]['inv'])} invested. " if top3_stocks else ""
+        f"Your worst pick: {worst_name} at {_pct(worst_return)} — evaluate if fundamentals support holding or if cutting losses is prudent. "
+        f"Average return per stock: {_pct(total_gl_pct)}. Stocks performing below this average are relative underperformers in your portfolio."
     )
     e["dividend_yield"] = (
-        f"Your portfolio's overall dividend yield is {div_yield:.2f}%, generating approximately {_fmt(div_annual)} per year in dividends. "
-        f"{div_paying} out of {num_stocks} stocks pay dividends. Your highest dividend-paying stock is {div_stock}. "
-        f"Dividends are like 'rent' from your stocks - companies share their profits with you regularly. "
-        f"A good dividend yield for Indian stocks is 1-3%. Above 3% is considered high yield. "
-        f"Dividends provide income even when stock prices don't rise, making your portfolio more resilient."
+        f"Your portfolio's dividend yield is {div_yield:.2f}%, generating approximately {_fmt(div_annual)} per year in passive income. "
+        f"Calculation: Dividend Yield = Total Annual Dividends / Current Portfolio Value × 100 = {_fmt(div_annual)} / {_fmt(current_val)} × 100 = {div_yield:.2f}%. "
+        f"{div_paying} out of {num_stocks} stocks pay dividends; {non_div} stocks pay no dividends. "
+        f"Highest yielding stock: {div_stock} at {div_yield_val:.2f}% yield. "
+        + (f"Per-stock dividends: {'; '.join(div_stock_parts)}. " if div_stock_parts else "")
+        + f"A good dividend yield for Indian stocks is 1-3%; above 3% is high yield. Your {div_yield:.2f}% yield {'exceeds' if div_yield > 3 else 'is within' if div_yield > 1 else 'is below'} the typical range."
     )
 
     e["sector_allocation_pie"] = (
-        f"Your portfolio is spread across {num_sectors} sectors. Your top sectors are: {top_3_sectors}. "
-        f"The largest sector is {top_sector_name} at {top_sector_pct:.1f}% of your portfolio. "
-        f"Think of sectors like baskets - you don't want all eggs in one basket. "
-        f"Ideally, no single sector should be more than 25-30% of your portfolio. "
-        + (f"Your {top_sector_name} allocation at {top_sector_pct:.1f}% is quite concentrated. "
-           f"If this sector faces regulatory changes, economic slowdown, or industry-specific issues, "
-           f"a large portion of your portfolio could be negatively affected. Consider spreading into other sectors."
+        f"Your portfolio spans {num_sectors} sectors. Full sector breakdown: {all_sectors_str}. "
+        f"Your largest allocation is {top_sector_name} at {top_sector_pct:.1f}% of your portfolio. Top 3 sectors: {top_3_sectors}. "
+        + (f"WARNING: {top_sector_name} at {top_sector_pct:.1f}% exceeds the recommended 25-30% maximum. A 20% drop in {top_sector_name} would drag your portfolio down by ~{top_sector_pct * 0.2:.1f}%. Consider diversifying into other sectors."
            if top_sector_pct > 30 else
-           f"Your sector allocation looks reasonably well-distributed, which provides good protection against sector-specific risks.")
+           f"Your sector allocation is well-distributed — no single sector dominates beyond 30%, providing good protection against sector-specific risks.")
     )
     e["sector_performance"] = (
-        f"This chart shows returns for each of your {num_sectors} sectors. Green bars mean the sector is in profit, red means loss. "
-        f"If an entire sector is losing money, it's usually a market-wide or industry issue, not just your stock-picking. "
-        f"For example, if all IT stocks are down, it might be due to global tech spending cuts, not because you picked wrong IT stocks. "
-        f"Conversely, if only YOUR stock in a sector is down while the sector is up, your specific stock pick may need review. "
-        f"Compare your sector returns with sectoral indices (like Nifty IT, Nifty Bank) to see if you're beating the sector average."
+        f"Sector-wise returns for your {num_sectors} sectors: {sector_perf_str}. "
+        f"Best performing sector: {best_sector.get('name', 'N/A')} at {_pct(best_sector.get('ret', 0))} (P&L: {_fmt(best_sector.get('gl', 0))}). "
+        f"Worst performing sector: {worst_sector.get('name', 'N/A')} at {_pct(worst_sector.get('ret', 0))} (P&L: {_fmt(worst_sector.get('gl', 0))}). "
+        f"If an entire sector is underperforming, it's typically a market-wide issue. If only your stock in a sector lags while peers do well, review your specific pick. "
+        f"Compare your sector returns with sectoral indices (Nifty IT, Nifty Bank, Nifty Pharma) to check if you're beating or trailing the sector average."
     )
     e["sector_insights"] = (
-        f"These insights identify your best-performing sector, worst-performing sector, and highest allocation sector. "
-        f"Key things to watch: Is your worst-performing sector also your largest allocation? That's a red flag. "
-        f"Is your best-performing sector a tiny allocation? You might want to increase exposure there. "
-        f"The ideal scenario is having your largest allocations in well-performing sectors with reasonable growth prospects."
+        f"Best sector: {best_sector.get('name', 'N/A')} returning {_pct(best_sector.get('ret', 0))} with {best_sector.get('pct', 0):.1f}% allocation. "
+        f"Worst sector: {worst_sector.get('name', 'N/A')} returning {_pct(worst_sector.get('ret', 0))} with {worst_sector.get('pct', 0):.1f}% allocation. "
+        f"Highest allocation: {top_sector_name} at {top_sector_pct:.1f}%. "
+        + (f"Red flag: Your worst sector ({worst_sector.get('name', 'N/A')}) has a high allocation — consider reducing exposure. " if worst_sector.get('pct', 0) > 20 else "")
+        + (f"Opportunity: Your best sector ({best_sector.get('name', 'N/A')}) has only {best_sector.get('pct', 0):.1f}% allocation — consider increasing it for better returns." if best_sector.get('pct', 0) < 15 else "")
     )
+    hhi = sum([(float(s.get('Percentage of Portfolio', 0)) ** 2) for s in (c.get('sector_data') or [])]) if c.get('sector_data') else 0
     e["diversification_analysis"] = (
-        f"With {num_sectors} sectors and {num_stocks} stocks, this measures how well-spread your investments are. "
-        f"Excellent diversification: 8+ sectors with no single sector above 25%. "
-        f"Good diversification: 5-7 sectors. Needs improvement: fewer than 5 sectors. "
-        f"Your concentration risk shows what percentage of your portfolio is in the largest sector ({top_sector_name}: {top_sector_pct:.1f}%). "
-        f"Higher concentration = higher risk. If {top_sector_name} drops 20%, it would drag your entire portfolio down by approximately {top_sector_pct * 0.2:.1f}%."
+        f"Your portfolio has {num_stocks} stocks across {num_sectors} sectors. Concentration metric (HHI-like): sum of squared sector weights = {hhi:.0f} (lower is better; below 1500 = well-diversified, 1500-2500 = moderate, above 2500 = concentrated). "
+        f"Largest sector: {top_sector_name} at {top_sector_pct:.1f}%. If {top_sector_name} drops 20%, your portfolio would lose approximately {top_sector_pct * 0.2:.1f}%. "
+        f"Diversification rating: {'Excellent (8+ sectors, no sector above 25%)' if num_sectors >= 8 and top_sector_pct <= 25 else 'Good (5-7 sectors)' if num_sectors >= 5 else 'Needs improvement (fewer than 5 sectors)'}. "
+        f"Top 3 sectors account for {sum([float(s.get('Percentage of Portfolio', 0)) for s in (c.get('sector_data') or [])[:3]]):.1f}% of your portfolio."
     )
     e["sector_recommendations"] = (
-        f"Actionable suggestions based on your sector allocation: over-concentrated sectors to trim, "
-        f"underperforming sectors to review, strong performers to potentially increase. "
-        f"These help you make informed decisions about whether to add, hold, or reduce exposure to specific industries."
+        f"Based on your sector allocation across {num_sectors} sectors: "
+        + (f"TRIM: {top_sector_name} is overweight at {top_sector_pct:.1f}% (recommended max 25-30%) — consider reducing by {top_sector_pct - 25:.1f}% to bring it in line. " if top_sector_pct > 25 else f"Your top sector {top_sector_name} at {top_sector_pct:.1f}% is within acceptable limits. ")
+        + (f"REVIEW: {worst_sector.get('name', 'N/A')} is your worst performer at {_pct(worst_sector.get('ret', 0))} — evaluate if the stocks in this sector have recovery potential. " if worst_sector.get('ret', 0) < -5 else "")
+        + (f"INCREASE: {best_sector.get('name', 'N/A')} is your best performer at {_pct(best_sector.get('ret', 0))} but only {best_sector.get('pct', 0):.1f}% of portfolio — consider adding exposure." if best_sector.get('pct', 0) < 15 else "")
     )
 
     e["stock_wise_returns"] = (
-        f"Individual stock returns show exactly how much each of your {num_stocks} stocks has earned or lost. "
-        f"Your best stock {top_name} has returned {_pct(top_return)} - this means for every ₹100 you invested in it, "
-        f"it's now worth ₹{100 + float(top_return) if isinstance(top_return, (int,float)) else 100:.0f}. "
+        f"Individual stock returns across your {num_stocks} holdings: "
+        f"Top 3: {top3_gainers_str}. "
+        f"Bottom 3: {bottom3_losers_str}. "
+        f"Your best stock {top_name} returned {_pct(top_return)} — for every ₹100 invested, it's now worth ₹{100 + float(top_return) if isinstance(top_return, (int, float)) else 100:.0f}. "
         f"Your worst stock {worst_name} is at {_pct(worst_return)}. "
-        f"Out of {num_stocks} stocks, {profitable} are making money and {loss_making} are in loss. "
-        f"A general rule: if a stock is down more than 20-30% and fundamentals haven't changed, consider averaging down. "
-        f"If fundamentals have worsened, consider cutting your losses."
+        f"Win rate: {profitable}/{num_stocks} = {win_rate:.1f}%. Stocks down >20% with deteriorating fundamentals are candidates for exit."
     )
     e["price_chart"] = (
-        f"Price charts show how each stock's price has moved over time since you bought it. "
-        f"An upward-sloping line means the stock has been growing in value. A downward slope means declining. "
-        f"Look for these patterns: steady upward trend (good - consistent growth), sharp spikes (might be speculative), "
-        f"gradual decline (review fundamentals), or flat line (stock isn't moving, your money is stuck). "
-        f"Compare your stocks' movements to see which ones have been steadily growing versus which are volatile."
+        f"Price charts track each stock's journey from buy price to current price. "
+        + (f"For example, {top_name} was bought at ₹{top3_stocks[0]['buy']:,.0f} and is now at ₹{top3_stocks[0]['cur']:,.0f} ({_pct(top3_stocks[0]['gl_pct'])}), showing {'an upward' if top3_stocks[0]['gl_pct'] > 0 else 'a downward'} trend. " if top3_stocks else "")
+        + (f"Meanwhile, {worst_name} moved from ₹{bottom3_stocks[-1]['buy']:,.0f} to ₹{bottom3_stocks[-1]['cur']:,.0f} ({_pct(bottom3_stocks[-1]['gl_pct'])}). " if bottom3_stocks else "")
+        + f"Look for steady upward trends (consistent growth) vs sharp spikes (speculative) vs gradual declines (review fundamentals). "
+        f"Flat lines indicate capital stuck without movement — consider redeploying to better opportunities."
     )
+    inv_vs_cur_parts = []
+    for s in sorted_by_gl[:3]:
+        inv_vs_cur_parts.append(f"{s['name']}: Invested {_fmt(s['inv'])} → Now {_fmt(s['curv'])} ({_pct(s['gl_pct'])})")
     e["investment_vs_current"] = (
-        f"For each stock, this bar chart compares your original investment (what you paid) versus current value (what it's worth). "
-        f"Green bars mean the stock is in profit, red bars mean loss. "
-        f"Your total investment of {_fmt(total_inv)} is now worth {_fmt(current_val)}. "
-        f"The taller the green bar above your investment bar, the more profitable that stock is. "
-        f"Stocks with large red bars are dragging your portfolio down - evaluate whether they have recovery potential."
+        f"Investment vs Current Value comparison for your portfolio: Total Invested {_fmt(total_inv)} → Current {_fmt(current_val)} (P&L: {_fmt(total_gl)}). "
+        f"Top performing stocks: {'; '.join(inv_vs_cur_parts) if inv_vs_cur_parts else 'N/A'}. "
+        f"Green bars indicate stocks in profit; red bars indicate loss. The wider the gap between green current-value bars and investment bars, the more profitable the stock. "
+        f"Stocks with large red gaps are dragging your portfolio — evaluate recovery potential for each."
     )
 
+    nifty_benchmark = 13.0
+    alpha_val = float(total_gl_pct) - nifty_benchmark if isinstance(total_gl_pct, (int, float)) else 0
     e["portfolio_vs_nifty"] = (
-        f"Your portfolio returned {_pct(total_gl_pct)} overall. This is compared against the Nifty 50 index (top 50 Indian companies by market cap). "
-        f"If Nifty 50 has beaten your return, it means you would have earned more money with less effort by simply buying a Nifty 50 index fund (like UTI Nifty ETF or SBI Nifty Index Fund). "
-        f"If your portfolio beats Nifty, your stock selection skill is adding value - keep doing what you're doing! "
-        f"Most professional fund managers struggle to beat the Nifty consistently, so beating it is genuinely impressive."
+        f"Your portfolio returned {_pct(total_gl_pct)} vs Nifty 50 historical average of ~13%/year. "
+        f"Alpha (excess return) = Portfolio Return − Benchmark = {_pct(total_gl_pct)} − +13.00% = {_pct(alpha_val)}. "
+        + (f"Your portfolio is outperforming Nifty 50 by {_pct(abs(alpha_val))} — your stock selection is adding value beyond what a passive index fund would deliver. " if alpha_val > 0 else
+           f"Your portfolio trails Nifty 50 by {_pct(abs(alpha_val))} — a simple Nifty 50 index fund (like UTI Nifty ETF or Nippon India Nifty 50 BeES) would have delivered better returns with less effort. ")
+        + f"Most professional fund managers struggle to beat Nifty consistently, so {'beating it is impressive' if alpha_val > 0 else 'underperformance is common but worth addressing'}."
     )
     e["portfolio_vs_sensex"] = (
-        f"Sensex tracks the top 30 companies on BSE (Bombay Stock Exchange). Like the Nifty comparison, "
-        f"this tells you if your active stock picking is worthwhile compared to simply investing in the market. "
-        f"Sensex and Nifty move very similarly, but Sensex is narrower (30 stocks vs 50). "
-        f"If your portfolio consistently underperforms both benchmarks, consider shifting some money to index funds."
+        f"Sensex (BSE 30) comparison: Your portfolio at {_pct(total_gl_pct)} vs Sensex historical ~12-13%/year. "
+        f"Sensex tracks top 30 BSE companies and moves similarly to Nifty but is narrower. "
+        + (f"With {num_stocks} stocks and {num_sectors} sectors, your portfolio has {'broader diversification than Sensex' if num_stocks > 30 else 'narrower coverage than even the Sensex'}. " if num_stocks > 0 else "")
+        + f"If your portfolio consistently underperforms both Nifty and Sensex, shifting a portion to index funds (e.g., 50% index + 50% active picks) could improve risk-adjusted returns."
     )
     e["alpha"] = (
-        f"Alpha measures your EXTRA returns above what the market delivered. With your {_pct(total_gl_pct)} return: "
-        f"Positive Alpha = Your stock picking is adding value - you're earning MORE than the market average. "
-        f"Negative Alpha = You'd actually be better off with a simple index fund. "
-        f"Zero Alpha = Your returns match the market exactly. "
-        f"Think of Alpha as your 'skill premium' - the reward (or penalty) for the time and effort you spend picking individual stocks "
-        f"instead of just buying the whole market through an index fund."
+        f"Alpha = Portfolio Return − Benchmark Return = {_pct(total_gl_pct)} − +13.00% (Nifty 50 avg) = {_pct(alpha_val)}. "
+        + (f"Positive Alpha of {_pct(alpha_val)} means your stock-picking skill is generating {_pct(abs(alpha_val))} extra return above what the market offers. This is genuinely valuable — most professional fund managers fail to generate consistent positive alpha. " if alpha_val > 0 else
+           f"Negative Alpha of {_pct(alpha_val)} means you would have earned {_pct(abs(alpha_val))} more by simply buying a Nifty 50 index fund. Consider reviewing your stock selection strategy or allocating a portion to passive index investing. ")
+        + f"Alpha is the truest measure of your investing skill — it strips away the market tailwind and shows only the value your decisions add."
     )
     e["beta"] = (
-        f"Beta measures how much your portfolio swings compared to the market. "
-        f"Beta = 1.0 means your {num_stocks} stocks move exactly like the market (Nifty goes up 2%, your portfolio goes up ~2%). "
-        f"Beta > 1.0 (say 1.5) means your portfolio is MORE volatile - if Nifty drops 10%, your portfolio might drop ~15%. But on good days, you gain more too. "
-        f"Beta < 1.0 (say 0.7) means your portfolio is LESS volatile - steadier, fewer dramatic ups and downs. "
-        f"For retirement or conservative goals, lower Beta is safer. For long-term wealth building, moderate Beta (0.8-1.2) is typical."
+        f"Your portfolio Beta is {port_beta:.2f}. Beta measures sensitivity to market movements relative to Nifty 50. "
+        f"With Beta = {port_beta:.2f}: If Nifty moves +10%, your portfolio is expected to move {port_beta * 10:+.1f}%. If Nifty drops -10%, you'd expect {port_beta * -10:+.1f}%. "
+        + (f"Your Beta > 1.0 indicates an aggressive portfolio — higher gains in bull markets but steeper losses in downturns. " if port_beta > 1.0 else
+           f"Your Beta < 1.0 indicates a defensive portfolio — more stable but may lag in strong bull markets. " if port_beta < 1.0 else
+           f"Beta of ~1.0 means your portfolio tracks the market closely. ")
+        + f"Risk classification: {risk_class}. Historical volatility: {hist_vol:.1f}%. For conservative goals (2-3 years), target Beta < 0.8; for long-term growth, Beta 0.8-1.2 is typical."
     )
 
     e["value_analysis"] = (
-        f"Value Analysis checks if each of your {num_stocks} stocks is 'cheap' or 'expensive' compared to its actual worth. "
-        f"It uses metrics like P/E ratio (price vs earnings), P/B ratio (price vs book value), and dividend yield. "
-        f"Think of it like buying a house - is the asking price fair compared to the property's value? "
-        f"A stock trading below its intrinsic value is a 'bargain' - you might want to buy more. "
-        f"A stock trading well above its value might be overpriced - time to consider booking profits."
+        f"Value Analysis evaluates each of your {num_stocks} stocks on P/E ratio (price-to-earnings), P/B ratio (price-to-book), and dividend yield to determine if they're undervalued or overvalued. "
+        + (f"For context, {top_name} with {_pct(top_return)} return may be approaching overvaluation if its P/E exceeds sector average. {worst_name} at {_pct(worst_return)} could be a value trap or a genuine bargain depending on fundamentals. " if top_name != 'N/A' else "")
+        + f"Stocks with P/E below 15 and P/B below 2 in large-cap space are typically considered value picks. Stocks with P/E above 40 are priced for high growth expectations. "
+        f"Your portfolio's dividend yield of {div_yield:.2f}% adds a value dimension — higher-yielding stocks tend to have a margin of safety."
     )
     e["growth_analysis"] = (
-        f"Growth Analysis checks if your stocks' companies are growing fast - revenue increasing, profits rising, market share expanding. "
-        f"Fast-growing companies like TCS, Infosys, or Bajaj Finance can give big returns even if they seem expensive today. "
-        f"It examines: revenue growth rate, profit growth, return on equity (ROE), and business expansion. "
-        f"A company growing at 20%+ annually could double in value in 3-4 years, even if its P/E ratio looks high right now."
+        f"Growth Analysis examines revenue growth, profit growth, ROE (return on equity), and market expansion for your {num_stocks} stocks. "
+        f"Companies growing revenue at 15-20%+ annually are classified as growth stocks. Your portfolio has {profitable} stocks in profit — these likely include growth winners. "
+        f"A company growing at 20% annually doubles in ~3.6 years (Rule of 72: 72/20 = 3.6 years). "
+        f"Your best performer {top_name} at {_pct(top_return)} demonstrates strong growth execution. "
+        f"Balance growth with valuations — overpaying for growth (P/E > 50-60) increases downside risk if growth slows."
     )
     e["buy_hold_sell"] = (
-        f"Each of your {num_stocks} stocks gets a specific recommendation combining both Value and Growth perspectives. "
-        f"BUY = The stock looks attractive at current prices - consider adding more shares. "
-        f"HOLD = Keep what you have - the stock is fairly valued, no urgent action needed. "
-        f"SELL = Consider exiting - the stock may be overvalued or fundamentally weak. "
-        f"Pay attention to {worst_name} ({_pct(worst_return)}) - if it gets a SELL rating, the data supports cutting your losses. "
-        f"Remember: These are algorithmic recommendations based on data, not personal advice. Always cross-check with your investment goals."
+        f"Each of your {num_stocks} stocks gets a BUY/HOLD/SELL rating based on combined Value + Growth scores. "
+        f"BUY = Stock is attractively valued with good growth — consider adding. HOLD = Fairly valued, no action needed. SELL = Overvalued or fundamentally weak — consider exiting. "
+        f"Key stocks to watch: {worst_name} at {_pct(worst_return)} — if rated SELL, the data supports cutting losses and redeploying the {_fmt(abs(bottom3_stocks[-1]['gl'])) if bottom3_stocks else 'invested capital'} elsewhere. "
+        f"{top_name} at {_pct(top_return)} — if it now exceeds {top1:.1f}% of portfolio, consider partial profit booking to manage concentration risk. "
+        f"These are algorithmic recommendations — always cross-check with your investment horizon and risk appetite."
     )
     e["alternative_suggestions"] = (
-        f"For stocks rated SELL, we suggest stronger alternatives in the same sector. "
-        f"For example, if {worst_name} gets a SELL rating, we'll suggest better-performing or better-valued options in the same industry. "
-        f"This helps you redeploy your money more effectively without changing your overall sector exposure. "
-        f"Always research the suggested alternatives before investing."
+        f"For SELL-rated stocks, we suggest stronger alternatives within the same sector to maintain your allocation balance. "
+        + (f"For instance, if {worst_name} (in {bottom3_stocks[-1]['sector'] if bottom3_stocks else 'N/A'} sector) gets a SELL rating at {_pct(worst_return)}, "
+           f"we suggest better-performing or better-valued peers in the same sector. " if bottom3_stocks else "")
+        + f"This approach lets you redeploy capital more effectively — selling a weak stock and buying a stronger one in the same industry maintains your sector exposure while improving quality. "
+        f"Your current investment of {_fmt(abs(bottom3_stocks[-1]['inv'])) if bottom3_stocks else _fmt(0)} in the weakest stock could work harder in a better-quality alternative. "
+        f"Always conduct your own research before acting on replacement suggestions."
     )
 
+    flagged_stocks_str = ", ".join([f"{f['stock']} ({f['percentage']:.1f}%)" for f in single_stock_flags]) if single_stock_flags else "None"
     e["overweight_positions"] = (
-        f"These are stocks that take up too much of your portfolio. "
-        + (f"If {top_name} has grown significantly ({_pct(top_return)}), it may now represent a disproportionately large chunk of your portfolio. "
-           f"While it's great that it grew, having too much in one stock is risky - if it suddenly drops, your entire portfolio takes a big hit. "
-           f"Consider selling some shares and spreading that money across other stocks to manage risk."
-           if top_name != "N/A" else "Stocks that have grown a lot may need trimming.")
+        f"Concentration analysis: Top 1 stock = {top1:.1f}% of portfolio, Top 3 = {top3_exp:.1f}%, Top 5 = {top5_exp:.1f}%. "
+        f"Stocks exceeding 15% threshold (flagged): {flagged_stocks_str}. "
+        + (f"Your largest holding at {top1:.1f}% is too concentrated — if this stock drops 30%, your entire portfolio would lose ~{top1 * 0.3:.1f}%. "
+           f"Consider trimming overweight positions and redistributing to underweight stocks or new opportunities. "
+           if top1 > 15 else f"No single stock exceeds the 15% concentration threshold — good diversification at the stock level. ")
+        + f"Ideal target: no single stock above 10-15% of your {_fmt(current_val)} portfolio."
     )
+    drift_sectors = drift_data.get('sector_drifts', []) if isinstance(drift_data, dict) else []
+    alignment = drift_data.get('alignment_score', 0) if isinstance(drift_data, dict) else 0
+    dev_level = drift_data.get('deviation_level', 'N/A') if isinstance(drift_data, dict) else 'N/A'
+    underweight_parts = [f"{d['sector']}: Your {d.get('portfolio_pct', 0):.1f}% vs Benchmark {d.get('benchmark_pct', 0)}% (drift: {d.get('drift', 0):+.1f}%)" for d in drift_sectors if d.get('drift', 0) < 0]
+    overweight_drift_parts = [f"{d['sector']}: Your {d.get('portfolio_pct', 0):.1f}% vs Benchmark {d.get('benchmark_pct', 0)}% (drift: {d.get('drift', 0):+.1f}%)" for d in drift_sectors if d.get('drift', 0) > 0]
     e["underweight_positions"] = (
-        f"These are sectors or stock categories where you have too little invested. With {_fmt(total_inv)} total investment, "
-        f"adding to underweight areas improves balance and reduces risk. "
-        f"For example, if you have zero exposure to Pharma or IT, you're missing potential growth opportunities. "
-        f"A well-balanced portfolio typically has exposure to 5-8 different sectors at minimum."
+        f"Benchmark alignment score: {alignment:.1f}/100 (Deviation: {dev_level}). "
+        f"Underweight sectors vs Nifty 50 benchmark: {'; '.join(underweight_parts) if underweight_parts else 'None — your allocation aligns well with the benchmark'}. "
+        f"Overweight sectors: {'; '.join(overweight_drift_parts) if overweight_drift_parts else 'None'}. "
+        f"Adding to underweight sectors improves balance and reduces tracking error vs the broader market. "
+        f"A well-balanced portfolio typically has exposure to 5-8 sectors, and your {num_sectors} sectors {'meet' if num_sectors >= 5 else 'fall short of'} this target."
     )
+    sector_flags_str = ", ".join([f"{f['sector']} ({f['percentage']:.1f}%)" for f in sector_overexposure]) if sector_overexposure else "None"
     e["concentration_alerts"] = (
-        f"Warnings when any single stock exceeds 10-15% of your {_fmt(current_val)} portfolio, "
-        f"or any sector exceeds 25-30%. "
-        + (f"Your biggest sector {top_sector_name} is at {top_sector_pct:.1f}%. "
-           if top_sector_name != "N/A" else "")
-        + f"Concentration risk is one of the biggest portfolio killers - even great companies can face unexpected problems "
-        f"(regulatory changes, management issues, sector downturns). Diversification is your best protection."
+        f"Concentration Score: {conc_score}/100 (Risk Level: {conc_risk_level}). "
+        f"Single stock flags (>15% of portfolio): {flagged_stocks_str}. "
+        f"Sector overexposure flags (>30% of portfolio): {sector_flags_str}. "
+        f"Top 1/3/5 concentration: {top1:.1f}% / {top3_exp:.1f}% / {top5_exp:.1f}%. Thresholds: Single stock <15%, Top 3 <40%, Top 5 <60%. "
+        + (f"ALERT: Your concentration risk is {conc_risk_level} — rebalancing is recommended to reduce single-stock and sector exposure." if conc_risk_level in ['High', 'Medium'] else
+           f"Your concentration levels are within safe limits — continue monitoring quarterly.")
     )
     e["rebalancing_strategy"] = (
-        f"Rebalancing means adjusting your portfolio back to a target allocation. Over time, winning stocks grow bigger "
-        f"and losing ones shrink, causing your portfolio to drift from your intended balance. "
-        f"Regular rebalancing (quarterly or semi-annually) forces you to 'sell high and buy low' systematically. "
-        f"It's one of the simplest ways to manage risk and potentially improve long-term returns."
+        f"Based on your portfolio's drift (alignment score: {alignment:.1f}/100) and concentration (score: {conc_score}/100, risk: {conc_risk_level}): "
+        + (f"Priority 1: Trim overweight stocks — {flagged_stocks_str} exceed the 15% single-stock limit. " if single_stock_flags else "")
+        + (f"Priority 2: Address sector drift — {'; '.join(overweight_drift_parts[:2])} are overweight vs Nifty 50 benchmark. " if overweight_drift_parts else "")
+        + (f"Priority 3: Add to underweight sectors — {'; '.join(underweight_parts[:2])}. " if underweight_parts else "")
+        + f"Rebalance quarterly or when any position drifts >5% from target. Systematic rebalancing forces 'sell high, buy low' discipline and can improve long-term risk-adjusted returns by 0.5-1% annually."
     )
 
     e["portfolio_value_over_time"] = (
-        f"This chart shows your portfolio's journey from {_fmt(total_inv)} to {_fmt(current_val)} over time. "
-        f"The blue line represents your portfolio's actual value on each day. The gray dashed line shows your cost basis (what you invested). "
-        f"When the blue line is above the gray line, you're in profit. Below it means you're at a loss for that period. "
-        f"The star marker shows your portfolio's all-time peak value. "
-        f"Dips along the way are completely normal - what matters is the overall direction. "
-        f"Your portfolio has {gain_word} {_fmt(abs(total_gl))} in total from your starting point."
+        f"Your portfolio's journey: Starting investment of {_fmt(total_inv)} → current value of {_fmt(current_val)}, a change of {_fmt(total_gl)} ({_pct(total_gl_pct)}). "
+        f"The blue line tracks your portfolio's daily market value; the gray dashed line shows your cost basis of {_fmt(total_inv)}. "
+        f"When blue > gray, you're in profit. Your portfolio has {gain_word} {_fmt(abs(total_gl))} from the starting point. "
+        f"Maximum drawdown during this period was {max_dd:.1f}% — meaning at the worst point, your portfolio dropped {max_dd:.1f}% from its peak. "
+        f"Despite drawdowns, the overall trajectory shows a {_pct(total_gl_pct)} cumulative return."
     )
     e["cumulative_returns"] = (
-        f"This shows your cumulative return percentage over time. Green bars mean positive returns, red bars mean negative. "
-        f"With your current {_pct(total_gl_pct)} total return, you can see exactly when your portfolio was performing best and worst. "
-        f"This helps you understand if your portfolio's growth has been steady or if it came in sudden bursts. "
-        f"Steady growth is generally better than volatile swings, even if the end result is the same."
+        f"Cumulative return = (Current Value − Investment) / Investment × 100 = ({_fmt(current_val)} − {_fmt(total_inv)}) / {_fmt(total_inv)} × 100 = {_pct(total_gl_pct)}. "
+        f"This chart shows how this return built up over time — green periods indicate positive accumulation, red indicates losses eating into gains. "
+        f"Your win rate of {win_rate:.1f}% ({profitable} winners out of {num_stocks}) contributes to the cumulative trajectory. "
+        f"Steady, gradual growth is healthier than volatile swings — even if the end result is the same, smoother returns reduce the chance of panic-selling during dips."
     )
     e["drawdown_analysis"] = (
-        f"Drawdown measures how much your portfolio has fallen from its highest point. "
-        f"Think of it like a hiker climbing a mountain - drawdown shows how far they've slipped back from the peak. "
-        f"A max drawdown of -20% means at some point, your portfolio lost 20% from its highest value. "
-        f"This is crucial for understanding risk: even if your overall return is positive, large drawdowns can be emotionally devastating "
-        f"and might cause you to panic-sell at the worst time. "
-        f"Lower drawdowns (less negative) mean your portfolio is more stable and easier to hold through tough times."
+        f"Maximum drawdown: {max_dd:.1f}%. This means at the worst point, your portfolio fell {max_dd:.1f}% from its peak value. "
+        f"Calculation: Drawdown = (Trough − Peak) / Peak × 100. For your portfolio with peak near {_fmt(current_val * 100 / (100 - max_dd)) if max_dd < 100 else _fmt(current_val)}, "
+        f"the trough represented a loss of approximately {_fmt(current_val * max_dd / (100 - max_dd)) if max_dd < 100 else 'N/A'} from peak. "
+        f"Context: A 10% drawdown is normal; 20% is uncomfortable; >30% is severe. Your {max_dd:.1f}% drawdown is {'within normal range' if max_dd < 15 else 'moderate — manageable for long-term investors' if max_dd < 25 else 'significant — ensure you have the emotional resilience to hold through such drops'}. "
+        f"Downside deviation: {downside_dev:.2f}%. Lower drawdowns mean your portfolio is easier to hold through market stress."
     )
     e["period_wise_returns"] = (
-        f"This breaks down your returns by time periods - daily, weekly, or monthly. "
-        f"You can see which months were good and which were tough. "
-        f"Win Rate shows the percentage of periods with positive returns. A win rate above 55% is quite good for equity investments. "
-        f"The Best Period and Average Return help you set realistic expectations. "
-        f"If your average monthly return is 1-2%, that's about 12-24% annually - which is excellent."
+        f"Period-wise return breakdown shows your portfolio's performance across daily, weekly, and monthly intervals. "
+        f"Your overall win rate is {win_rate:.1f}% ({profitable}/{num_stocks} stocks profitable). A win rate above 55% is strong for equity portfolios. "
+        f"Portfolio return: {_pct(total_gl_pct)} total. If achieved over 12 months, that's approximately {total_gl_pct / 12:.2f}% per month. "
+        f"Context: Average monthly return of 1-2% translates to 12-24% annually — which is excellent for equity investing. "
+        f"Track the consistency of returns: steady small gains beat occasional large swings for sustainable wealth building."
     )
     e["performance_summary"] = (
-        f"Key performance numbers at a glance: Total Return ({_pct(total_gl_pct)} overall change), "
-        f"Peak Portfolio Value (highest value your portfolio ever reached), "
-        f"Current Drawdown (how far you are from that peak), and Annualized Volatility (how much your portfolio swings). "
-        f"Low volatility with high returns is the ideal combination - it means steady growth without dramatic ups and downs."
+        f"Key performance metrics: Total Return: {_pct(total_gl_pct)} ({_fmt(total_gl)}), Portfolio Value: {_fmt(current_val)}, Investment: {_fmt(total_inv)}. "
+        f"Sharpe Ratio: {sharpe} (risk-adjusted return; >1.0 is good, >2.0 is excellent). Sortino Ratio: {sortino} (focuses on downside risk only). "
+        f"Max Drawdown: {max_dd:.1f}%, Historical Volatility: {hist_vol:.1f}%, Beta: {port_beta:.2f}. "
+        f"Risk Classification: {risk_class}. Win Rate: {win_rate:.1f}% ({profitable} profitable, {loss_making} in loss). "
+        f"The ideal combination is high Sharpe (>1.0) with low drawdown (<15%) — meaning steady growth without dramatic swings."
     )
     e["performance_insights"] = (
-        f"Automated observations about your portfolio's health based on return levels, drawdown severity, volatility, and recent momentum. "
-        f"These insights flag potential concerns (high drawdowns, negative trends) and highlight positives (strong returns, low volatility). "
-        f"Think of it as a quick health check summary - green insights are good, yellow means watch out, red means action needed."
+        f"Data-driven insights: Your {_pct(total_gl_pct)} return with {max_dd:.1f}% max drawdown gives a return/drawdown ratio of {abs(total_gl_pct / max_dd):.2f}x (>1.0 is desirable). " if max_dd > 0 else
+        f"Data-driven insights: Your {_pct(total_gl_pct)} return with minimal drawdown indicates strong risk-adjusted performance. "
+        f"Portfolio volatility of {hist_vol:.1f}% {'is elevated — expect larger daily swings' if hist_vol > 25 else 'is moderate — typical for a diversified equity portfolio' if hist_vol > 15 else 'is low — your portfolio is relatively stable'}. "
+        f"Win rate of {win_rate:.1f}% with {profitable} winners and {loss_making} losers {'shows strong stock selection' if win_rate > 60 else 'is typical for equity portfolios' if win_rate > 45 else 'indicates room for improvement in stock selection'}. "
+        f"Sharpe Ratio of {sharpe} {'indicates excellent risk-adjusted returns' if isinstance(sharpe, (int, float)) and sharpe > 1.0 else 'suggests room to improve your risk-return tradeoff' if isinstance(sharpe, (int, float)) else 'could not be computed due to insufficient data'}."
     )
 
+    mcap = structural.get('market_cap_allocation', {}) if isinstance(structural, dict) else {}
+    large_pct = mcap.get('Large Cap', 0)
+    mid_pct = mcap.get('Mid Cap', 0)
+    small_pct = mcap.get('Small Cap', 0)
+    style_label = style_data.get('style_label', 'Blend') if isinstance(style_data, dict) else 'Blend'
+    thematic = structural.get('thematic_clusters', []) if isinstance(structural, dict) else []
     e["investor_type"] = (
-        f"With {num_stocks} stocks across {num_sectors} sectors and a {_pct(total_gl_pct)} return, "
-        f"your investing style is classified as aggressive, moderate, or conservative. "
-        f"Aggressive: Heavy small/mid-cap, concentrated bets, high volatility stocks. "
-        f"Moderate: Mix of large and mid-cap, balanced sectors, moderate volatility. "
-        f"Conservative: Mostly large-cap blue chips, diversified sectors, low volatility. "
-        f"Knowing your style helps you make consistent decisions aligned with your risk tolerance."
+        f"Based on your portfolio composition: Market Cap split — Large Cap: {large_pct:.1f}%, Mid Cap: {mid_pct:.1f}%, Small Cap: {small_pct:.1f}%. "
+        f"Investment Style: {style_label}. Thematic clusters detected: {', '.join(thematic) if thematic else 'Diversified'}. "
+        + (f"Your profile is Conservative (>60% Large Cap) — prioritizing stability and established companies. " if large_pct > 60 else
+           f"Your profile is Aggressive (>40% Mid/Small Cap) — pursuing higher growth with elevated risk. " if (mid_pct + small_pct) > 40 else
+           f"Your profile is Moderate — balanced mix across market caps. ")
+        + f"With {num_stocks} stocks across {num_sectors} sectors and a {_pct(total_gl_pct)} return, your portfolio aligns with a {style_label.lower()} investing approach."
     )
     e["risk_tolerance"] = (
-        f"Your portfolio's risk level is assessed based on your stock choices, sector concentration, and returns pattern. "
-        f"High risk means bigger potential gains but also bigger losses. "
-        f"If you're investing for goals within 2-3 years (like buying a house), lower risk is safer. "
-        f"For long-term goals (10+ years like retirement), you can afford higher risk as temporary dips tend to recover."
+        f"Risk Classification: {risk_class}. Portfolio Beta: {port_beta:.2f} (market sensitivity). Historical Volatility: {hist_vol:.1f}%. "
+        f"With Beta = {port_beta:.2f}, a 10% Nifty move translates to approximately {port_beta * 10:.1f}% move in your portfolio. "
+        f"Max Drawdown experienced: {max_dd:.1f}% — this is the worst-case scenario you've already lived through. "
+        + (f"Your high-risk profile suits long-term goals (10+ years). For shorter goals (2-3 years), consider shifting 20-30% to debt/FD. " if risk_class == 'High Risk' else
+           f"Your moderate risk profile is suitable for medium-term goals (3-5 years). " if risk_class == 'Moderate Risk' else
+           f"Your low-risk profile suits conservative goals. You can afford slightly more equity exposure for better long-term returns. ")
+        + f"Downside deviation: {downside_dev:.2f}% — measures only negative volatility, a better risk indicator than total volatility."
     )
+    avg_hold = behavior.get('average_holding_days', 0) if isinstance(behavior, dict) else 0
+    hold_dist = behavior.get('holding_distribution', {}) if isinstance(behavior, dict) else {}
+    beh_pattern = behavior.get('behavior_pattern', 'N/A') if isinstance(behavior, dict) else 'N/A'
     e["holding_period"] = (
-        f"How long you typically hold stocks significantly impacts taxes and returns. "
-        f"Short-term (less than 1 year): 15% STCG tax on profits. "
-        f"Long-term (more than 1 year): 10% LTCG tax on profits above ₹1 lakh per year. "
-        f"Historical data shows longer holding periods generally produce better returns and lower taxes. "
-        f"The stock market has never given negative returns over any 15-year period in India's history."
+        f"Average holding period: {avg_hold:.0f} days. Behavior pattern: {beh_pattern}. "
+        f"Holding distribution: <3 months: {hold_dist.get('<3 months', 0)} stocks, 3-12 months: {hold_dist.get('3-12 months', 0)} stocks, >12 months: {hold_dist.get('>12 months', 0)} stocks. "
+        + (f"With {avg_hold:.0f} days average holding, most of your positions are short-term — attracting 20% STCG tax on profits. " if avg_hold < 365 else
+           f"With {avg_hold:.0f} days average holding, most positions qualify for LTCG tax (12.5% above ₹1.25L exemption), saving 7.5% vs STCG rate. ")
+        + f"Tax impact: Short-term gains of {_fmt(stcg_gains)} taxed at 20% = {_fmt(est_stcg_tax)}; Long-term gains of {_fmt(ltcg_gains)} taxed at 12.5% (above ₹1.25L) = {_fmt(est_ltcg_tax)}. "
+        f"Historically, longer holding periods produce better returns: Indian equity has never given negative returns over any 15-year period."
     )
+    short_term_h = behavior.get('short_term_holdings', 0) if isinstance(behavior, dict) else 0
+    long_term_h = behavior.get('long_term_holdings', 0) if isinstance(behavior, dict) else 0
+    overtrade = behavior.get('overtrading_detected', False) if isinstance(behavior, dict) else False
+    beh_score = behavior.get('behavior_score', 0) if isinstance(behavior, dict) else 0
     e["behavioral_analysis"] = (
-        f"This examines your investing habits and potential biases. With {profitable} winning and {loss_making} losing stocks: "
-        f"Loss Aversion: Are you holding losing stocks too long, hoping they'll recover? "
-        f"Disposition Effect: Are you selling winners too early while keeping losers? "
-        f"Overconfidence: Did you bet too heavily on certain stocks? "
-        f"Recency Bias: Are your recent decisions influenced by recent news rather than fundamentals? "
-        f"These biases are natural human tendencies, but awareness helps you make better decisions."
+        f"Behavior Score: {beh_score}/100. Pattern: {beh_pattern}. Overtrading detected: {'Yes — you are churning positions too frequently' if overtrade else 'No — trading frequency is normal'}. "
+        f"Short-term holdings (<90 days): {short_term_h} stocks. Long-term holdings (>365 days): {long_term_h} stocks. "
+        f"With {profitable} winning and {loss_making} losing stocks, watch for: Loss Aversion (holding losers too long hoping for recovery), "
+        f"Disposition Effect (selling winners too early while keeping losers), and Overconfidence (concentrated bets on {top1:.1f}% top holding). "
+        + (f"Your high churn rate increases transaction costs and tax liability — consider adopting a buy-and-hold approach. " if overtrade else
+           f"Your holding behavior is disciplined — maintain this approach for better long-term outcomes. ")
     )
 
     e["health_score"] = (
-        f"Your portfolio scored {health_val}/100 (Grade {health_grade}). "
-        + (f"Above 75 is healthy - your portfolio is well-structured. " if isinstance(health_val, (int, float)) and health_val >= 75 else
-           f"Below 75 means there's room for improvement. " if isinstance(health_val, (int, float)) else "")
-        + f"The score considers: diversification ({num_sectors} sectors), returns ({_pct(total_gl_pct)}), risk metrics, "
-        f"concentration levels, and overall portfolio balance. "
-        f"To improve your score: add more sectors, reduce largest positions, and review consistently underperforming stocks."
+        f"Portfolio Health Score: {health_val}/100 (Grade {health_grade}). "
+        f"Formula: Score = Diversification({health_components.get('diversification', 0)}) × 25% + Risk({health_components.get('risk', 0)}) × 25% + Liquidity({health_components.get('liquidity', 0)}) × 20% + Behavior({health_components.get('behavior', 0)}) × 15% + Style({health_components.get('style_balance', 0)}) × 15%. "
+        f"Calculation: ({health_components.get('diversification', 0)} × 0.25) + ({health_components.get('risk', 0)} × 0.25) + ({health_components.get('liquidity', 0)} × 0.20) + ({health_components.get('behavior', 0)} × 0.15) + ({health_components.get('style_balance', 0)} × 0.15) = {health_val}. "
+        + (f"Grade A (≥80): Your portfolio is well-structured and healthy. " if health_grade == 'A' else
+           f"Grade B (65-79): Good portfolio with room for improvement in {'risk management' if health_components.get('risk', 100) < 65 else 'diversification' if health_components.get('diversification', 100) < 65 else 'behavioral discipline'}. " if health_grade == 'B' else
+           f"Grade C/D: Significant improvement needed. Focus on the lowest component score first. ")
+        + f"{health_summary}"
     )
     e["risk_radar"] = (
-        f"A spider chart showing 8 risk dimensions of your portfolio. "
-        f"Each spoke represents a different risk type - the further out the point on each spoke, the higher that particular risk. "
-        f"Risk dimensions include: concentration risk, volatility, drawdown, sector risk, liquidity risk, and more. "
-        f"Look for any spokes sticking out dramatically far - those are your biggest vulnerabilities. "
-        f"An ideal portfolio would have a relatively even, moderate shape across all spokes."
+        f"Risk radar displays 8 dimensions of portfolio risk with actual values: "
+        f"1) Concentration Risk: score {conc_score}/100 (top stock: {top1:.1f}%). "
+        f"2) Volatility: {hist_vol:.1f}% annualized. "
+        f"3) Max Drawdown: {max_dd:.1f}%. "
+        f"4) Sector Risk: top sector {top_sector_name} at {top_sector_pct:.1f}%. "
+        f"5) Liquidity Risk: {liquidity_data.get('liquidity_risk', 'N/A')} (score: {liquidity_data.get('portfolio_liquidity_score', 'N/A')}/100). "
+        f"6) Tail Risk: {tail_risk_data.get('tail_risk_level', 'N/A')} (score: {tail_risk_data.get('tail_risk_score', 'N/A')}/100). "
+        f"7) Beta Risk: {port_beta:.2f} (market sensitivity). "
+        f"8) Behavioral Risk: score {beh_score}/100 ({'overtrading detected' if overtrade else 'normal trading pattern'}). "
+        f"Focus on spokes extending furthest — those represent your biggest vulnerabilities."
     )
+    ind_conc = structural.get('industry_concentration', {}) if isinstance(structural, dict) else {}
+    sec_alloc = structural.get('sector_allocation', {}) if isinstance(structural, dict) else {}
     e["structural_diagnostics"] = (
-        f"Shows how your {_fmt(current_val)} portfolio is split between Large Cap (top 100 companies - safer, steadier), "
-        f"Mid Cap (101-250 - moderate risk, good growth potential), and Small Cap (250+ - higher risk, highest growth potential). "
-        f"A balanced mix for moderate investors: 50-60% Large Cap, 20-30% Mid Cap, 10-20% Small Cap. "
-        f"Conservative: 70%+ Large Cap. Aggressive: 40%+ Mid/Small Cap."
+        f"Market Cap breakdown of your {_fmt(current_val)} portfolio: Large Cap: {large_pct:.1f}%, Mid Cap: {mid_pct:.1f}%, Small Cap: {small_pct:.1f}%. "
+        f"Sector allocation: {', '.join([f'{k}: {v:.1f}%' for k, v in sec_alloc.items()][:5]) if sec_alloc else 'N/A'}. "
+        f"Industry concentration: Top sector {ind_conc.get('top_sector', 'N/A')} at {ind_conc.get('top_sector_pct', 0):.1f}% {'(CONCENTRATED — above 30%)' if ind_conc.get('is_concentrated', False) else '(within limits)'}. "
+        f"Thematic clusters: {', '.join(thematic) if thematic else 'Diversified — no single theme dominates'}. "
+        f"Recommended balance for moderate investors: 50-60% Large Cap, 20-30% Mid Cap, 10-20% Small Cap. Your {large_pct:.1f}% Large Cap is {'above' if large_pct > 60 else 'within' if large_pct > 40 else 'below'} this range."
     )
+    val_tilt = style_data.get('value_tilt', 50) if isinstance(style_data, dict) else 50
+    growth_tilt = style_data.get('growth_tilt', 50) if isinstance(style_data, dict) else 50
+    momentum = style_data.get('momentum_exposure', 0) if isinstance(style_data, dict) else 0
+    quality = style_data.get('quality_factor', 'N/A') if isinstance(style_data, dict) else 'N/A'
+    vol_tilt = style_data.get('volatility_tilt', 'Neutral') if isinstance(style_data, dict) else 'Neutral'
     e["style_analysis"] = (
-        f"Your {num_stocks} stocks are analyzed for Value vs Growth investment tilt. "
-        f"Value investing: Buying established companies whose stock price is below their actual worth (like buying a ₹100 item for ₹70). "
-        f"Growth investing: Buying fast-growing companies that might seem expensive but could grow into their valuation. "
-        f"Most successful portfolios have a blend of both. Pure value can miss opportunities; pure growth can be volatile."
+        f"Investment Style: {style_label}. Value Tilt: {val_tilt:.1f}%, Growth Tilt: {growth_tilt:.1f}%. "
+        f"Momentum Exposure: {momentum:.1f}% of stocks showing strong upward momentum. Quality Factor: {quality}. Volatility Tilt: {vol_tilt}. "
+        + (f"Your portfolio leans towards Value investing — you hold stocks trading below their estimated worth. This style does well in market recoveries and bear markets. " if val_tilt > 60 else
+           f"Your portfolio leans towards Growth investing — you hold fast-growing companies that may appear expensive. This style excels in bull markets but can be volatile. " if growth_tilt > 60 else
+           f"Your Blend style balances Value and Growth — the most resilient approach across market cycles. ")
+        + f"Quality factor '{quality}' indicates the presence of fundamentally strong companies (high ROE, low debt, consistent earnings) in your portfolio."
     )
     e["concentration_risk"] = (
-        f"Your single largest stock holds {top1:.1f}% of your portfolio. "
-        + (f"That's too concentrated (above 15%) - if this one stock drops 30%, your entire portfolio would lose about {top1 * 0.3:.1f}%. "
-           f"Consider selling some shares and redistributing across other stocks."
-           if top1 > 15 else f"This is within a reasonable range - good diversification.")
-        + f" Ideally, no single stock should exceed 10-15% of your {_fmt(current_val)} portfolio."
+        f"Concentration Score: {conc_score}/100 (Risk Level: {conc_risk_level}). "
+        f"Top 1 stock exposure: {top1:.1f}% of portfolio. Top 3: {top3_exp:.1f}%. Top 5: {top5_exp:.1f}%. "
+        f"Single stock flags (>15%): {flagged_stocks_str}. Sector overexposure (>30%): {sector_flags_str}. "
+        + (f"RISK ALERT: Your largest stock at {top1:.1f}% is dangerously concentrated. A 30% drop in this stock alone would reduce your portfolio by {top1 * 0.3:.1f}% (~{_fmt(current_val * top1 * 0.003)}). " if top1 > 15 else
+           f"Your stock-level concentration is within acceptable limits — no single stock dominates excessively. ")
+        + f"Thresholds: Single stock <15%, Top 3 <40%, Top 5 <60%, Single sector <30%. Your portfolio {'violates' if conc_risk_level == 'High' else 'meets'} these standards."
     )
     e["volatility_drawdown"] = (
-        f"Your portfolio's Sharpe ratio is {sharpe} (higher is better; above 1.0 is good, above 2.0 is excellent). "
-        f"The Sharpe ratio measures 'risk-adjusted returns' - how much return you get per unit of risk taken. "
-        f"A Sharpe of 0.5 means mediocre risk-adjusted performance, while 1.5+ means excellent. "
-        f"Max drawdown was {max_dd:.1f}% - this is the biggest drop from a peak your portfolio experienced."
+        f"Volatility & Drawdown Analysis: Historical Volatility: {hist_vol:.1f}% (annualized). Max Drawdown: {max_dd:.1f}%. "
+        f"Sharpe Ratio: {sharpe} (return per unit of risk; >1.0 good, >2.0 excellent). Sortino Ratio: {sortino} (return per unit of downside risk; higher is better). "
+        f"Portfolio Beta: {port_beta:.2f}. Downside Deviation: {downside_dev:.2f}%. Risk Classification: {risk_class}. "
+        f"Your Sharpe of {sharpe} means for every 1% of volatility risk, you earned {float(sharpe):.2f}% excess return {'— a strong risk/reward tradeoff' if isinstance(sharpe, (int, float)) and float(sharpe) > 1 else '— room to improve risk-adjusted returns' if isinstance(sharpe, (int, float)) else ''}. "
+        f"Max drawdown of {max_dd:.1f}% is {'minimal — excellent risk control' if max_dd < 10 else 'moderate — typical for equity portfolios' if max_dd < 20 else 'significant — ensure you can tolerate such drops emotionally and financially'}."
     )
     e["behavior_analysis"] = (
-        f"Analyzes your investing habits. With {profitable} profitable and {loss_making} loss-making stocks, "
-        f"this section identifies common behavioral biases: "
-        f"Are you holding losers too long hoping they'll bounce back? Are you selling winners too early? "
-        f"These are the most common and costly investing mistakes."
+        f"Behavioral Score: {beh_score}/100. Pattern: {beh_pattern}. Average Holding: {avg_hold:.0f} days. "
+        f"Short-term holdings (<90 days): {short_term_h}. Long-term holdings (>365 days): {long_term_h}. "
+        f"Overtrading: {'DETECTED — more than 50% of stocks held under 90 days, increasing costs and tax burden' if overtrade else 'Not detected — trading frequency is healthy'}. "
+        f"With {profitable} profitable and {loss_making} loss-making stocks, common biases to watch: Holding {worst_name} ({_pct(worst_return)}) may reflect loss aversion; "
+        f"selling winners like {top_name} too early reflects disposition effect. "
+        f"Improving behavior score: Hold winners longer, cut losers faster, avoid churning positions."
     )
     e["drift_analysis"] = (
-        f"Checks if your portfolio has drifted from ideal balance. With {top_sector_name} at {top_sector_pct:.1f}%, "
-        f"this compares your allocation against the Nifty 50 benchmark allocation. "
-        f"Large drift means your portfolio has changed significantly from your original plan - time to rebalance."
+        f"Drift Analysis vs Nifty 50 Benchmark. Alignment Score: {alignment:.1f}/100. Deviation Level: {dev_level}. "
+        f"Sector drifts detected: {'; '.join([f'{d[\"sector\"]}: Your {d.get(\"portfolio_pct\", 0):.1f}% vs Benchmark {d.get(\"benchmark_pct\", 0)}% (drift {d.get(\"drift\", 0):+.1f}%)' for d in drift_sectors[:5]]) if drift_sectors else 'Minimal drift — portfolio aligns well with benchmark'}. "
+        + (f"Your alignment score of {alignment:.1f}% indicates {'significant drift — your portfolio has deviated substantially from the benchmark' if alignment < 50 else 'moderate drift — some sectors are over/underweight' if alignment < 75 else 'low drift — good alignment with benchmark'}. ")
+        + f"Large positive drift means overweight (you have more than benchmark); large negative drift means underweight (you have less). "
+        f"Consider rebalancing sectors with drift > ±10% to reduce tracking error."
     )
+    overlaps = overlap_data.get('overlaps', []) if isinstance(overlap_data, dict) else []
+    overlap_risk = overlap_data.get('overlap_risk', 'N/A') if isinstance(overlap_data, dict) else 'N/A'
+    total_overlaps = overlap_data.get('total_overlap_groups', 0) if isinstance(overlap_data, dict) else 0
+    overlap_parts = []
+    for ov in overlaps[:5]:
+        stocks_in_group = ", ".join([s.get('stock', 'Unknown') if isinstance(s, dict) else str(s) for s in ov.get('stocks', [])[:4]])
+        overlap_parts.append(f"{ov.get('group', 'Unknown')}: {ov.get('count', 0)} stocks ({stocks_in_group})")
     e["overlap_detection"] = (
-        f"Finds correlated or similar stocks in your {num_stocks} holdings. For example, having HDFC Bank, ICICI Bank, "
-        f"SBI, and Kotak all at once means heavy banking overlap - they tend to move together. "
-        f"Multiple similar stocks reduce the diversification benefit. "
-        f"True diversification means stocks that don't move in the same direction at the same time."
+        f"Overlap Risk: {overlap_risk}. Total overlap groups found: {total_overlaps}. "
+        + (f"Overlapping groups: {'; '.join(overlap_parts)}. " if overlap_parts else "No significant business group or sector overlaps detected. ")
+        + f"Overlap means multiple stocks from the same business group or sector — they tend to move together, reducing diversification benefit. "
+        f"In your {num_stocks}-stock portfolio, {'these overlaps mean some of your diversification is illusory — the overlapping stocks will rise and fall together' if total_overlaps > 0 else 'the lack of overlaps indicates genuine diversification across different businesses'}. "
+        f"True diversification requires stocks that don't correlate strongly — different sectors, different business groups, different market cap segments."
     )
+    attr_gain = attribution.get('total_portfolio_gain', 0) if isinstance(attribution, dict) else 0
+    top_contribs = attribution.get('top_contributors', []) if isinstance(attribution, dict) else []
+    bot_contribs = attribution.get('bottom_contributors', []) if isinstance(attribution, dict) else []
+    gainers_ct = attribution.get('gainers_count', 0) if isinstance(attribution, dict) else 0
+    losers_ct = attribution.get('losers_count', 0) if isinstance(attribution, dict) else 0
+    sec_attr = attribution.get('sector_attribution', {}) if isinstance(attribution, dict) else {}
+    top_contrib_str = "; ".join([f"{c.get('stock', 'Unknown')}: {_fmt(c.get('absolute_contribution', 0))} ({c.get('contribution_pct', 0):.1f}% of total P&L)" for c in top_contribs[:3]])
+    bot_contrib_str = "; ".join([f"{c.get('stock', 'Unknown')}: {_fmt(c.get('absolute_contribution', 0))} ({c.get('contribution_pct', 0):.1f}% of total P&L)" for c in bot_contribs[:3]])
+    sec_attr_str = "; ".join([f"{k}: {_fmt(v.get('absolute', 0))} ({v.get('contribution_pct', 0):.1f}%)" for k, v in list(sec_attr.items())[:4]]) if sec_attr else "N/A"
     e["return_attribution"] = (
-        f"Breaks down your total {'profit' if total_gl >= 0 else 'loss'} of {_fmt(abs(total_gl))} - which stocks contributed how much? "
-        f"Your biggest positive contributor is {top_name} ({_pct(top_return)}), "
-        f"while {worst_name} ({_pct(worst_return)}) dragged performance. "
-        f"This helps you understand whether your profit is coming from many stocks or just one lucky pick."
+        f"Total portfolio P&L: {_fmt(attr_gain)}. Gainers: {gainers_ct} stocks. Losers: {losers_ct} stocks. "
+        f"Top contributors: {top_contrib_str if top_contrib_str else 'N/A'}. "
+        f"Bottom contributors (drags): {bot_contrib_str if bot_contrib_str else 'N/A'}. "
+        f"Sector attribution: {sec_attr_str}. "
+        f"This analysis reveals whether your gains come from broad diversification (many stocks contributing) or concentrated bets (1-2 stocks driving all returns). "
+        + (f"{'Your returns are concentrated — top 3 contributors drive the majority of gains, making your portfolio vulnerable if these stocks reverse.' if top_contribs and len(top_contribs) > 0 and abs(top_contribs[0].get('contribution_pct', 0)) > 40 else 'Your returns are well-distributed across multiple stocks — a healthier pattern.'}")
     )
+    illiquid = liquidity_data.get('illiquid_positions', []) if isinstance(liquidity_data, dict) else []
+    liq_score = liquidity_data.get('portfolio_liquidity_score', 0) if isinstance(liquidity_data, dict) else 0
+    liq_risk = liquidity_data.get('liquidity_risk', 'N/A') if isinstance(liquidity_data, dict) else 'N/A'
+    illiq_str = "; ".join([f"{p.get('stock', 'Unknown')}: {p.get('days_to_liquidate', 0):.1f} days to liquidate" for p in illiquid[:5]]) if illiquid else "None — all positions are liquid"
     e["liquidity_risk"] = (
-        f"Checks if any of your {num_stocks} stocks would be hard to sell quickly without affecting the price. "
-        f"Large-cap stocks (like Reliance, TCS) are highly liquid - you can sell thousands of shares instantly. "
-        f"Small-cap stocks might take days to sell if you have large positions. "
-        f"Liquidity matters most when you urgently need cash or want to exit during a market crash."
+        f"Portfolio Liquidity Score: {liq_score}/100. Liquidity Risk: {liq_risk}. "
+        f"Illiquid positions (>5 days to sell 10% of position): {illiq_str}. "
+        f"Out of {num_stocks} stocks, {len(illiquid)} have low liquidity. "
+        f"Liquidity matters during emergencies or market crashes when you need to exit quickly. Large-cap stocks like the Nifty 50 constituents can be sold in seconds; small-cap stocks may take days. "
+        + (f"ALERT: {len(illiquid)} illiquid positions totaling a portion of your portfolio — if you need urgent cash, these cannot be sold quickly without price impact." if illiquid else
+           f"All positions are sufficiently liquid — you can exit the entire portfolio within a few trading sessions.")
     )
+    high_vol_stocks = tail_risk_data.get('high_volatility_stocks', []) if isinstance(tail_risk_data, dict) else []
+    hvol_pct = tail_risk_data.get('high_vol_exposure_pct', 0) if isinstance(tail_risk_data, dict) else 0
+    scap_pct = tail_risk_data.get('small_cap_exposure_pct', 0) if isinstance(tail_risk_data, dict) else 0
+    tail_score = tail_risk_data.get('tail_risk_score', 0) if isinstance(tail_risk_data, dict) else 0
+    tail_level = tail_risk_data.get('tail_risk_level', 'N/A') if isinstance(tail_risk_data, dict) else 'N/A'
+    hvol_str = "; ".join([f"{s.get('stock', 'Unknown')}: {s.get('volatility', 0):.1f}% annualized volatility" for s in high_vol_stocks[:5]]) if high_vol_stocks else "None"
     e["tail_risk"] = (
-        f"Measures the probability of extreme losses in your {_fmt(current_val)} portfolio. "
-        f"In a severe market crash (like March 2020 COVID crash when markets fell 35%), how much could you lose? "
-        f"This uses statistical methods (Value at Risk, Conditional VaR) to estimate worst-case scenarios. "
-        f"Understanding tail risk helps you keep emergency reserves and avoid over-leveraging."
+        f"Tail Risk Score: {tail_score}/100 (Level: {tail_level}). High-volatility stocks (>40% annualized vol): {hvol_str}. "
+        f"High-vol exposure: {hvol_pct:.1f}% of portfolio. Small-cap exposure: {scap_pct:.1f}%. "
+        f"In a severe crash scenario (like March 2020 COVID crash, -35%), your portfolio could potentially lose {_fmt(current_val * 0.35)} in a worst case. "
+        f"With {len(high_vol_stocks)} high-volatility stocks comprising {hvol_pct:.1f}% of your portfolio, "
+        + (f"your tail risk is elevated — consider hedging with put options or reducing exposure to the most volatile names. " if tail_level in ['High', 'Moderate'] else
+           f"your tail risk is well-managed — the portfolio can withstand moderate market shocks. ")
+        + f"Keep 6-12 months of expenses in liquid assets outside equity to avoid forced selling during crashes."
     )
     e["tax_impact"] = (
-        f"Estimated taxes if you sold today: Short-term Capital Gains (STCG) at 15%: {_fmt(stcg)}, "
-        f"Long-term Capital Gains (LTCG) at 10% above ₹1 lakh per year: {_fmt(ltcg)}. "
-        f"Stocks held less than 1 year attract higher taxes (15% vs 10%). "
-        f"Tax planning tip: If a stock is near 1-year holding, wait a few more days/weeks to save 5% in taxes. "
-        f"You can also offset gains against losses to reduce your overall tax bill."
+        f"Tax Analysis (FY 2024 rates): STCG (held <12 months) gains: {_fmt(stcg_gains)}, taxed at 20% = {_fmt(est_stcg_tax)}. "
+        f"LTCG (held >12 months) gains: {_fmt(ltcg_gains)}, taxed at 12.5% above ₹1.25L exemption = {_fmt(est_ltcg_tax)}. LTCG exemption remaining: {_fmt(ltcg_exemption_rem)}. "
+        f"Short-term losses: {_fmt(stcg_losses)}. Long-term losses: {_fmt(ltcg_losses)}. These losses can offset gains. "
+        f"STT on sell: {_fmt(stt_sell)} (0.1% of sell value). Total estimated tax + transaction costs: {_fmt(total_tax_costs)}. "
+        f"Tax planning tip: If stocks are near the 1-year mark, wait to convert STCG (20%) to LTCG (12.5%), saving 7.5% in tax rate. "
+        f"Net proceeds if you sold everything today: approximately {_fmt(current_val - total_tax_costs)}."
     )
+    int_rate = macro_data.get('interest_rate_sensitivity', {}) if isinstance(macro_data, dict) else {}
+    commodity = macro_data.get('commodity_exposure', {}) if isinstance(macro_data, dict) else {}
+    currency = macro_data.get('currency_exposure', {}) if isinstance(macro_data, dict) else {}
+    bank_exp = int_rate.get('banking_exposure_pct', 0)
+    nbfc_exp = int_rate.get('nbfc_exposure_pct', 0)
+    crude_exp = commodity.get('crude_sensitive_pct', 0)
+    metals_exp = commodity.get('metals_exposure_pct', 0)
+    export_exp = currency.get('export_oriented_pct', 0)
     e["macro_sensitivity"] = (
-        f"How your {num_stocks} stocks react to macroeconomic changes - interest rate changes by RBI, oil price movements, "
-        f"rupee value fluctuation, inflation, GDP growth. "
-        f"For example: Banking stocks benefit from rate cuts but suffer when rates rise. "
-        f"IT stocks benefit from a weaker rupee (they earn in dollars). "
-        f"FMCG stocks are relatively unaffected by most macro changes. "
-        f"Understanding these sensitivities helps you prepare for different economic scenarios."
+        f"Macro Sensitivity Analysis for your {num_stocks}-stock portfolio: "
+        f"Interest Rate Sensitivity: Banking {bank_exp:.1f}% + NBFC {nbfc_exp:.1f}% = {bank_exp + nbfc_exp:.1f}% rate-sensitive. {'HIGH sensitivity — an RBI rate hike of 50bps could negatively impact ~' + f'{bank_exp + nbfc_exp:.1f}% of your portfolio.' if bank_exp + nbfc_exp > 30 else 'Moderate rate sensitivity.'} "
+        f"Commodity Exposure: Crude-sensitive {crude_exp:.1f}%, Metals {metals_exp:.1f}%. {'Oil price spikes would impact a significant portion of your portfolio.' if crude_exp > 15 else 'Limited commodity sensitivity.'} "
+        f"Currency Exposure: Export-oriented stocks {export_exp:.1f}%. {'A weakening rupee benefits your IT/Pharma export stocks; strengthening rupee hurts them.' if export_exp > 15 else 'Low currency sensitivity.'} "
+        f"Prepare for RBI policy changes, global commodity swings, and INR movements based on these exposures."
     )
+    scenarios = scenario_data.get('scenarios', []) if isinstance(scenario_data, dict) else []
+    scen_val = scenario_data.get('current_portfolio_value', current_val) if isinstance(scenario_data, dict) else current_val
+    scenario_parts = []
+    for sc in scenarios:
+        scenario_parts.append(f"{sc.get('scenario', 'N/A')}: Market move {sc.get('market_move', 0)}% → Portfolio impact {sc.get('projected_portfolio_impact_pct', 0):.1f}%, Estimated loss {_fmt(abs(sc.get('projected_loss_amount', 0)))}")
     e["scenario_analysis"] = (
-        f"Stress-tests your {_fmt(current_val)} portfolio under extreme conditions: "
-        f"What if the market crashes 30%? What if interest rates spike by 2%? What if oil doubles? "
-        f"Shows estimated portfolio value under each scenario. "
-        f"This isn't about predicting the future - it's about understanding your worst-case exposure and ensuring "
-        f"you can financially and emotionally handle those scenarios."
+        f"Stress-test results for your {_fmt(scen_val)} portfolio: "
+        + (f"{' | '.join(scenario_parts)}. " if scenario_parts else "No scenario data available. ")
+        + f"These projections use stock-specific Beta values to estimate how each holding would react to market shocks. "
+        f"For example, a stock with Beta 1.5 would drop 15% in a 10% market crash vs Beta 0.7 dropping only 7%. "
+        f"Your portfolio Beta of {port_beta:.2f} means a broad market crash of -20% would approximately reduce your portfolio by {_fmt(abs(scen_val * port_beta * 0.2))}. "
+        f"Ensure you can financially and emotionally withstand these scenarios before they happen."
     )
 
     e["methodology_calculations"] = (
-        f"This page explains every formula used to analyze your {num_stocks}-stock portfolio. "
-        f"All calculations for your portfolio - from the {_pct(total_gl_pct)} return to risk metrics - "
-        f"are explained with formulas here. Full transparency so you can verify any number yourself or share with your financial advisor."
+        f"Formulas used for your {num_stocks}-stock, {_fmt(current_val)} portfolio: "
+        f"Return = (Current − Investment) / Investment × 100 = ({_fmt(current_val)} − {_fmt(total_inv)}) / {_fmt(total_inv)} × 100 = {_pct(total_gl_pct)}. "
+        f"Sharpe Ratio = (Portfolio Return − Risk-Free Rate) / Portfolio Std Dev = {sharpe}. "
+        f"Beta = Cov(Stock, Market) / Var(Market) = {port_beta:.2f}. "
+        f"Max Drawdown = (Trough − Peak) / Peak = {max_dd:.1f}%. "
+        f"Health Score = Diversification(25%) + Risk(25%) + Liquidity(20%) + Behavior(15%) + Style(15%) = {health_val}/100. "
+        f"HHI Concentration = Σ(sector weight²) = {hhi:.0f}. All numbers are computed from your actual portfolio data for full transparency."
     )
 
     return e
