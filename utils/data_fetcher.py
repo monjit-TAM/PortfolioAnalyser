@@ -390,18 +390,28 @@ class DataFetcher:
         return self.sector_mapping.get(base_name, 'Others')
     
     def get_dividend_yield(self, stock_name):
-        """Get dividend yield for a stock from yfinance"""
+        """Get dividend yield for a stock from yfinance. Returns yield as percentage (e.g. 2.5 means 2.5%)"""
         try:
             symbol = self.get_stock_symbol(stock_name)
             ticker = yf.Ticker(symbol)
             info = ticker.info
-            dividend_yield = info.get('dividendYield', 0) or info.get('trailingAnnualDividendYield', 0)
-            if dividend_yield:
-                return round(dividend_yield * 100, 2)
+
             dividend_rate = info.get('dividendRate', 0) or info.get('trailingAnnualDividendRate', 0)
             current_price = info.get('regularMarketPrice') or info.get('currentPrice', 0)
-            if dividend_rate and current_price:
+            if dividend_rate and current_price and dividend_rate > 0 and current_price > 0:
                 return round((dividend_rate / current_price) * 100, 2)
+
+            trailing_yield = info.get('trailingAnnualDividendYield', 0)
+            if trailing_yield and 0 < trailing_yield < 1:
+                return round(trailing_yield * 100, 2)
+
+            forward_yield = info.get('dividendYield', 0)
+            if forward_yield:
+                if forward_yield > 1:
+                    return round(forward_yield, 2)
+                else:
+                    return round(forward_yield * 100, 2)
+
             return 0.0
         except Exception as e:
             print(f"Error fetching dividend for {stock_name}: {e}")
