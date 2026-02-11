@@ -5,6 +5,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 import os
+from utils.page_explanations import render_section_explainer
 
 class PortfolioRebalancing:
     def __init__(self):
@@ -64,13 +65,12 @@ class PortfolioRebalancing:
             'Others': 30
         }
     
-    def render(self, analysis_results, portfolio_data, current_data):
+    def render(self, analysis_results, portfolio_data, current_data, lang_code="en"):
         """Render portfolio rebalancing recommendations"""
         
         st.header("⚖️ Portfolio Rebalancing Suggestions")
         
-        # Select rebalancing strategy
-        st.subheader("📊 Select Your Investment Strategy")
+        render_section_explainer("Select Your Investment Strategy", "rebalancing_strategy", lang_code=lang_code, analysis_results=analysis_results, icon="📊")
         
         col1, col2 = st.columns([1, 2])
         
@@ -92,7 +92,7 @@ class PortfolioRebalancing:
         st.markdown("---")
         
         # Current vs Target Allocation
-        st.subheader("📈 Current vs Target Allocation")
+        render_section_explainer("Current vs Target Allocation", "concentration_alerts", lang_code=lang_code, analysis_results=analysis_results, icon="📈")
         
         current_allocation = self.calculate_current_allocation(analysis_results)
         target_allocation = self.strategies[strategy]
@@ -135,7 +135,7 @@ class PortfolioRebalancing:
         st.markdown("---")
         
         # Rebalancing Actions
-        st.subheader("💡 Recommended Rebalancing Actions")
+        render_section_explainer("Recommended Rebalancing Actions", "overweight_positions", lang_code=lang_code, analysis_results=analysis_results, icon="💡")
         
         portfolio_value = analysis_results['portfolio_summary']['current_value']
         rebalancing_actions = self.generate_rebalancing_actions(
@@ -210,7 +210,7 @@ class PortfolioRebalancing:
         st.markdown("---")
         
         # Sector Rebalancing
-        st.subheader("🏭 Sector Rebalancing Recommendations")
+        render_section_explainer("Sector Rebalancing Recommendations", "underweight_positions", lang_code=lang_code, analysis_results=analysis_results, icon="🏭")
         
         current_sector_allocation = self.calculate_sector_allocation(analysis_results)
         sector_actions = self.generate_sector_recommendations(current_sector_allocation)

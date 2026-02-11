@@ -3,31 +3,28 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+from utils.page_explanations import render_section_explainer, render_inline_explainer
 
 class Dashboard:
-    def render(self, analysis_results, portfolio_data, current_data):
+    def render(self, analysis_results, portfolio_data, current_data, lang_code="en"):
         """Render the main dashboard"""
         
         summary = analysis_results['portfolio_summary']
         stock_performance = pd.DataFrame(analysis_results['stock_performance'])
         dividend_metrics = analysis_results.get('dividend_metrics', {})
         
-        self.render_executive_summary(summary, portfolio_data)
-        self.render_dividend_and_tax_metrics(dividend_metrics, summary)
+        self.render_executive_summary(summary, portfolio_data, lang_code, analysis_results)
+        self.render_dividend_and_tax_metrics(dividend_metrics, summary, lang_code, analysis_results)
         self.render_concentration_alerts(portfolio_data, summary)
         self.render_contribution_waterfall(stock_performance)
-        self.render_performance_charts(summary, stock_performance, analysis_results)
+        self.render_performance_charts(summary, stock_performance, analysis_results, lang_code)
     
-    def render_executive_summary(self, summary, portfolio_data):
+    def render_executive_summary(self, summary, portfolio_data, lang_code="en", analysis_results=None):
         """Render Executive Summary with health score gauge"""
         
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
-                    border-radius: 12px; padding: 25px; margin-bottom: 20px; 
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);'>
-            <h2 style='color: #fff; margin: 0 0 20px 0; font-size: 24px;'>📊 Executive Summary</h2>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("<div style='background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);'>", unsafe_allow_html=True)
+        render_section_explainer("Executive Summary", "dashboard_summary", lang_code=lang_code, analysis_results=analysis_results, icon="📊")
+        st.markdown("</div>", unsafe_allow_html=True)
         
         col_health, col_metrics = st.columns([1, 2])
         
@@ -61,16 +58,19 @@ class Dashboard:
             ))
             fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
             st.plotly_chart(fig_gauge, use_container_width=True)
+            render_inline_explainer("portfolio_health_score", lang_code=lang_code, analysis_results=analysis_results)
         
         with col_metrics:
             col1, col2, col3 = st.columns(3)
             
             with col1:
                 st.metric("Total Investment", f"₹{summary['total_investment']:,.0f}")
+                render_inline_explainer("total_investment", lang_code=lang_code, analysis_results=analysis_results)
                 st.metric("Holdings", f"{summary.get('total_stocks', len(portfolio_data))} stocks")
             
             with col2:
                 st.metric("Current Value", f"₹{summary['current_value']:,.0f}")
+                render_inline_explainer("current_value", lang_code=lang_code, analysis_results=analysis_results)
                 profit_ratio = summary['profitable_stocks'] / max(1, summary.get('total_stocks', len(portfolio_data))) * 100
                 st.metric("Win Rate", f"{profit_ratio:.0f}%")
             
@@ -78,20 +78,17 @@ class Dashboard:
                 gain_color = "normal" if summary['total_gain_loss'] >= 0 else "inverse"
                 st.metric("Total Gain/Loss", f"₹{summary['total_gain_loss']:,.0f}", 
                          delta=f"{summary['total_gain_loss_percentage']:+.2f}%")
+                render_inline_explainer("total_gain_loss", lang_code=lang_code, analysis_results=analysis_results)
                 st.metric("Profitable", f"{summary['profitable_stocks']} / {summary.get('total_stocks', len(portfolio_data))}")
         
         st.markdown("---")
     
-    def render_dividend_and_tax_metrics(self, dividend_metrics, summary):
+    def render_dividend_and_tax_metrics(self, dividend_metrics, summary, lang_code="en", analysis_results=None):
         """Render Dividend Yield and Tax Implication metrics"""
         
-        st.markdown("""
-        <div style='background: linear-gradient(135deg, #0d4f36 0%, #1a7a52 100%); 
-                    border-radius: 12px; padding: 25px; margin-bottom: 20px; 
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);'>
-            <h2 style='color: #fff; margin: 0 0 20px 0; font-size: 24px;'>💰 Dividend & Tax Metrics</h2>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("<div style='background: linear-gradient(135deg, #0d4f36 0%, #1a7a52 100%); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);'>", unsafe_allow_html=True)
+        render_section_explainer("Dividend & Income Metrics", "dividend_yield", lang_code=lang_code, analysis_results=analysis_results, icon="💰")
+        st.markdown("</div>", unsafe_allow_html=True)
         
         col_div, col_tax = st.columns(2)
         
@@ -363,7 +360,7 @@ class Dashboard:
         
         st.markdown("</div>", unsafe_allow_html=True)
     
-    def render_performance_charts(self, summary, stock_performance, analysis_results):
+    def render_performance_charts(self, summary, stock_performance, analysis_results, lang_code="en"):
         """Render performance overview charts"""
         
         st.markdown("""
@@ -460,11 +457,8 @@ class Dashboard:
         
         st.markdown("</div>", unsafe_allow_html=True)
         
-        st.markdown("""
-        <div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; 
-                    padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>
-            <h3 style='color: #FF6B35; margin-bottom: 15px; margin-top: 0;'>📋 Portfolio Holdings Summary</h3>
-        """, unsafe_allow_html=True)
+        st.markdown("<div style='background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);'>", unsafe_allow_html=True)
+        render_section_explainer("Portfolio Holdings Summary", "stock_performance_table", lang_code=lang_code, analysis_results=analysis_results, icon="📋")
         
         display_df = stock_performance[['Stock Name', 'Sector', 'Category', 'Quantity', 'Buy Price', 'Current Price', 
                                       'Investment Value', 'Current Value', 'Absolute Gain/Loss', 'Percentage Gain/Loss']].copy()

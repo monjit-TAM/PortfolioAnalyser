@@ -4,9 +4,10 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from utils.page_explanations import render_section_explainer
 
 class CustomerProfile:
-    def render(self, analysis_results, portfolio_data, recommendations):
+    def render(self, analysis_results, portfolio_data, recommendations, lang_code="en"):
         """Render customer profile and investment style analysis"""
         
         st.header("👤 Customer Investment Profile")
@@ -99,7 +100,7 @@ class CustomerProfile:
         st.markdown("---")
         
         # Investment Style Analysis
-        st.subheader("🎯 Investment Style Analysis")
+        render_section_explainer("Investment Style Analysis", "investor_type", lang_code=lang_code, analysis_results=analysis_results, icon="🎯")
         
         # Analyze investment style based on recommendations and portfolio composition
         style_analysis = self.analyze_investment_style(analysis_results, recommendations)
@@ -131,7 +132,7 @@ class CustomerProfile:
             st.plotly_chart(fig_style, use_container_width=True)
         
         with col2:
-            st.subheader("⚖️ Risk Profile")
+            render_section_explainer("Risk Profile", "risk_tolerance", lang_code=lang_code, analysis_results=analysis_results, icon="⚖️")
             
             risk_profile = self.assess_risk_profile(analysis_results, style_analysis)
             
@@ -208,7 +209,7 @@ class CustomerProfile:
         st.markdown("---")
         
         # Investment Behavior Analysis
-        st.subheader("🧠 Investment Behavior Profile")
+        render_section_explainer("Investment Behavior Profile", "behavioral_analysis", lang_code=lang_code, analysis_results=analysis_results, icon="🧠")
         
         behavior_analysis = self.analyze_investment_behavior(analysis_results, recommendations)
         
@@ -262,7 +263,7 @@ class CustomerProfile:
         st.markdown("---")
         
         # Personalized Recommendations
-        st.subheader("🎯 Personalized Investment Strategy")
+        render_section_explainer("Personalized Investment Strategy", "holding_period", lang_code=lang_code, analysis_results=analysis_results, icon="🎯")
         
         strategy_recommendations = self.generate_strategy_recommendations(
             analysis_results, style_analysis, risk_profile, behavior_analysis

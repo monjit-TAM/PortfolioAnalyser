@@ -2,9 +2,10 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+from utils.page_explanations import render_section_explainer
 
 class SectorAnalysis:
-    def render(self, analysis_results, portfolio_data):
+    def render(self, analysis_results, portfolio_data, lang_code="en"):
         """Render sector analysis section"""
         
         st.header("🏭 Sector Analysis")
@@ -19,7 +20,7 @@ class SectorAnalysis:
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("📊 Sector Allocation by Value")
+            render_section_explainer("Sector Allocation by Value", "sector_allocation_pie", lang_code, analysis_results, icon="📊")
             
             fig_pie = px.pie(
                 sector_data,
@@ -36,7 +37,7 @@ class SectorAnalysis:
             st.plotly_chart(fig_pie, use_container_width=True)
         
         with col2:
-            st.subheader("📈 Sector Performance")
+            render_section_explainer("Sector Performance", "sector_performance", lang_code, analysis_results, icon="📈")
             
             # Create color map based on returns
             colors = ['green' if x >= 0 else 'red' for x in sector_data['Sector Return %']]
@@ -62,8 +63,7 @@ class SectorAnalysis:
         
         st.markdown("---")
         
-        # Detailed Sector Table
-        st.subheader("📋 Detailed Sector Analysis")
+        render_section_explainer("Detailed Sector Analysis", "sector_insights", lang_code=lang_code, analysis_results=analysis_results, icon="📋")
         
         # Format the data for display
         display_sector_data = sector_data.copy()
@@ -77,8 +77,7 @@ class SectorAnalysis:
         
         st.markdown("---")
         
-        # Sector Insights and Recommendations
-        st.subheader("💡 Sector Insights")
+        render_section_explainer("Sector Insights", "sector_insights", lang_code, analysis_results, icon="💡")
         
         # Find best and worst performing sectors
         best_sector = sector_data.loc[sector_data['Sector Return %'].idxmax()]
@@ -105,9 +104,8 @@ class SectorAnalysis:
                    f"Allocation: {most_allocated['Percentage of Portfolio']:.1f}%\n\n"
                    f"Return: {most_allocated['Sector Return %']:+.2f}%")
         
-        # Diversification Analysis
         st.markdown("---")
-        st.subheader("🎯 Diversification Analysis")
+        render_section_explainer("Diversification Analysis", "diversification_analysis", lang_code, analysis_results, icon="🎯")
         
         total_sectors = len(sector_data)
         concentration_risk = sector_data['Percentage of Portfolio'].max()
@@ -160,9 +158,8 @@ class SectorAnalysis:
                        unsafe_allow_html=True)
             st.caption(concentration_advice)
         
-        # Sector Recommendations
         st.markdown("---")
-        st.subheader("📝 Sector Recommendations")
+        render_section_explainer("Sector Recommendations", "sector_recommendations", lang_code, analysis_results, icon="📝")
         
         recommendations = []
         

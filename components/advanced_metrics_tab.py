@@ -3,64 +3,46 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
-ADVANCED_METRIC_EXPLAINERS = {
-    "Portfolio Health Score": "Health Score",
-    "Risk Radar": "Risk Radar",
-    "Structural Diagnostics": "Structural Diagnostics",
-    "Style Analysis": "Style Analysis",
-    "Concentration Risk": "Concentration Risk",
-    "Volatility & Drawdown": "Volatility & Drawdown",
-    "Behavior Analysis": "Behavior Analysis",
-    "Drift Analysis": "Drift Analysis",
-    "Overlap Detection": "Overlap Detection",
-    "Return Attribution": "Return Attribution",
-    "Liquidity Risk": "Liquidity Risk",
-    "Tail Risk": "Tail Risk",
-    "Tax Impact": "Tax Impact",
-    "Macro Sensitivity": "Macro Sensitivity",
-    "Scenario Analysis": "Scenario Analysis"
+ADVANCED_METRIC_KEYS = {
+    "Portfolio Health Score": "health_score",
+    "Risk Radar": "risk_radar",
+    "Structural Diagnostics": "structural_diagnostics",
+    "Style Analysis": "style_analysis",
+    "Concentration Risk": "concentration_risk",
+    "Volatility & Drawdown": "volatility_drawdown",
+    "Behavior Analysis": "behavior_analysis",
+    "Drift Analysis": "drift_analysis",
+    "Overlap Detection": "overlap_detection",
+    "Return Attribution": "return_attribution",
+    "Liquidity Risk": "liquidity_risk",
+    "Tail Risk": "tail_risk",
+    "Tax Impact": "tax_impact",
+    "Macro Sensitivity": "macro_sensitivity",
+    "Scenario Analysis": "scenario_analysis"
 }
 
 def _render_metric_explainer(category_name):
     try:
-        from utils.page_explanations import generate_dynamic_explanation, SUPPORTED_LANGUAGES, translate_text
-        
+        from utils.page_explanations import render_inline_explainer, SUPPORTED_LANGUAGES
+
         lang_code = "en"
         if hasattr(st, 'session_state') and 'explanation_language' in st.session_state:
             lang_code = SUPPORTED_LANGUAGES.get(st.session_state.explanation_language, "en")
-        
-        metric_key = ADVANCED_METRIC_EXPLAINERS.get(category_name)
+
+        metric_key = ADVANCED_METRIC_KEYS.get(category_name)
         if not metric_key:
             return
-        
+
         analysis_results = st.session_state.get('analysis_results')
         advanced_metrics = st.session_state.get('advanced_metrics')
-        
-        advanced_data = generate_dynamic_explanation("advanced", analysis_results, advanced_metrics)
-        metrics = advanced_data.get("metrics", [])
-        
-        explanation_text = None
-        for m in metrics:
-            if m["name"] == metric_key:
-                explanation_text = m["explanation"]
-                break
-        
-        if not explanation_text:
-            return
-        
-        if lang_code != "en":
-            explanation_text = translate_text(explanation_text, lang_code)
-        
-        st.markdown(f"""
-        <div style='background: #f0f4ff; padding: 12px 16px; border-radius: 8px; 
-                    border-left: 3px solid #4285f4; margin-bottom: 16px;'>
-            <p style='color: #555; font-size: 13px; line-height: 1.5; margin: 0;'>
-                ℹ️ {explanation_text}
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+
+        col_title, col_info = st.columns([20, 1])
+        with col_title:
+            st.markdown(f"#### {category_name}")
+        with col_info:
+            render_inline_explainer(metric_key, lang_code, analysis_results, advanced_metrics)
     except Exception:
-        pass
+        st.markdown(f"#### {category_name}")
 
 def render_advanced_metrics_tab(advanced_metrics):
     if not advanced_metrics:

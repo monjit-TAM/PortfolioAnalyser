@@ -5,9 +5,10 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from utils.page_explanations import render_section_explainer
 
 class HistoricalPerformance:
-    def render(self, analysis_results, portfolio_data, historical_data):
+    def render(self, analysis_results, portfolio_data, historical_data, lang_code="en"):
         """Render historical portfolio performance tracking"""
         
         st.header("📈 Historical Portfolio Performance")
@@ -19,8 +20,7 @@ class HistoricalPerformance:
             st.warning("Insufficient historical data to display performance tracking.")
             return
         
-        # Performance summary metrics
-        st.subheader("📊 Performance Summary")
+        render_section_explainer("Performance Summary", "performance_summary", lang_code, analysis_results, icon="📊")
         
         col1, col2, col3, col4 = st.columns(4)
         
@@ -74,8 +74,7 @@ class HistoricalPerformance:
         
         st.markdown("---")
         
-        # Portfolio value chart over time
-        st.subheader("💰 Portfolio Value Over Time")
+        render_section_explainer("Portfolio Value Over Time", "portfolio_value_over_time", lang_code, analysis_results, icon="💰")
         
         fig = go.Figure()
         
@@ -121,8 +120,7 @@ class HistoricalPerformance:
         
         st.markdown("---")
         
-        # Returns chart
-        st.subheader("📊 Cumulative Returns Over Time")
+        render_section_explainer("Cumulative Returns Over Time", "cumulative_returns", lang_code, analysis_results, icon="📊")
         
         # Calculate cumulative returns
         portfolio_history['Cumulative_Return'] = ((portfolio_history['Portfolio_Value'] - initial_value) / initial_value) * 100
@@ -155,8 +153,7 @@ class HistoricalPerformance:
         
         st.markdown("---")
         
-        # Drawdown chart
-        st.subheader("📉 Drawdown Analysis")
+        render_section_explainer("Drawdown Analysis", "drawdown_analysis", lang_code, analysis_results, icon="📉")
         
         # Calculate drawdown from peak
         running_max = portfolio_history['Portfolio_Value'].expanding().max()
@@ -199,8 +196,7 @@ class HistoricalPerformance:
         
         st.markdown("---")
         
-        # Monthly/Period returns
-        st.subheader("📅 Period-wise Returns")
+        render_section_explainer("Period-wise Returns", "period_wise_returns", lang_code, analysis_results, icon="📅")
         
         period = st.radio(
             "Select Period:",
@@ -262,8 +258,7 @@ class HistoricalPerformance:
         
         st.markdown("---")
         
-        # Performance insights
-        st.subheader("💡 Performance Insights")
+        render_section_explainer("Performance Insights", "performance_insights", lang_code, analysis_results, icon="💡")
         
         insights = self.generate_performance_insights(portfolio_history, total_return, max_drawdown, volatility)
         

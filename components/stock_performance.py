@@ -4,9 +4,10 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 from datetime import datetime, timedelta
+from utils.page_explanations import render_section_explainer
 
 class StockPerformance:
-    def render(self, analysis_results, portfolio_data, current_data, historical_data):
+    def render(self, analysis_results, portfolio_data, current_data, historical_data, lang_code="en"):
         """Render individual stock performance analysis"""
         
         st.header("📈 Individual Stock Performance")
@@ -144,7 +145,12 @@ class StockPerformance:
         
         # Price Chart
         if not stock_history.empty:
-            st.subheader(f"📈 Price Chart - {selected_stock}")
+            render_section_explainer(
+                title=f"📈 Price Chart - {selected_stock}",
+                metric_key="price_chart",
+                lang_code=lang_code,
+                analysis_results=analysis_results
+            )
             
             # Create price chart with buy price line and ATH marker
             fig = make_subplots(

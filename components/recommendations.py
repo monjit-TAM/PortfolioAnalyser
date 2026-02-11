@@ -2,9 +2,10 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+from utils.page_explanations import render_section_explainer
 
 class Recommendations:
-    def render(self, recommendations, analysis_results):
+    def render(self, recommendations, analysis_results, lang_code="en"):
         """Render investment recommendations section"""
         
         st.header("💡 Investment Recommendations")
@@ -14,7 +15,7 @@ class Recommendations:
             return
         
         # Summary of recommendations
-        st.subheader("📊 Recommendation Summary")
+        render_section_explainer("Recommendation Summary", "buy_hold_sell", lang_code=lang_code, analysis_results=analysis_results, icon="📊")
         
         # Count recommendations by action
         buy_count = sum(1 for rec in recommendations if rec['overall_recommendation']['action'] == 'BUY')
@@ -65,10 +66,10 @@ class Recommendations:
             self.render_overall_recommendations(recommendations)
         
         with tab2:
-            self.render_value_perspective(recommendations)
+            self.render_value_perspective(recommendations, lang_code=lang_code, analysis_results=analysis_results)
         
         with tab3:
-            self.render_growth_perspective(recommendations)
+            self.render_growth_perspective(recommendations, lang_code=lang_code, analysis_results=analysis_results)
     
     def render_overall_recommendations(self, recommendations):
         """Render overall recommendations combining both perspectives"""
@@ -174,10 +175,10 @@ class Recommendations:
                         for alt in rec['alternatives']:
                             st.success(f"💡 **{alt['stock_name']}** ({alt['sector']}): {alt['rationale']}")
     
-    def render_value_perspective(self, recommendations):
+    def render_value_perspective(self, recommendations, lang_code="en", analysis_results=None):
         """Render recommendations from value investing perspective"""
         
-        st.subheader("💰 Value Investing Perspective")
+        render_section_explainer("Value Investing Perspective", "value_analysis", lang_code=lang_code, analysis_results=analysis_results, icon="💰")
         st.write("*Analysis based on fundamental metrics like P/E, P/B ratios, dividend yield, and financial health*")
         
         # Sort by value score (higher is better for value investing)
@@ -243,10 +244,10 @@ class Recommendations:
                     else:
                         st.info("💡 **Value Tip**: Fair valuation - monitor for better entry points")
     
-    def render_growth_perspective(self, recommendations):
+    def render_growth_perspective(self, recommendations, lang_code="en", analysis_results=None):
         """Render recommendations from growth investing perspective"""
         
-        st.subheader("🚀 Growth Investing Perspective")
+        render_section_explainer("Growth Investing Perspective", "growth_analysis", lang_code=lang_code, analysis_results=analysis_results, icon="🚀")
         st.write("*Analysis based on revenue growth, earnings growth, ROE, and price momentum*")
         
         # Sort by growth score (higher is better for growth investing)
@@ -315,7 +316,7 @@ class Recommendations:
         st.markdown("---")
         
         # Growth vs Value Analysis Summary
-        st.subheader("⚖️ Value vs Growth Analysis Summary")
+        render_section_explainer("Value vs Growth Analysis Summary", "alternative_suggestions", lang_code=lang_code, analysis_results=analysis_results, icon="⚖️")
         
         value_buy = sum(1 for rec in recommendations if rec['value_analysis']['recommendation'] == 'BUY')
         growth_buy = sum(1 for rec in recommendations if rec['growth_analysis']['recommendation'] == 'BUY')

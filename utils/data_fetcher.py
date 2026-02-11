@@ -5,6 +5,15 @@ from datetime import datetime, timedelta
 import streamlit as st
 import os
 
+def _flatten_yf_columns(df):
+    if df.empty:
+        return df
+    if isinstance(df.columns, pd.MultiIndex):
+        df = df.copy()
+        df.columns = df.columns.get_level_values(0)
+    return df
+
+
 class DataFetcher:
     def __init__(self, use_database=True):
         self.nse_suffix = ".NS"
@@ -295,13 +304,13 @@ class DataFetcher:
         try:
             end_date = datetime.now()
             
-            historical_data = yf.download(symbol, start=start_date, end=end_date, progress=False)
+            historical_data = _flatten_yf_columns(yf.download(symbol, start=start_date, end=end_date, progress=False))
             
             if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                 historical_data.index = historical_data.index.tz_localize(None)
             
             if historical_data.empty:
-                historical_data = yf.download(symbol, period="1mo", progress=False)
+                historical_data = _flatten_yf_columns(yf.download(symbol, period="1mo", progress=False))
                 if hasattr(historical_data.index, 'tz') and historical_data.index.tz is not None:
                     historical_data.index = historical_data.index.tz_localize(None)
             

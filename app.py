@@ -1161,8 +1161,9 @@ def display_analysis():
             st.session_state.explanation_language = "English"
         lang_options = list(SUPPORTED_LANGUAGES.keys())
         current_idx = lang_options.index(st.session_state.explanation_language) if st.session_state.explanation_language in lang_options else 0
+        st.markdown("<p style='font-size:11px; color:#888; margin:0 0 2px 0; white-space:nowrap;'>Select language to understand metrics</p>", unsafe_allow_html=True)
         selected_lang = st.selectbox(
-            "🌐 Language",
+            "Select language to understand metrics",
             options=lang_options,
             index=current_idx,
             key="lang_selector_main",
@@ -1227,7 +1228,8 @@ def display_analysis():
         dashboard.render(
             st.session_state.analysis_results,
             st.session_state.portfolio_data,
-            st.session_state.current_data
+            st.session_state.current_data,
+            lang_code=lang_code
         )
     
     with tab2:
@@ -1235,7 +1237,8 @@ def display_analysis():
         sector_analysis = SectorAnalysis()
         sector_analysis.render(
             st.session_state.analysis_results,
-            st.session_state.portfolio_data
+            st.session_state.portfolio_data,
+            lang_code=lang_code
         )
     
     with tab3:
@@ -1245,7 +1248,8 @@ def display_analysis():
             st.session_state.analysis_results,
             st.session_state.portfolio_data,
             st.session_state.current_data,
-            st.session_state.historical_data
+            st.session_state.historical_data,
+            lang_code=lang_code
         )
     
     with tab4:
@@ -1253,7 +1257,8 @@ def display_analysis():
         benchmark_comparison = BenchmarkComparison()
         benchmark_comparison.render(
             st.session_state.analysis_results,
-            st.session_state.portfolio_data
+            st.session_state.portfolio_data,
+            lang_code=lang_code
         )
     
     with tab5:
@@ -1262,7 +1267,8 @@ def display_analysis():
             recommendations = Recommendations()
             recommendations.render(
                 st.session_state.recommendations,
-                st.session_state.analysis_results
+                st.session_state.analysis_results,
+                lang_code=lang_code
             )
         else:
             render_disclaimer_overlay('advice')
@@ -1274,7 +1280,8 @@ def display_analysis():
             rebalancing.render(
                 st.session_state.analysis_results,
                 st.session_state.portfolio_data,
-                st.session_state.current_data
+                st.session_state.current_data,
+                lang_code=lang_code
             )
         else:
             render_disclaimer_overlay('rebalance')
@@ -1285,7 +1292,8 @@ def display_analysis():
         historical_performance.render(
             st.session_state.analysis_results,
             st.session_state.portfolio_data,
-            st.session_state.historical_data
+            st.session_state.historical_data,
+            lang_code=lang_code
         )
     
     with tab8:
@@ -1294,7 +1302,8 @@ def display_analysis():
         customer_profile.render(
             st.session_state.analysis_results,
             st.session_state.portfolio_data,
-            st.session_state.recommendations
+            st.session_state.recommendations,
+            lang_code=lang_code
         )
     
     with tab9:

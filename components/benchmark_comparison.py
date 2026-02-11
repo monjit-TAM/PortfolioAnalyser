@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from utils.data_fetcher import DataFetcher
+from utils.page_explanations import render_section_explainer
 
 class BenchmarkComparison:
     def __init__(self):
@@ -17,7 +18,7 @@ class BenchmarkComparison:
             'Small Cap': 'NIFTY_SMALLCAP_100'
         }
     
-    def render(self, analysis_results, portfolio_data):
+    def render(self, analysis_results, portfolio_data, lang_code="en"):
         """Render benchmark comparison analysis"""
         
         st.header("📊 Benchmark Comparison")
@@ -28,8 +29,7 @@ class BenchmarkComparison:
             st.warning("No stock performance data available.")
             return
         
-        # Portfolio vs Benchmark Overview
-        st.subheader("🎯 Portfolio vs Market Indices")
+        render_section_explainer("Portfolio vs Market Indices", "portfolio_vs_nifty", lang_code=lang_code, analysis_results=analysis_results, icon="🎯")
         
         # Calculate portfolio-level benchmark comparison
         portfolio_return = analysis_results['portfolio_summary']['total_gain_loss_percentage']
@@ -77,7 +77,7 @@ class BenchmarkComparison:
         st.markdown("---")
         
         # Category-wise Benchmark Comparison
-        st.subheader("📈 Category-wise Benchmark Analysis")
+        render_section_explainer("Category-wise Benchmark Analysis", "portfolio_vs_sensex", lang_code=lang_code, analysis_results=analysis_results, icon="📈")
         
         category_analysis = pd.DataFrame(analysis_results['category_analysis'])
         
@@ -216,7 +216,7 @@ class BenchmarkComparison:
         st.markdown("---")
         
         # Performance Insights
-        st.subheader("💡 Benchmark Analysis Insights")
+        render_section_explainer("Benchmark Analysis Insights", "alpha", lang_code=lang_code, analysis_results=analysis_results, icon="💡")
         
         # Calculate overall portfolio performance vs benchmarks
         insights = []
@@ -255,7 +255,7 @@ class BenchmarkComparison:
         
         # Recommendations based on benchmark analysis
         st.markdown("---")
-        st.subheader("📋 Benchmark-Based Recommendations")
+        render_section_explainer("Benchmark-Based Recommendations", "beta", lang_code=lang_code, analysis_results=analysis_results, icon="📋")
         
         recommendations = []
         
