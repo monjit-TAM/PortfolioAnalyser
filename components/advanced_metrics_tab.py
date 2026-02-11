@@ -3,6 +3,62 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
+ADVANCED_METRIC_EXPLAINERS = {
+    "Portfolio Health Score": "Health Score",
+    "Risk Radar": "Risk Radar",
+    "Structural Diagnostics": "Structural Diagnostics",
+    "Style Analysis": "Style Analysis",
+    "Concentration Risk": "Concentration Risk",
+    "Volatility & Drawdown": "Volatility & Drawdown",
+    "Behavior Analysis": "Behavior Analysis",
+    "Drift Analysis": "Drift Analysis",
+    "Overlap Detection": "Overlap Detection",
+    "Return Attribution": "Return Attribution",
+    "Liquidity Risk": "Liquidity Risk",
+    "Tail Risk": "Tail Risk",
+    "Tax Impact": "Tax Impact",
+    "Macro Sensitivity": "Macro Sensitivity",
+    "Scenario Analysis": "Scenario Analysis"
+}
+
+def _render_metric_explainer(category_name):
+    try:
+        from utils.page_explanations import PAGE_EXPLANATIONS, SUPPORTED_LANGUAGES, translate_text
+        
+        lang_code = "en"
+        if hasattr(st, 'session_state') and 'explanation_language' in st.session_state:
+            lang_code = SUPPORTED_LANGUAGES.get(st.session_state.explanation_language, "en")
+        
+        metric_key = ADVANCED_METRIC_EXPLAINERS.get(category_name)
+        if not metric_key:
+            return
+        
+        advanced_data = PAGE_EXPLANATIONS.get("advanced", {})
+        metrics = advanced_data.get("metrics", [])
+        
+        explanation_text = None
+        for m in metrics:
+            if m["name"] == metric_key:
+                explanation_text = m["explanation"]
+                break
+        
+        if not explanation_text:
+            return
+        
+        if lang_code != "en":
+            explanation_text = translate_text(explanation_text, lang_code)
+        
+        st.markdown(f"""
+        <div style='background: #f0f4ff; padding: 12px 16px; border-radius: 8px; 
+                    border-left: 3px solid #4285f4; margin-bottom: 16px;'>
+            <p style='color: #555; font-size: 13px; line-height: 1.5; margin: 0;'>
+                ℹ️ {explanation_text}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    except Exception:
+        pass
+
 def render_advanced_metrics_tab(advanced_metrics):
     if not advanced_metrics:
         st.warning("No advanced metrics available. Please analyze your portfolio first.")
@@ -38,6 +94,7 @@ def render_advanced_metrics_tab(advanced_metrics):
     st.markdown("---")
     
     for category in selected_categories:
+        _render_metric_explainer(category)
         if category == "Portfolio Health Score":
             render_health_score(advanced_metrics.get('health_score', {}))
         elif category == "Risk Radar":

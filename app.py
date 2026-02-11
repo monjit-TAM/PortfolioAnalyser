@@ -1081,8 +1081,8 @@ def display_analysis():
             st.session_state.analysis_complete = False
             st.rerun()
     
-    # Action buttons row with AI Assistant prominently placed
-    col1, col2, col3, col4 = st.columns([1, 1.2, 1, 1.2])
+    # Action buttons row with AI Assistant and language selector
+    col1, col2, col3, col4, col5 = st.columns([1, 1.2, 1, 1.2, 0.8])
     
     with col1:
         if st.button("🔄 Refresh Prices", type="secondary", help="Update with latest stock prices", use_container_width=True):
@@ -1155,6 +1155,23 @@ def display_analysis():
             st.session_state.show_ai_assistant = True
             st.rerun()
     
+    with col5:
+        from utils.page_explanations import SUPPORTED_LANGUAGES
+        if 'explanation_language' not in st.session_state:
+            st.session_state.explanation_language = "English"
+        lang_options = list(SUPPORTED_LANGUAGES.keys())
+        current_idx = lang_options.index(st.session_state.explanation_language) if st.session_state.explanation_language in lang_options else 0
+        selected_lang = st.selectbox(
+            "🌐 Language",
+            options=lang_options,
+            index=current_idx,
+            key="lang_selector_main",
+            label_visibility="collapsed"
+        )
+        if selected_lang != st.session_state.explanation_language:
+            st.session_state.explanation_language = selected_lang
+            st.rerun()
+    
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Show AI Assistant modal if triggered
@@ -1193,7 +1210,15 @@ def display_analysis():
         "📐 Methodology"
     ])
     
+    from utils.page_explanations import render_page_explainer, render_language_selector, SUPPORTED_LANGUAGES
+    
+    if 'explanation_language' not in st.session_state:
+        st.session_state.explanation_language = "English"
+    
+    lang_code = SUPPORTED_LANGUAGES.get(st.session_state.explanation_language, "en")
+    
     with tab1:
+        render_page_explainer("dashboard", lang_code)
         dashboard = Dashboard()
         dashboard.render(
             st.session_state.analysis_results,
@@ -1202,6 +1227,7 @@ def display_analysis():
         )
     
     with tab2:
+        render_page_explainer("sectors", lang_code)
         sector_analysis = SectorAnalysis()
         sector_analysis.render(
             st.session_state.analysis_results,
@@ -1209,6 +1235,7 @@ def display_analysis():
         )
     
     with tab3:
+        render_page_explainer("stocks", lang_code)
         stock_performance = StockPerformance()
         stock_performance.render(
             st.session_state.analysis_results,
@@ -1218,6 +1245,7 @@ def display_analysis():
         )
     
     with tab4:
+        render_page_explainer("benchmark", lang_code)
         benchmark_comparison = BenchmarkComparison()
         benchmark_comparison.render(
             st.session_state.analysis_results,
@@ -1225,6 +1253,7 @@ def display_analysis():
         )
     
     with tab5:
+        render_page_explainer("advice", lang_code)
         if st.session_state.get('disclaimer_accepted', False):
             recommendations = Recommendations()
             recommendations.render(
@@ -1235,6 +1264,7 @@ def display_analysis():
             render_disclaimer_overlay('advice')
     
     with tab6:
+        render_page_explainer("rebalance", lang_code)
         if st.session_state.get('disclaimer_accepted', False):
             rebalancing = PortfolioRebalancing()
             rebalancing.render(
@@ -1246,6 +1276,7 @@ def display_analysis():
             render_disclaimer_overlay('rebalance')
     
     with tab7:
+        render_page_explainer("history", lang_code)
         historical_performance = HistoricalPerformance()
         historical_performance.render(
             st.session_state.analysis_results,
@@ -1254,6 +1285,7 @@ def display_analysis():
         )
     
     with tab8:
+        render_page_explainer("profile", lang_code)
         customer_profile = CustomerProfile()
         customer_profile.render(
             st.session_state.analysis_results,
@@ -1262,6 +1294,7 @@ def display_analysis():
         )
     
     with tab9:
+        render_page_explainer("advanced", lang_code)
         if 'advanced_metrics' not in st.session_state:
             with st.spinner("Calculating advanced metrics..."):
                 from utils.advanced_metrics import AdvancedMetricsCalculator as AMC
@@ -1283,6 +1316,7 @@ def display_analysis():
         render_advanced_metrics_tab(st.session_state.advanced_metrics)
     
     with tab10:
+        render_page_explainer("methodology", lang_code)
         from components.methodology import Methodology
         methodology = Methodology()
         methodology.render()
