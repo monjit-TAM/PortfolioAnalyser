@@ -1,251 +1,5 @@
-PAGE_EXPLANATIONS = {
-    "dashboard": {
-        "title": "Dashboard - Executive Summary",
-        "icon": "📊",
-        "summary": "This is your portfolio's report card. It gives you a quick snapshot of how your investments are doing overall.",
-        "metrics": [
-            {
-                "name": "Portfolio Health Score",
-                "explanation": "Think of this like a health check-up score for your investments. A score above 75 means your portfolio is in good shape. Below 50 means it needs attention. It considers how well-spread your investments are, how risky they are, and how well they're performing."
-            },
-            {
-                "name": "Total Investment",
-                "explanation": "This is the total amount of money you originally put into buying all your stocks. It's your starting point - the money you spent to buy shares."
-            },
-            {
-                "name": "Current Value",
-                "explanation": "This is what all your stocks are worth right now if you were to sell them today. If this is higher than your Total Investment, you're making profit. If lower, you're at a loss."
-            },
-            {
-                "name": "Total Gain/Loss",
-                "explanation": "Simply put, this is your profit or loss. It's the difference between what your stocks are worth now versus what you paid for them. Green means profit, red means loss."
-            },
-            {
-                "name": "Return Percentage",
-                "explanation": "This tells you the percentage of profit or loss on your investment. For example, if you invested ₹1,00,000 and it's now worth ₹1,20,000, your return is +20%. It helps you compare whether your stocks did better or worse than keeping money in a bank fixed deposit."
-            },
-            {
-                "name": "Stock Performance Table",
-                "explanation": "This table shows each stock you own with its buy price, current price, and how much profit or loss it has made. It helps you see which stocks are winners and which ones are dragging your portfolio down."
-            }
-        ]
-    },
-    "sectors": {
-        "title": "Sectors - Industry Breakdown",
-        "icon": "🏭",
-        "summary": "This page shows how your money is spread across different industries like IT, Banking, Pharma, etc. A well-balanced portfolio shouldn't have too much money in one industry.",
-        "metrics": [
-            {
-                "name": "Sector Allocation Pie Chart",
-                "explanation": "This pie chart shows what percentage of your money is in each industry. For example, if 50% is in IT stocks, you're heavily dependent on the tech sector. Ideally, no single sector should be more than 25-30% of your portfolio."
-            },
-            {
-                "name": "Sector Performance",
-                "explanation": "This shows how each industry group in your portfolio has performed. It helps you see which sectors are making money and which are losing. If Banking stocks are all losing, it might be a sector-wide problem, not just your stock picks."
-            },
-            {
-                "name": "Sector Diversification Score",
-                "explanation": "This score tells you how well-spread your investments are across industries. A high score means good diversification - your money is spread well. A low score means your money is concentrated in few sectors, which is risky."
-            }
-        ]
-    },
-    "stocks": {
-        "title": "Stocks - Individual Performance",
-        "icon": "📈",
-        "summary": "This page gives you a detailed look at how each individual stock in your portfolio is performing. It's like a progress report for each of your investments.",
-        "metrics": [
-            {
-                "name": "Stock-wise Returns",
-                "explanation": "Shows the profit or loss for each stock separately. A stock showing +50% means it has grown by half since you bought it. A stock showing -20% means it has lost one-fifth of its value."
-            },
-            {
-                "name": "Price Chart",
-                "explanation": "This chart shows how your stock's price has moved over time since you bought it. An upward line is good (price going up), a downward line means the price has been falling."
-            },
-            {
-                "name": "Investment vs Current Value",
-                "explanation": "For each stock, this compares what you paid versus what it's worth now. Green bars above the line mean profit, red bars below mean loss. It instantly shows your winners and losers."
-            }
-        ]
-    },
-    "benchmark": {
-        "title": "Benchmark - Market Comparison",
-        "icon": "📊",
-        "summary": "This page compares your portfolio's performance against major market indices like Nifty 50 and Sensex. It answers the question: 'Am I doing better or worse than the market?'",
-        "metrics": [
-            {
-                "name": "Portfolio vs Nifty 50",
-                "explanation": "Nifty 50 represents the top 50 companies in India. If your portfolio returned +15% but Nifty gave +20%, it means you would have been better off just buying a Nifty index fund. This comparison helps you judge if your stock picking is adding value."
-            },
-            {
-                "name": "Portfolio vs Sensex",
-                "explanation": "Sensex tracks the top 30 companies on BSE. Like Nifty comparison, this tells you if your stock selection is beating the market average or not."
-            },
-            {
-                "name": "Alpha",
-                "explanation": "Alpha measures your extra returns above the market. Positive alpha means you're earning MORE than the market - your stock picking is working! Negative alpha means you're underperforming the market."
-            },
-            {
-                "name": "Beta",
-                "explanation": "Beta measures how much your portfolio swings compared to the market. Beta = 1 means your portfolio moves exactly like the market. Beta > 1 means more ups and downs (riskier). Beta < 1 means steadier than the market (less risky)."
-            }
-        ]
-    },
-    "advice": {
-        "title": "Advice - Investment Recommendations",
-        "icon": "💡",
-        "summary": "This page gives you actionable suggestions for each stock - whether to Buy more, Hold, or Sell. It looks at each stock from two perspectives: Value investing (like Warren Buffett) and Growth investing.",
-        "metrics": [
-            {
-                "name": "Value Analysis",
-                "explanation": "Value investing looks at whether a stock is cheap or expensive compared to its true worth. Think of it like bargain shopping - is the stock currently at a 'sale price' or is it overpriced? It checks things like P/E ratio (price compared to earnings) and dividend yield."
-            },
-            {
-                "name": "Growth Analysis",
-                "explanation": "Growth investing looks at whether a company is growing fast - its revenue is increasing, profits are going up, and the business is expanding. Fast-growing companies can give big returns even if they seem expensive today."
-            },
-            {
-                "name": "BUY / HOLD / SELL Rating",
-                "explanation": "BUY means the stock looks good and you might want to add more. HOLD means keep what you have but don't buy more. SELL means the stock isn't performing well and you should consider selling it to invest the money elsewhere."
-            },
-            {
-                "name": "Alternative Suggestions",
-                "explanation": "When a stock gets a SELL rating, we suggest better alternatives in the same sector. For example, if a banking stock is underperforming, we might suggest a stronger bank stock to replace it with."
-            }
-        ]
-    },
-    "rebalance": {
-        "title": "Rebalance - Portfolio Adjustment",
-        "icon": "⚖️",
-        "summary": "This page tells you how to adjust your portfolio for better balance. Over time, some stocks grow more than others, making your portfolio uneven. Rebalancing means fixing this to reduce risk.",
-        "metrics": [
-            {
-                "name": "Overweight Positions",
-                "explanation": "These are stocks that have become too large a portion of your portfolio. Like having too many eggs in one basket - if that stock falls, it will hurt your whole portfolio a lot. The suggestion is to sell some of these and spread the money."
-            },
-            {
-                "name": "Underweight Positions",
-                "explanation": "These are stocks or sectors where you have too little investment. Adding more here would improve your portfolio's balance and reduce risk."
-            },
-            {
-                "name": "Concentration Alerts",
-                "explanation": "These are warnings when any single stock or sector takes up too much of your portfolio. A general rule is no single stock should be more than 10-15% of your total portfolio, and no sector more than 25-30%."
-            }
-        ]
-    },
-    "history": {
-        "title": "History - Performance Over Time",
-        "icon": "📅",
-        "summary": "This page shows how your portfolio value has changed over time. It helps you understand your investment journey - the ups and downs along the way.",
-        "metrics": [
-            {
-                "name": "Portfolio Value Over Time",
-                "explanation": "This chart tracks your portfolio's total value from when you first invested to today. The line going up means your investments are growing. Dips are normal and happen to everyone - what matters is the overall upward trend."
-            },
-            {
-                "name": "Monthly/Yearly Returns",
-                "explanation": "This breaks down your returns by time period. You can see which months or years were good and which were bad. It helps you understand patterns - for example, markets often dip during certain events but recover later."
-            }
-        ]
-    },
-    "profile": {
-        "title": "Profile - Investor Profile",
-        "icon": "👤",
-        "summary": "This page analyzes your investing style and behavior based on your portfolio. It tells you what kind of investor you are and whether your approach matches your goals.",
-        "metrics": [
-            {
-                "name": "Investor Type",
-                "explanation": "Based on your stock choices, this tells you if you're an aggressive investor (taking big risks for big returns), conservative investor (preferring safety), or somewhere in between. Knowing your style helps you make better decisions."
-            },
-            {
-                "name": "Risk Tolerance",
-                "explanation": "This measures how much risk your portfolio is taking. High risk means bigger potential gains but also bigger potential losses. If you're close to retirement, you might want lower risk. If you're young, you can afford more risk."
-            },
-            {
-                "name": "Holding Period",
-                "explanation": "This shows how long you typically hold your stocks. Long-term holding (1+ years) usually means you're a patient investor, which historically gives better returns and lower taxes. Short-term trading means higher taxes and more transaction costs."
-            }
-        ]
-    },
-    "advanced": {
-        "title": "Advanced - Deep Analysis",
-        "icon": "🔬",
-        "summary": "This page provides professional-grade analysis with 15 different types of deep checks on your portfolio. Think of it as a complete medical check-up for your investments.",
-        "metrics": [
-            {
-                "name": "Health Score",
-                "explanation": "An overall score out of 100 that considers everything - diversification, risk, returns, and more. Like a fitness score for your portfolio. Above 75 is healthy, 50-75 needs some attention, below 50 needs major changes."
-            },
-            {
-                "name": "Risk Radar",
-                "explanation": "A spider/radar chart that shows 8 different types of risk in your portfolio. It helps you see at a glance which areas are risky and which are safe. Each spoke of the chart represents a different risk factor."
-            },
-            {
-                "name": "Structural Diagnostics",
-                "explanation": "Shows how your money is spread across large companies (safer), medium companies, and small companies (riskier). A good mix of all three types usually works best."
-            },
-            {
-                "name": "Style Analysis",
-                "explanation": "Tells you if your portfolio leans towards 'Value' stocks (established companies at reasonable prices) or 'Growth' stocks (fast-growing companies). Neither is wrong - it's about knowing your style."
-            },
-            {
-                "name": "Concentration Risk",
-                "explanation": "Measures whether too much of your money is in just a few stocks. If your top 3 stocks make up 60%+ of your portfolio, that's risky because if even one of them falls sharply, your whole portfolio suffers."
-            },
-            {
-                "name": "Volatility & Drawdown",
-                "explanation": "Measures how much your portfolio value bounces up and down. High volatility means big swings (stressful but potentially rewarding). Drawdown shows the biggest drop from a peak - how much you could lose in a bad period."
-            },
-            {
-                "name": "Behavior Analysis",
-                "explanation": "Analyzes your investing habits - are you buying and selling too frequently? Are you holding losing stocks too long hoping they'll recover? Are you selling winners too early? These are common mistakes this section helps you identify."
-            },
-            {
-                "name": "Drift Analysis",
-                "explanation": "Checks if your portfolio has drifted away from a balanced position over time. Stocks that grow a lot can make your portfolio unbalanced. This shows how far you've drifted from an ideal allocation."
-            },
-            {
-                "name": "Overlap Detection",
-                "explanation": "Finds stocks in your portfolio that are very similar to each other. For example, having both HDFC Bank and ICICI Bank means you're 'doubling up' on banking. This reduces the benefit of diversification."
-            },
-            {
-                "name": "Return Attribution",
-                "explanation": "Breaks down exactly where your profits and losses came from. Which stocks contributed most to your gains? Which stocks pulled your portfolio down? This helps you understand what's really driving your returns."
-            },
-            {
-                "name": "Liquidity Risk",
-                "explanation": "Checks if any of your stocks are hard to sell quickly. Stocks with low trading volume can be difficult to sell at a fair price when you need the money. This is especially important for small-cap stocks."
-            },
-            {
-                "name": "Tail Risk",
-                "explanation": "Measures the chance of extreme losses - rare but devastating events. Think of it as preparing for a 'worst case scenario'. Portfolios with high tail risk could lose a lot in market crashes."
-            },
-            {
-                "name": "Tax Impact",
-                "explanation": "Shows how much tax you'll pay on your gains. In India, stocks held less than 1 year have higher taxes (Short Term Capital Gains at 15%) compared to stocks held over 1 year (Long Term Capital Gains at 10% above ₹1 lakh). This helps you plan when to sell."
-            },
-            {
-                "name": "Macro Sensitivity",
-                "explanation": "Shows how your portfolio might be affected by big economic changes like interest rate hikes, oil price changes, or rupee weakness. Helps you prepare for economic shifts."
-            },
-            {
-                "name": "Scenario Analysis",
-                "explanation": "Tests your portfolio against worst-case scenarios - what happens if the market crashes 30%? What if interest rates spike? This stress test shows how resilient your portfolio is in tough times."
-            }
-        ]
-    },
-    "methodology": {
-        "title": "Methodology - How We Calculate",
-        "icon": "📐",
-        "summary": "This page explains the mathematical methods and formulas we use for all calculations. It's provided for transparency so you can trust and verify our analysis.",
-        "metrics": [
-            {
-                "name": "Calculation Methods",
-                "explanation": "We explain every formula used - from simple return calculations to complex risk metrics. This ensures complete transparency. You can verify our calculations or share them with your financial advisor."
-            }
-        ]
-    }
-}
+import os
+from openai import OpenAI
 
 SUPPORTED_LANGUAGES = {
     "English": "en",
@@ -263,106 +17,6 @@ SUPPORTED_LANGUAGES = {
     "اردو (Urdu)": "ur"
 }
 
-def get_page_explanation(page_key):
-    return PAGE_EXPLANATIONS.get(page_key, {})
-
-_translation_cache = {}
-
-def translate_text(text, target_lang_code):
-    if target_lang_code == "en":
-        return text
-    
-    cache_key = f"{target_lang_code}:{text[:100]}"
-    if cache_key in _translation_cache:
-        return _translation_cache[cache_key]
-    
-    try:
-        import os
-        from openai import OpenAI
-        
-        client = OpenAI(
-            api_key=os.environ.get("AI_INTEGRATIONS_OPENAI_API_KEY"),
-            base_url=os.environ.get("AI_INTEGRATIONS_OPENAI_BASE_URL")
-        )
-        
-        lang_names = {v: k.split(" (")[0] if " (" in k else k for k, v in SUPPORTED_LANGUAGES.items()}
-        lang_name = lang_names.get(target_lang_code, "Hindi")
-        
-        # the newest OpenAI model is "gpt-5" which was released August 7, 2025.
-        # do not change this unless explicitly requested by the user
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": f"Translate the following text to {lang_name}. Keep financial terms like 'Nifty 50', 'Sensex', 'P/E ratio', 'Alpha', 'Beta', 'Sharpe ratio' in English. Keep currency symbol ₹ as is. Provide only the translation, nothing else."},
-                {"role": "user", "content": text}
-            ],
-            max_completion_tokens=2000
-        )
-        translated = response.choices[0].message.content.strip()
-        _translation_cache[cache_key] = translated
-        return translated
-    except Exception as e:
-        return text
-
-def get_translated_explanation(page_key, lang_code="en"):
-    explanation = get_page_explanation(page_key)
-    if not explanation or lang_code == "en":
-        return explanation
-    
-    batch_cache_key = f"batch:{lang_code}:{page_key}"
-    if batch_cache_key in _translation_cache:
-        return _translation_cache[batch_cache_key]
-    
-    try:
-        import os, json
-        from openai import OpenAI
-        
-        client = OpenAI(
-            api_key=os.environ.get("AI_INTEGRATIONS_OPENAI_API_KEY"),
-            base_url=os.environ.get("AI_INTEGRATIONS_OPENAI_BASE_URL")
-        )
-        
-        lang_names = {v: k.split(" (")[0] if " (" in k else k for k, v in SUPPORTED_LANGUAGES.items()}
-        lang_name = lang_names.get(lang_code, "Hindi")
-        
-        texts_to_translate = [explanation.get("summary", "")]
-        for metric in explanation.get("metrics", []):
-            texts_to_translate.append(metric["explanation"])
-        
-        combined = "\n---SEPARATOR---\n".join(texts_to_translate)
-        
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": f"Translate the following texts to {lang_name}. Each text is separated by '---SEPARATOR---'. Keep the separator in your output. Keep financial terms like 'Nifty 50', 'Sensex', 'P/E ratio', 'Alpha', 'Beta', 'Sharpe ratio' in English. Keep currency symbol ₹ as is. Provide only the translations with separators, nothing else."},
-                {"role": "user", "content": combined}
-            ],
-            max_completion_tokens=4000
-        )
-        
-        translated_parts = response.choices[0].message.content.strip().split("---SEPARATOR---")
-        translated_parts = [p.strip() for p in translated_parts]
-        
-        translated = {
-            "title": explanation.get("title", ""),
-            "icon": explanation.get("icon", ""),
-            "summary": translated_parts[0] if translated_parts else explanation.get("summary", ""),
-            "metrics": []
-        }
-        
-        for i, metric in enumerate(explanation.get("metrics", [])):
-            idx = i + 1
-            translated["metrics"].append({
-                "name": metric["name"],
-                "explanation": translated_parts[idx] if idx < len(translated_parts) else metric["explanation"]
-            })
-        
-        _translation_cache[batch_cache_key] = translated
-        return translated
-    except Exception:
-        return explanation
-
-
 EXPANDER_LABELS = {
     "en": "Understanding this page",
     "hi": "इस पेज को समझें",
@@ -379,15 +33,590 @@ EXPANDER_LABELS = {
     "ur": "اس صفحے کو سمجھیں"
 }
 
-def render_page_explainer(page_key, lang_code="en"):
+
+def _fmt(val, prefix="₹"):
+    if val is None:
+        return "N/A"
+    try:
+        v = float(val)
+        if abs(v) >= 10000000:
+            return f"{prefix}{v/10000000:,.2f} Cr"
+        elif abs(v) >= 100000:
+            return f"{prefix}{v/100000:,.2f} L"
+        else:
+            return f"{prefix}{v:,.0f}"
+    except:
+        return str(val)
+
+
+def _pct(val):
+    try:
+        return f"{float(val):+.2f}%"
+    except:
+        return "N/A"
+
+
+def _safe_get(d, *keys, default=None):
+    for k in keys:
+        if isinstance(d, dict):
+            d = d.get(k, default)
+        else:
+            return default
+    return d
+
+
+def generate_dynamic_explanation(page_key, analysis_results=None, advanced_metrics=None, recommendations=None):
+    import pandas as pd
+
+    summary = _safe_get(analysis_results, 'portfolio_summary', default={}) if analysis_results else {}
+    stock_perf = _safe_get(analysis_results, 'stock_performance', default=[]) if analysis_results else []
+    sector_data = _safe_get(analysis_results, 'sector_analysis', default=[]) if analysis_results else []
+    dividend_metrics = _safe_get(analysis_results, 'dividend_metrics', default={}) if analysis_results else {}
+
+    total_inv = summary.get('total_investment', 0)
+    current_val = summary.get('current_value', 0)
+    total_gl = summary.get('total_gain_loss', 0)
+    total_gl_pct = summary.get('total_gain_loss_percentage', 0)
+    num_stocks = summary.get('number_of_stocks', 0)
+    profitable = summary.get('profitable_stocks', 0)
+    loss_making = summary.get('loss_making_stocks', 0)
+
+    if stock_perf:
+        try:
+            perf_df = pd.DataFrame(stock_perf) if not isinstance(stock_perf, pd.DataFrame) else stock_perf
+            if 'Gain/Loss %' in perf_df.columns:
+                top_stock = perf_df.loc[perf_df['Gain/Loss %'].idxmax()]
+                worst_stock = perf_df.loc[perf_df['Gain/Loss %'].idxmin()]
+                top_name = top_stock.get('Stock Name', 'N/A')
+                top_return = top_stock.get('Gain/Loss %', 0)
+                worst_name = worst_stock.get('Stock Name', 'N/A')
+                worst_return = worst_stock.get('Gain/Loss %', 0)
+            else:
+                top_name = worst_name = "N/A"
+                top_return = worst_return = 0
+        except:
+            top_name = worst_name = "N/A"
+            top_return = worst_return = 0
+    else:
+        top_name = worst_name = "N/A"
+        top_return = worst_return = 0
+
+    if sector_data:
+        try:
+            sec_df = pd.DataFrame(sector_data) if not isinstance(sector_data, pd.DataFrame) else sector_data
+            if not sec_df.empty and 'Percentage of Portfolio' in sec_df.columns:
+                top_sector = sec_df.loc[sec_df['Percentage of Portfolio'].idxmax()]
+                top_sector_name = top_sector.get('Sector', 'N/A')
+                top_sector_pct = top_sector.get('Percentage of Portfolio', 0)
+                num_sectors = len(sec_df)
+            else:
+                top_sector_name = "N/A"
+                top_sector_pct = 0
+                num_sectors = 0
+        except:
+            top_sector_name = "N/A"
+            top_sector_pct = 0
+            num_sectors = 0
+    else:
+        top_sector_name = "N/A"
+        top_sector_pct = 0
+        num_sectors = 0
+
+    profit_or_loss = "profit" if total_gl >= 0 else "loss"
+    gain_word = "gained" if total_gl >= 0 else "lost"
+
+    if page_key == "dashboard":
+        return {
+            "title": "Dashboard - Executive Summary",
+            "icon": "📊",
+            "summary": f"Your portfolio of {num_stocks} stocks has a total investment of {_fmt(total_inv)} and is currently worth {_fmt(current_val)}. "
+                       f"You have {gain_word} {_fmt(abs(total_gl))} ({_pct(total_gl_pct)}). "
+                       f"{profitable} out of {num_stocks} stocks are in profit.",
+            "metrics": [
+                {
+                    "name": "Portfolio Health Score",
+                    "explanation": f"Your portfolio health score considers diversification across {num_sectors} sectors, "
+                                   f"your {_pct(total_gl_pct)} return, and your win rate of {profitable}/{num_stocks} stocks in profit. "
+                                   f"A score above 75 means your portfolio is in good shape, below 50 means it needs attention."
+                },
+                {
+                    "name": "Total Investment",
+                    "explanation": f"You originally invested {_fmt(total_inv)} across {num_stocks} stocks. "
+                                   f"This is the total money you spent to buy all your shares."
+                },
+                {
+                    "name": "Current Value",
+                    "explanation": f"Your stocks are currently worth {_fmt(current_val)}. "
+                                   + (f"This is {_fmt(abs(current_val - total_inv))} MORE than what you invested - you're in profit!"
+                                      if current_val >= total_inv else
+                                      f"This is {_fmt(abs(total_inv - current_val))} LESS than what you invested - you're at a loss.")
+                },
+                {
+                    "name": "Total Gain/Loss",
+                    "explanation": f"You have {gain_word} {_fmt(abs(total_gl))} overall ({_pct(total_gl_pct)}). "
+                                   f"Your best performer is {top_name} at {_pct(top_return)}, and your weakest stock is {worst_name} at {_pct(worst_return)}."
+                },
+                {
+                    "name": "Return Percentage",
+                    "explanation": f"Your overall portfolio return is {_pct(total_gl_pct)}. "
+                                   + (f"For comparison, a bank fixed deposit typically gives 6-7% per year. "
+                                      f"Your portfolio is {'outperforming' if total_gl_pct > 7 else 'underperforming compared to'} a simple FD."
+                                      if total_gl_pct != 0 else "Upload portfolio to see your returns.")
+                },
+                {
+                    "name": "Stock Performance Table",
+                    "explanation": f"This table shows all {num_stocks} stocks with their buy price, current price, and individual gains/losses. "
+                                   f"Currently {profitable} stocks are making money and {loss_making} stocks are in loss. "
+                                   f"Look for {worst_name} ({_pct(worst_return)}) - it may need your attention."
+                }
+            ]
+        }
+
+    elif page_key == "sectors":
+        sector_summary_parts = []
+        if sector_data:
+            try:
+                sec_df = pd.DataFrame(sector_data) if not isinstance(sector_data, pd.DataFrame) else sector_data
+                for _, row in sec_df.head(3).iterrows():
+                    sector_summary_parts.append(f"{row.get('Sector', 'Unknown')} ({row.get('Percentage of Portfolio', 0):.1f}%)")
+            except:
+                pass
+        top_3_text = ", ".join(sector_summary_parts) if sector_summary_parts else "your various sectors"
+
+        return {
+            "title": "Sectors - Industry Breakdown",
+            "icon": "🏭",
+            "summary": f"Your money is spread across {num_sectors} sectors. Your largest sector is {top_sector_name} "
+                       f"at {top_sector_pct:.1f}% of your portfolio. Top sectors: {top_3_text}. "
+                       + ("This sector has too much concentration (above 30%). Consider diversifying." if top_sector_pct > 30 else
+                          "Your sector allocation looks reasonably balanced."),
+            "metrics": [
+                {
+                    "name": "Sector Allocation Pie Chart",
+                    "explanation": f"Your portfolio is spread across {num_sectors} sectors. {top_sector_name} is your largest at {top_sector_pct:.1f}%. "
+                                   f"Ideally, no single sector should be more than 25-30%. "
+                                   + (f"Your {top_sector_name} allocation is high - if this sector faces problems, a large part of your portfolio could be affected."
+                                      if top_sector_pct > 30 else
+                                      f"Your allocation looks well-distributed across sectors.")
+                },
+                {
+                    "name": "Sector Performance",
+                    "explanation": f"This shows returns for each of your {num_sectors} sectors. "
+                                   f"If an entire sector is losing, it's likely a market-wide issue, not just your stock picks."
+                },
+                {
+                    "name": "Sector Diversification Score",
+                    "explanation": f"With {num_sectors} sectors and {num_stocks} stocks, this score measures how well-spread your investments are. "
+                                   f"More sectors generally means better diversification and lower risk."
+                }
+            ]
+        }
+
+    elif page_key == "stocks":
+        return {
+            "title": "Stocks - Individual Performance",
+            "icon": "📈",
+            "summary": f"Here's how each of your {num_stocks} stocks is performing individually. "
+                       f"Your star performer is {top_name} ({_pct(top_return)}) "
+                       f"and your weakest is {worst_name} ({_pct(worst_return)}).",
+            "metrics": [
+                {
+                    "name": "Stock-wise Returns",
+                    "explanation": f"Your best stock {top_name} has returned {_pct(top_return)}, while {worst_name} has returned {_pct(worst_return)}. "
+                                   f"Out of {num_stocks} stocks, {profitable} are in profit and {loss_making} are in loss."
+                },
+                {
+                    "name": "Price Chart",
+                    "explanation": f"These charts show how each stock's price has moved since you bought it. An upward trend is good. "
+                                   f"Compare your stocks' price movements to see which ones have been steadily growing."
+                },
+                {
+                    "name": "Investment vs Current Value",
+                    "explanation": f"For each stock, this compares what you paid versus what it's worth now. "
+                                   f"Green bars mean profit, red bars mean loss. "
+                                   f"Your total investment of {_fmt(total_inv)} is now worth {_fmt(current_val)}."
+                }
+            ]
+        }
+
+    elif page_key == "benchmark":
+        return {
+            "title": "Benchmark - Market Comparison",
+            "icon": "📊",
+            "summary": f"Your portfolio returned {_pct(total_gl_pct)} overall. This page compares that against Nifty 50 and Sensex "
+                       f"to answer: 'Did your stock picking add value, or would a simple index fund have been better?'",
+            "metrics": [
+                {
+                    "name": "Portfolio vs Nifty 50",
+                    "explanation": f"Your portfolio's {_pct(total_gl_pct)} return is compared against Nifty 50 (top 50 Indian companies). "
+                                   f"If Nifty beat your return, you might have been better off with a Nifty index fund, which is also less effort."
+                },
+                {
+                    "name": "Portfolio vs Sensex",
+                    "explanation": f"Sensex tracks the top 30 companies on BSE. Like the Nifty comparison, this tells you if your stock selection "
+                                   f"is adding value compared to the market average."
+                },
+                {
+                    "name": "Alpha",
+                    "explanation": f"Alpha measures your EXTRA returns above the market. With your {_pct(total_gl_pct)} return, "
+                                   f"positive Alpha means your stock picking is working - you're earning more than the market. "
+                                   f"Negative Alpha means you'd be better off with an index fund."
+                },
+                {
+                    "name": "Beta",
+                    "explanation": f"Beta measures how much your portfolio swings compared to the market. "
+                                   f"Beta = 1 means your {num_stocks} stocks move exactly like the market. "
+                                   f"Beta > 1 means more ups and downs (riskier). Beta < 1 means steadier (less risky)."
+                }
+            ]
+        }
+
+    elif page_key == "advice":
+        return {
+            "title": "Advice - Investment Recommendations",
+            "icon": "💡",
+            "summary": f"Based on your {num_stocks} stocks, this page gives specific Buy/Hold/Sell advice. "
+                       f"With {loss_making} stocks currently in loss, pay special attention to SELL recommendations to cut losses early.",
+            "metrics": [
+                {
+                    "name": "Value Analysis",
+                    "explanation": f"Checks if each of your {num_stocks} stocks is cheap or expensive compared to its true worth. "
+                                   f"Like bargain shopping - is the stock at a 'sale price' or overpriced? "
+                                   f"It looks at P/E ratio, dividend yield, and fundamentals."
+                },
+                {
+                    "name": "Growth Analysis",
+                    "explanation": f"Checks if your stocks' companies are growing fast - revenue increasing, profits rising, business expanding. "
+                                   f"Fast-growing companies can give big returns even if they seem expensive today."
+                },
+                {
+                    "name": "BUY / HOLD / SELL Rating",
+                    "explanation": f"Each of your {num_stocks} stocks gets a specific rating. "
+                                   f"BUY = add more shares. HOLD = keep what you have. "
+                                   f"SELL = consider selling and reinvesting the money better. "
+                                   f"Pay attention to your worst performer {worst_name} ({_pct(worst_return)})."
+                },
+                {
+                    "name": "Alternative Suggestions",
+                    "explanation": f"For stocks rated SELL, we suggest stronger alternatives in the same sector. "
+                                   f"For example, if {worst_name} gets a SELL rating, we'll suggest better options in its sector."
+                }
+            ]
+        }
+
+    elif page_key == "rebalance":
+        return {
+            "title": "Rebalance - Portfolio Adjustment",
+            "icon": "⚖️",
+            "summary": f"Your portfolio of {num_stocks} stocks across {num_sectors} sectors may have drifted from an ideal balance. "
+                       f"This page shows which positions are too large or too small and how to fix them.",
+            "metrics": [
+                {
+                    "name": "Overweight Positions",
+                    "explanation": f"These are stocks that take up too much of your portfolio. "
+                                   + (f"For example, if {top_name} has grown significantly ({_pct(top_return)}), "
+                                      f"it may now be a disproportionately large chunk. Consider selling some to spread risk."
+                                      if top_name != "N/A" else "Stocks that have grown a lot may need trimming.")
+                },
+                {
+                    "name": "Underweight Positions",
+                    "explanation": f"These are sectors or stocks where you have too little. With {_fmt(total_inv)} invested, "
+                                   f"adding to underweight areas improves balance and reduces risk."
+                },
+                {
+                    "name": "Concentration Alerts",
+                    "explanation": f"Warnings when any single stock exceeds 10-15% of your {_fmt(current_val)} portfolio, "
+                                   f"or any sector exceeds 25-30%. "
+                                   + (f"Your biggest sector {top_sector_name} is at {top_sector_pct:.1f}%."
+                                      if top_sector_name != "N/A" else "")
+                }
+            ]
+        }
+
+    elif page_key == "history":
+        return {
+            "title": "History - Performance Over Time",
+            "icon": "📅",
+            "summary": f"Track how your {_fmt(total_inv)} investment has changed over time. "
+                       f"Currently at {_fmt(current_val)}, a {_pct(total_gl_pct)} change from your starting point.",
+            "metrics": [
+                {
+                    "name": "Portfolio Value Over Time",
+                    "explanation": f"This chart shows your journey from {_fmt(total_inv)} to {_fmt(current_val)}. "
+                                   f"Dips along the way are normal - what matters is the overall direction. "
+                                   f"Your portfolio has {gain_word} {_fmt(abs(total_gl))} in total."
+                },
+                {
+                    "name": "Monthly/Yearly Returns",
+                    "explanation": f"See which months were good and which were tough. With a {_pct(total_gl_pct)} overall return, "
+                                   f"understanding timing helps you stay calm during temporary dips."
+                }
+            ]
+        }
+
+    elif page_key == "profile":
+        win_rate = (profitable / num_stocks * 100) if num_stocks > 0 else 0
+        return {
+            "title": "Profile - Investor Profile",
+            "icon": "👤",
+            "summary": f"Based on your {num_stocks} stock picks, {win_rate:.0f}% win rate, and sector choices, "
+                       f"this page tells you what kind of investor you are and whether your approach matches your goals.",
+            "metrics": [
+                {
+                    "name": "Investor Type",
+                    "explanation": f"With {num_stocks} stocks across {num_sectors} sectors and a {_pct(total_gl_pct)} return, "
+                                   f"your investing style is classified as aggressive, moderate, or conservative. "
+                                   f"Knowing this helps you make better decisions."
+                },
+                {
+                    "name": "Risk Tolerance",
+                    "explanation": f"Your portfolio's risk level is based on your stock choices and {_pct(total_gl_pct)} return. "
+                                   f"High risk means bigger potential gains but also bigger losses. "
+                                   f"If you're near retirement, lower risk is safer."
+                },
+                {
+                    "name": "Holding Period",
+                    "explanation": f"How long you typically hold stocks matters for taxes. Holding over 1 year means lower taxes (LTCG at 10%) "
+                                   f"versus short-term (STCG at 15%). Longer holding also historically gives better returns."
+                }
+            ]
+        }
+
+    elif page_key == "advanced":
+        adv = advanced_metrics or {}
+        health = _safe_get(adv, 'health_score', default={})
+        health_val = health.get('score', 'N/A') if isinstance(health, dict) else 'N/A'
+        health_grade = health.get('grade', 'N/A') if isinstance(health, dict) else 'N/A'
+
+        concentration = _safe_get(adv, 'concentration', default={})
+        top1 = concentration.get('top1_pct', 0) if isinstance(concentration, dict) else 0
+
+        volatility = _safe_get(adv, 'volatility', default={})
+        sharpe = volatility.get('sharpe_ratio', 'N/A') if isinstance(volatility, dict) else 'N/A'
+        max_dd = volatility.get('max_drawdown', 0) if isinstance(volatility, dict) else 0
+
+        tax_data = _safe_get(adv, 'tax_impact', default={})
+        stcg = tax_data.get('stcg_tax', 0) if isinstance(tax_data, dict) else 0
+        ltcg = tax_data.get('ltcg_tax', 0) if isinstance(tax_data, dict) else 0
+
+        return {
+            "title": "Advanced - Deep Analysis",
+            "icon": "🔬",
+            "summary": f"Professional-grade 15-layer analysis of your {num_stocks}-stock, {_fmt(current_val)} portfolio. "
+                       f"Health Score: {health_val}/100 (Grade {health_grade}). "
+                       f"This is a complete check-up covering risk, concentration, behavior, and more.",
+            "metrics": [
+                {
+                    "name": "Health Score",
+                    "explanation": f"Your portfolio scored {health_val}/100 (Grade {health_grade}). "
+                                   + (f"Above 75 is healthy. " if isinstance(health_val, (int, float)) and health_val >= 75 else
+                                      f"Below 75 means there's room for improvement. " if isinstance(health_val, (int, float)) else "")
+                                   + f"It factors in your {_pct(total_gl_pct)} return, {num_sectors} sectors, and risk metrics."
+                },
+                {
+                    "name": "Risk Radar",
+                    "explanation": f"A spider chart showing 8 risk dimensions of your portfolio. "
+                                   f"Each spoke shows a different risk type - the further out, the higher the risk. "
+                                   f"Look for any spokes sticking out far - those need attention."
+                },
+                {
+                    "name": "Structural Diagnostics",
+                    "explanation": f"Shows how your {_fmt(current_val)} is split between Large Cap (safer), "
+                                   f"Mid Cap, and Small Cap (riskier) stocks. A mix of all three usually works best for growth with manageable risk."
+                },
+                {
+                    "name": "Style Analysis",
+                    "explanation": f"Your {num_stocks} stocks are analyzed for Value vs Growth tilt. "
+                                   f"Value means buying established companies at fair prices. Growth means betting on fast-growing businesses."
+                },
+                {
+                    "name": "Concentration Risk",
+                    "explanation": f"Your single largest stock holds {top1:.1f}% of your portfolio. "
+                                   + (f"That's too concentrated (above 15%) - if it drops sharply, your whole portfolio takes a big hit."
+                                      if top1 > 15 else f"This is within a reasonable range.")
+                                   + f" Ideally, no single stock should exceed 10-15% of your {_fmt(current_val)} portfolio."
+                },
+                {
+                    "name": "Volatility & Drawdown",
+                    "explanation": f"Your portfolio's Sharpe ratio is {sharpe} (higher is better, above 1 is good). "
+                                   f"Max drawdown was {max_dd:.1f}% - this is the biggest drop from a peak your portfolio experienced."
+                },
+                {
+                    "name": "Behavior Analysis",
+                    "explanation": f"Analyzes your investing habits. With {profitable} profitable and {loss_making} loss-making stocks, "
+                                   f"are you holding losers too long hoping they'll recover? Are you selling winners too early? "
+                                   f"These are common biases this section helps identify."
+                },
+                {
+                    "name": "Drift Analysis",
+                    "explanation": f"Checks if your portfolio has drifted from ideal balance. With {top_sector_name} at {top_sector_pct:.1f}%, "
+                                   f"this compares your allocation against the Nifty 50 benchmark allocation."
+                },
+                {
+                    "name": "Overlap Detection",
+                    "explanation": f"Finds similar stocks in your {num_stocks} holdings. For example, having multiple banking stocks "
+                                   f"reduces diversification benefit. This identifies which of your stocks overlap significantly."
+                },
+                {
+                    "name": "Return Attribution",
+                    "explanation": f"Your total {'profit' if total_gl >= 0 else 'loss'} of {_fmt(abs(total_gl))} - where did it come from? "
+                                   f"Your biggest contributor is {top_name} ({_pct(top_return)}), "
+                                   f"while {worst_name} ({_pct(worst_return)}) dragged performance."
+                },
+                {
+                    "name": "Liquidity Risk",
+                    "explanation": f"Checks if any of your {num_stocks} stocks would be hard to sell quickly. "
+                                   f"Stocks with low trading volume can be hard to exit at a fair price when you need money urgently."
+                },
+                {
+                    "name": "Tail Risk",
+                    "explanation": f"Measures the chance of extreme losses in your {_fmt(current_val)} portfolio. "
+                                   f"In a severe market crash (like 2020), how much could you lose? This prepares you for worst-case scenarios."
+                },
+                {
+                    "name": "Tax Impact",
+                    "explanation": f"Estimated taxes: Short-term (STCG at 15%): {_fmt(stcg)}, Long-term (LTCG at 10% above ₹1L): {_fmt(ltcg)}. "
+                                   f"Stocks held less than 1 year attract higher taxes. Planning your sell timing can save you tax money."
+                },
+                {
+                    "name": "Macro Sensitivity",
+                    "explanation": f"How your {num_stocks} stocks react to economic changes - interest rates, oil prices, rupee value. "
+                                   f"Helps you prepare if, for example, RBI raises interest rates or oil prices spike."
+                },
+                {
+                    "name": "Scenario Analysis",
+                    "explanation": f"Stress-tests your {_fmt(current_val)} portfolio: What if the market crashes 30%? "
+                                   f"What if interest rates spike? Shows estimated portfolio value under each scenario."
+                }
+            ]
+        }
+
+    elif page_key == "methodology":
+        return {
+            "title": "Methodology - How We Calculate",
+            "icon": "📐",
+            "summary": f"This page explains every formula used to analyze your {num_stocks}-stock portfolio. "
+                       f"Full transparency so you can verify calculations or share them with your financial advisor.",
+            "metrics": [
+                {
+                    "name": "Calculation Methods",
+                    "explanation": f"All calculations for your portfolio - from the {_pct(total_gl_pct)} return to risk metrics - "
+                                   f"are explained with formulas here. You can verify any number yourself or share with your CA/advisor."
+                }
+            ]
+        }
+
+    return {
+        "title": page_key.title(),
+        "icon": "📊",
+        "summary": "This section provides analysis of your portfolio.",
+        "metrics": []
+    }
+
+
+_translation_cache = {}
+
+
+def translate_text(text, target_lang_code):
+    if target_lang_code == "en":
+        return text
+
+    cache_key = f"{target_lang_code}:{text[:100]}"
+    if cache_key in _translation_cache:
+        return _translation_cache[cache_key]
+
+    try:
+        client = OpenAI(
+            api_key=os.environ.get("AI_INTEGRATIONS_OPENAI_API_KEY"),
+            base_url=os.environ.get("AI_INTEGRATIONS_OPENAI_BASE_URL")
+        )
+
+        lang_names = {v: k.split(" (")[0] if " (" in k else k for k, v in SUPPORTED_LANGUAGES.items()}
+        lang_name = lang_names.get(target_lang_code, "Hindi")
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"Translate the following text to {lang_name}. Keep financial terms like 'Nifty 50', 'Sensex', 'P/E ratio', 'Alpha', 'Beta', 'Sharpe ratio' in English. Keep currency symbol ₹ and all numbers as is. Provide only the translation, nothing else."},
+                {"role": "user", "content": text}
+            ],
+            max_completion_tokens=2000
+        )
+        translated = response.choices[0].message.content.strip()
+        _translation_cache[cache_key] = translated
+        return translated
+    except Exception:
+        return text
+
+
+def get_translated_dynamic_explanation(page_key, lang_code="en", analysis_results=None, advanced_metrics=None, recommendations=None):
+    explanation = generate_dynamic_explanation(page_key, analysis_results, advanced_metrics, recommendations)
+
+    if lang_code == "en":
+        return explanation
+
+    batch_cache_key = f"dyn_batch:{lang_code}:{page_key}:{hash(explanation.get('summary', '')[:50])}"
+    if batch_cache_key in _translation_cache:
+        return _translation_cache[batch_cache_key]
+
+    try:
+        client = OpenAI(
+            api_key=os.environ.get("AI_INTEGRATIONS_OPENAI_API_KEY"),
+            base_url=os.environ.get("AI_INTEGRATIONS_OPENAI_BASE_URL")
+        )
+
+        lang_names = {v: k.split(" (")[0] if " (" in k else k for k, v in SUPPORTED_LANGUAGES.items()}
+        lang_name = lang_names.get(lang_code, "Hindi")
+
+        texts_to_translate = [explanation.get("summary", "")]
+        for metric in explanation.get("metrics", []):
+            texts_to_translate.append(metric["explanation"])
+
+        combined = "\n---SEPARATOR---\n".join(texts_to_translate)
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"Translate the following texts to {lang_name}. Each text is separated by '---SEPARATOR---'. Keep the separator in your output. Keep financial terms like 'Nifty 50', 'Sensex', 'P/E ratio', 'Alpha', 'Beta', 'Sharpe ratio', 'STCG', 'LTCG' in English. Keep currency symbol ₹ and all numbers as is. Provide only the translations with separators, nothing else."},
+                {"role": "user", "content": combined}
+            ],
+            max_completion_tokens=4000
+        )
+
+        translated_parts = response.choices[0].message.content.strip().split("---SEPARATOR---")
+        translated_parts = [p.strip() for p in translated_parts]
+
+        translated = {
+            "title": explanation.get("title", ""),
+            "icon": explanation.get("icon", ""),
+            "summary": translated_parts[0] if translated_parts else explanation.get("summary", ""),
+            "metrics": []
+        }
+
+        for i, metric in enumerate(explanation.get("metrics", [])):
+            idx = i + 1
+            translated["metrics"].append({
+                "name": metric["name"],
+                "explanation": translated_parts[idx] if idx < len(translated_parts) else metric["explanation"]
+            })
+
+        _translation_cache[batch_cache_key] = translated
+        return translated
+    except Exception:
+        return explanation
+
+
+def render_page_explainer(page_key, lang_code="en", analysis_results=None, advanced_metrics=None, recommendations=None):
     import streamlit as st
-    
-    explanation = get_translated_explanation(page_key, lang_code)
+
+    explanation = get_translated_dynamic_explanation(
+        page_key, lang_code, analysis_results, advanced_metrics, recommendations
+    )
     if not explanation:
         return
-    
+
     expander_label = EXPANDER_LABELS.get(lang_code, "Understanding this page")
-    
+
     with st.expander(f"ℹ️ {expander_label}", expanded=False):
         st.markdown(f"""
         <div style='background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%); 
@@ -398,7 +627,7 @@ def render_page_explainer(page_key, lang_code="en"):
             </p>
         </div>
         """, unsafe_allow_html=True)
-        
+
         metrics = explanation.get("metrics", [])
         if metrics:
             for metric in metrics:
@@ -417,19 +646,19 @@ def render_page_explainer(page_key, lang_code="en"):
 
 def render_language_selector():
     import streamlit as st
-    
+
     if 'explanation_language' not in st.session_state:
         st.session_state.explanation_language = "English"
-    
+
     lang = st.selectbox(
         "🌐 Explanation Language",
         options=list(SUPPORTED_LANGUAGES.keys()),
         index=list(SUPPORTED_LANGUAGES.keys()).index(st.session_state.explanation_language),
         key="lang_selector"
     )
-    
+
     if lang != st.session_state.explanation_language:
         st.session_state.explanation_language = lang
         st.rerun()
-    
-    return SUPPORTED_LANGUAGES[lang]
+
+    return SUPPORTED_LANGUAGES.get(lang, "en")

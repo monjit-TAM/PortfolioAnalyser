@@ -1217,8 +1217,12 @@ def display_analysis():
     
     lang_code = SUPPORTED_LANGUAGES.get(st.session_state.explanation_language, "en")
     
+    _ar = st.session_state.analysis_results
+    _adv = st.session_state.get('advanced_metrics')
+    _rec = st.session_state.get('recommendations')
+    
     with tab1:
-        render_page_explainer("dashboard", lang_code)
+        render_page_explainer("dashboard", lang_code, analysis_results=_ar)
         dashboard = Dashboard()
         dashboard.render(
             st.session_state.analysis_results,
@@ -1227,7 +1231,7 @@ def display_analysis():
         )
     
     with tab2:
-        render_page_explainer("sectors", lang_code)
+        render_page_explainer("sectors", lang_code, analysis_results=_ar)
         sector_analysis = SectorAnalysis()
         sector_analysis.render(
             st.session_state.analysis_results,
@@ -1235,7 +1239,7 @@ def display_analysis():
         )
     
     with tab3:
-        render_page_explainer("stocks", lang_code)
+        render_page_explainer("stocks", lang_code, analysis_results=_ar)
         stock_performance = StockPerformance()
         stock_performance.render(
             st.session_state.analysis_results,
@@ -1245,7 +1249,7 @@ def display_analysis():
         )
     
     with tab4:
-        render_page_explainer("benchmark", lang_code)
+        render_page_explainer("benchmark", lang_code, analysis_results=_ar)
         benchmark_comparison = BenchmarkComparison()
         benchmark_comparison.render(
             st.session_state.analysis_results,
@@ -1253,7 +1257,7 @@ def display_analysis():
         )
     
     with tab5:
-        render_page_explainer("advice", lang_code)
+        render_page_explainer("advice", lang_code, analysis_results=_ar, recommendations=_rec)
         if st.session_state.get('disclaimer_accepted', False):
             recommendations = Recommendations()
             recommendations.render(
@@ -1264,7 +1268,7 @@ def display_analysis():
             render_disclaimer_overlay('advice')
     
     with tab6:
-        render_page_explainer("rebalance", lang_code)
+        render_page_explainer("rebalance", lang_code, analysis_results=_ar)
         if st.session_state.get('disclaimer_accepted', False):
             rebalancing = PortfolioRebalancing()
             rebalancing.render(
@@ -1276,7 +1280,7 @@ def display_analysis():
             render_disclaimer_overlay('rebalance')
     
     with tab7:
-        render_page_explainer("history", lang_code)
+        render_page_explainer("history", lang_code, analysis_results=_ar)
         historical_performance = HistoricalPerformance()
         historical_performance.render(
             st.session_state.analysis_results,
@@ -1285,7 +1289,7 @@ def display_analysis():
         )
     
     with tab8:
-        render_page_explainer("profile", lang_code)
+        render_page_explainer("profile", lang_code, analysis_results=_ar)
         customer_profile = CustomerProfile()
         customer_profile.render(
             st.session_state.analysis_results,
@@ -1294,7 +1298,6 @@ def display_analysis():
         )
     
     with tab9:
-        render_page_explainer("advanced", lang_code)
         if 'advanced_metrics' not in st.session_state:
             with st.spinner("Calculating advanced metrics..."):
                 from utils.advanced_metrics import AdvancedMetricsCalculator as AMC
@@ -1313,10 +1316,11 @@ def display_analysis():
                     benchmark_data
                 )
         
+        render_page_explainer("advanced", lang_code, analysis_results=_ar, advanced_metrics=st.session_state.advanced_metrics)
         render_advanced_metrics_tab(st.session_state.advanced_metrics)
     
     with tab10:
-        render_page_explainer("methodology", lang_code)
+        render_page_explainer("methodology", lang_code, analysis_results=_ar)
         from components.methodology import Methodology
         methodology = Methodology()
         methodology.render()

@@ -23,7 +23,7 @@ ADVANCED_METRIC_EXPLAINERS = {
 
 def _render_metric_explainer(category_name):
     try:
-        from utils.page_explanations import PAGE_EXPLANATIONS, SUPPORTED_LANGUAGES, translate_text
+        from utils.page_explanations import generate_dynamic_explanation, SUPPORTED_LANGUAGES, translate_text
         
         lang_code = "en"
         if hasattr(st, 'session_state') and 'explanation_language' in st.session_state:
@@ -33,7 +33,10 @@ def _render_metric_explainer(category_name):
         if not metric_key:
             return
         
-        advanced_data = PAGE_EXPLANATIONS.get("advanced", {})
+        analysis_results = st.session_state.get('analysis_results')
+        advanced_metrics = st.session_state.get('advanced_metrics')
+        
+        advanced_data = generate_dynamic_explanation("advanced", analysis_results, advanced_metrics)
         metrics = advanced_data.get("metrics", [])
         
         explanation_text = None
