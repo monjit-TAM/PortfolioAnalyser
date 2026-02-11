@@ -164,12 +164,14 @@ def _build_all_explanations(ctx):
     single_stock_flags = concentration.get('single_stock_flags', []) if isinstance(concentration, dict) else []
     sector_overexposure = concentration.get('sector_overexposure_flags', []) if isinstance(concentration, dict) else []
     volatility = _safe_get(adv, 'volatility', default={}) or {}
-    sharpe = volatility.get('sharpe_ratio', 'N/A') if isinstance(volatility, dict) else 'N/A'
-    sortino = volatility.get('sortino_ratio', 'N/A') if isinstance(volatility, dict) else 'N/A'
-    max_dd = volatility.get('max_drawdown', 0) if isinstance(volatility, dict) else 0
-    hist_vol = volatility.get('historical_volatility', 0) if isinstance(volatility, dict) else 0
-    port_beta = volatility.get('portfolio_beta', 1.0) if isinstance(volatility, dict) else 1.0
-    downside_dev = volatility.get('downside_deviation', 0) if isinstance(volatility, dict) else 0
+    _sharpe_raw = volatility.get('sharpe_ratio', 0) if isinstance(volatility, dict) else 0
+    sharpe = float(_sharpe_raw) if isinstance(_sharpe_raw, (int, float)) else 0.0
+    _sortino_raw = volatility.get('sortino_ratio', 0) if isinstance(volatility, dict) else 0
+    sortino = float(_sortino_raw) if isinstance(_sortino_raw, (int, float)) else 0.0
+    max_dd = float(volatility.get('max_drawdown', 0)) if isinstance(volatility, dict) else 0.0
+    hist_vol = float(volatility.get('historical_volatility', 0)) if isinstance(volatility, dict) else 0.0
+    port_beta = float(volatility.get('portfolio_beta', 1.0)) if isinstance(volatility, dict) else 1.0
+    downside_dev = float(volatility.get('downside_deviation', 0)) if isinstance(volatility, dict) else 0.0
     risk_class = volatility.get('risk_classification', 'N/A') if isinstance(volatility, dict) else 'N/A'
     tax_data = _safe_get(adv, 'tax_impact', default={}) or {}
     stcg_gains = tax_data.get('short_term_gains', 0) if isinstance(tax_data, dict) else 0
@@ -636,7 +638,7 @@ def _build_all_explanations(ctx):
         f"Volatility & Drawdown Analysis: Historical Volatility: {hist_vol:.1f}% (annualized). Max Drawdown: {max_dd:.1f}%. "
         f"Sharpe Ratio: {sharpe} (return per unit of risk; >1.0 good, >2.0 excellent). Sortino Ratio: {sortino} (return per unit of downside risk; higher is better). "
         f"Portfolio Beta: {port_beta:.2f}. Downside Deviation: {downside_dev:.2f}%. Risk Classification: {risk_class}. "
-        f"Your Sharpe of {sharpe} means for every 1% of volatility risk, you earned {float(sharpe):.2f}% excess return {'— a strong risk/reward tradeoff' if isinstance(sharpe, (int, float)) and float(sharpe) > 1 else '— room to improve risk-adjusted returns' if isinstance(sharpe, (int, float)) else ''}. "
+        f"Your Sharpe of {sharpe:.2f} means for every 1% of volatility risk, you earned {sharpe:.2f}% excess return {'— a strong risk/reward tradeoff' if sharpe > 1 else '— room to improve risk-adjusted returns'}. "
         f"Max drawdown of {max_dd:.1f}% is {'minimal — excellent risk control' if max_dd < 10 else 'moderate — typical for equity portfolios' if max_dd < 20 else 'significant — ensure you can tolerate such drops emotionally and financially'}."
     )
     e["behavior_analysis"] = (
@@ -647,11 +649,20 @@ def _build_all_explanations(ctx):
         f"selling winners like {top_name} too early reflects disposition effect. "
         f"Improving behavior score: Hold winners longer, cut losers faster, avoid churning positions."
     )
+    drift_details = []
+    for d in drift_sectors[:5]:
+        ds = d.get('sector', 'N/A') if isinstance(d, dict) else str(d)
+        dp = d.get('portfolio_pct', 0) if isinstance(d, dict) else 0
+        db = d.get('benchmark_pct', 0) if isinstance(d, dict) else 0
+        dd = d.get('drift', 0) if isinstance(d, dict) else 0
+        drift_details.append(f"{ds}: Your {dp:.1f}% vs Benchmark {db}% (drift {dd:+.1f}%)")
+    drift_text = '; '.join(drift_details) if drift_details else 'Minimal drift — portfolio aligns well with benchmark'
+    alignment_desc = 'significant drift — portfolio has deviated substantially from benchmark' if alignment < 50 else ('moderate drift — some sectors are over/underweight' if alignment < 75 else 'low drift — good alignment with benchmark')
     e["drift_analysis"] = (
         f"Drift Analysis vs Nifty 50 Benchmark. Alignment Score: {alignment:.1f}/100. Deviation Level: {dev_level}. "
-        f"Sector drifts detected: {'; '.join([f'{d[\"sector\"]}: Your {d.get(\"portfolio_pct\", 0):.1f}% vs Benchmark {d.get(\"benchmark_pct\", 0)}% (drift {d.get(\"drift\", 0):+.1f}%)' for d in drift_sectors[:5]]) if drift_sectors else 'Minimal drift — portfolio aligns well with benchmark'}. "
-        + (f"Your alignment score of {alignment:.1f}% indicates {'significant drift — your portfolio has deviated substantially from the benchmark' if alignment < 50 else 'moderate drift — some sectors are over/underweight' if alignment < 75 else 'low drift — good alignment with benchmark'}. ")
-        + f"Large positive drift means overweight (you have more than benchmark); large negative drift means underweight (you have less). "
+        f"Sector drifts detected: {drift_text}. "
+        f"Your alignment score of {alignment:.1f}% indicates {alignment_desc}. "
+        f"Large positive drift means overweight (you have more than benchmark); large negative drift means underweight (you have less). "
         f"Consider rebalancing sectors with drift > ±10% to reduce tracking error."
     )
     overlaps = overlap_data.get('overlaps', []) if isinstance(overlap_data, dict) else []
