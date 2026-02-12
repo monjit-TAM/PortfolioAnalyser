@@ -27,6 +27,7 @@ from components.homepage import (
     render_how_it_works_section, render_cta_section, render_csv_requirements,
     render_insights_section, render_footer, render_methodology_section, render_metrics_section
 )
+from components.portfolio_summary import render_portfolio_summary
 
 def init_database():
     if os.environ.get('DATABASE_URL'):
@@ -1198,7 +1199,8 @@ def display_analysis():
     """, unsafe_allow_html=True)
     
     # Create tabs for different analysis sections
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+        "📋 Summary",
         "📊 Dashboard", 
         "🏭 Sectors", 
         "📈 Stocks", 
@@ -1222,6 +1224,29 @@ def display_analysis():
     _adv = st.session_state.get('advanced_metrics')
     _rec = st.session_state.get('recommendations')
     
+    with tab0:
+        adv_for_summary = st.session_state.get('advanced_metrics')
+        if not adv_for_summary:
+            try:
+                from utils.advanced_metrics import AdvancedMetricsCalculator as AMC
+                metrics_calculator = AMC()
+                stock_perf = st.session_state.analysis_results.get('stock_performance', [])
+                portfolio_for_metrics = pd.DataFrame(stock_perf)
+                benchmark_data = st.session_state.get('historical_data', {}).get('NIFTY 50')
+                adv_for_summary = metrics_calculator.calculate_all_metrics(
+                    portfolio_for_metrics,
+                    st.session_state.get('historical_data', {}),
+                    benchmark_data
+                )
+                st.session_state.advanced_metrics = adv_for_summary
+            except Exception:
+                adv_for_summary = {}
+        render_portfolio_summary(
+            st.session_state.analysis_results,
+            adv_for_summary,
+            st.session_state.get('recommendations')
+        )
+
     with tab1:
         render_page_explainer("dashboard", lang_code, analysis_results=_ar)
         dashboard = Dashboard()

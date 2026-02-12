@@ -44,6 +44,7 @@ The backend consists of core services:
 6.  **Portfolio Advisor:** Interactive advisor module that answers questions about portfolio metrics, recommendations, sector analysis, benchmark comparisons, and rebalancing strategies.
 7.  **Advanced Metrics Calculator:** Provides 10-layer institutional-grade analysis including structural diagnostics, style analysis, concentration risk, volatility metrics, behavior analysis, drift analysis, overlap detection, return attribution, liquidity risk, tail risk, macro sensitivity, health score, and scenario analysis.
 8.  **Corporate Actions Manager:** Adjusts buy prices and quantities for bonus issues and stock splits to ensure accurate performance calculations.
+9.  **Portfolio Summary (components/portfolio_summary.py):** One-page layman-friendly summary with key metrics, winners/losers, action items, risk/tax overview, multi-language support (13 Indian languages), and text-to-speech audio generation using OpenAI gpt-audio model.
 
 ### REST API Architecture (FastAPI)
 
