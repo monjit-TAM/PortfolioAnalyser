@@ -204,6 +204,32 @@ def generate_summary_text(analysis_results, advanced_metrics, recommendations):
     return "\n".join(sections)
 
 
+def _condense_for_audio(text, max_chars=3000):
+    lines = text.split("\n")
+    condensed = []
+    char_count = 0
+    skip_sections = {"IMPORTANT DISCLAIMER"}
+    current_section_skip = False
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped in skip_sections:
+            current_section_skip = True
+            continue
+        if stripped.isupper() and len(stripped) > 3 and stripped not in skip_sections:
+            current_section_skip = False
+
+        if current_section_skip:
+            continue
+
+        if char_count + len(stripped) > max_chars:
+            break
+        condensed.append(stripped)
+        char_count += len(stripped)
+
+    return " ".join([l for l in condensed if l])
+
+
 def generate_tts_audio(text, lang_code="en"):
     try:
         client = OpenAI(
@@ -214,10 +240,12 @@ def generate_tts_audio(text, lang_code="en"):
         lang_names = {v: k.split(" (")[0] if " (" in k else k for k, v in SUPPORTED_LANGUAGES.items()}
         lang_name = lang_names.get(lang_code, "English")
 
+        audio_text = _condense_for_audio(text)
+
         if lang_code != "en":
-            tts_prompt = f"Read the following portfolio analysis report in {lang_name}. Speak clearly and at a moderate pace, as if you are a friendly financial advisor explaining to a client. Keep financial terms like Nifty 50, P/E ratio, Alpha, Beta, STCG, LTCG in English. Here is the report:\n\n{text}"
+            tts_prompt = f"Read the following portfolio analysis summary in {lang_name}. Speak clearly and naturally, like a friendly financial advisor. Keep financial terms like Nifty 50, P/E ratio, STCG, LTCG in English. Here is the summary:\n\n{audio_text}"
         else:
-            tts_prompt = f"Read the following portfolio analysis report aloud. Speak clearly and at a moderate pace, as if you are a friendly financial advisor explaining to a client. Here is the report:\n\n{text}"
+            tts_prompt = f"Read the following portfolio analysis summary aloud. Speak clearly and naturally, like a friendly financial advisor explaining to a client:\n\n{audio_text}"
 
         # the newest OpenAI model is "gpt-5" which was released August 7, 2025.
         # do not change this unless explicitly requested by the user
@@ -226,17 +254,23 @@ def generate_tts_audio(text, lang_code="en"):
             modalities=["text", "audio"],
             audio={"voice": "nova", "format": "wav"},
             messages=[
-                {"role": "system", "content": f"You are a professional financial advisor narrating a portfolio analysis report in {lang_name}. Read the content naturally and clearly. Do not add any commentary or extra content beyond what is provided."},
+                {"role": "system", "content": f"You are a professional financial advisor narrating a portfolio analysis report in {lang_name}. Read the content naturally and clearly. Do not add any extra commentary."},
                 {"role": "user", "content": tts_prompt},
             ],
         )
 
         audio_data = getattr(response.choices[0].message, "audio", None)
         if audio_data and hasattr(audio_data, "data"):
-            return base64.b64decode(audio_data.data)
+            audio_bytes = base64.b64decode(audio_data.data)
+            if len(audio_bytes) > 0:
+                return audio_bytes
+            print("TTS: Audio data was empty after decode")
+            return None
+        print(f"TTS: No audio in response. Message: {response.choices[0].message}")
         return None
     except Exception as e:
-        st.error(f"Audio generation failed: {str(e)[:100]}")
+        print(f"TTS error: {str(e)}")
+        st.error(f"Audio generation failed: {str(e)[:200]}")
         return None
 
 
@@ -478,8 +512,11 @@ def render_portfolio_summary(analysis_results, advanced_metrics, recommendations
         with btn_col2:
             generate_audio = st.button("🔊 Listen to Analysis", use_container_width=True, key="generate_audio_btn")
 
-    if show_text or st.session_state.get('show_summary_detail', False):
-        st.session_state.show_summary_detail = True
+    if show_text:
+        st.session_state.show_summary_detail = not st.session_state.get('show_summary_detail', False)
+        st.rerun()
+
+    if st.session_state.get('show_summary_detail', False):
         st.markdown(f"""
         <div style='background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); 
                     border: 1px solid #e2e8f0; white-space: pre-line; font-size: 14px; line-height: 1.8; color: #333;'>
@@ -487,21 +524,22 @@ def render_portfolio_summary(analysis_results, advanced_metrics, recommendations
         </div>
         """, unsafe_allow_html=True)
 
+    audio_cache_key = f"summary_audio_{lang_code}"
+
     if generate_audio:
-        audio_cache_key = f"summary_audio_{lang_code}"
         if audio_cache_key not in st.session_state:
             with st.spinner(f"Generating audio in {st.session_state.summary_language}... This may take a moment."):
-                text_for_audio = display_text if lang_code != "en" else summary_text
+                text_for_audio = summary_text
                 audio_bytes = generate_tts_audio(text_for_audio, lang_code)
                 if audio_bytes:
                     st.session_state[audio_cache_key] = audio_bytes
-                    st.session_state.show_audio_player = True
                     st.rerun()
+                else:
+                    st.warning("Could not generate audio. Please try again.")
         else:
-            st.session_state.show_audio_player = True
+            pass
 
-    audio_cache_key = f"summary_audio_{lang_code}"
-    if st.session_state.get('show_audio_player', False) and audio_cache_key in st.session_state:
+    if audio_cache_key in st.session_state:
         st.markdown("""
         <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 15px; margin-top: 15px;'>
             <p style='color: white; margin: 0 0 10px 0; font-weight: 600;'>Your Portfolio Analysis Audio</p>
