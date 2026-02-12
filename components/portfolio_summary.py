@@ -204,7 +204,7 @@ def generate_summary_text(analysis_results, advanced_metrics, recommendations):
     return "\n".join(sections)
 
 
-def _condense_for_audio(text, max_chars=3000):
+def _condense_for_audio(text, max_chars=1000):
     lines = text.split("\n")
     condensed = []
     char_count = 0
@@ -231,30 +231,32 @@ def _condense_for_audio(text, max_chars=3000):
 
 
 def generate_tts_audio(text, lang_code="en"):
+    import traceback
     try:
+        st.info("Connecting to audio service...")
+
         client = OpenAI(
             api_key=os.environ.get("AI_INTEGRATIONS_OPENAI_API_KEY"),
             base_url=os.environ.get("AI_INTEGRATIONS_OPENAI_BASE_URL")
         )
 
-        lang_names = {v: k.split(" (")[0] if " (" in k else k for k, v in SUPPORTED_LANGUAGES.items()}
-        lang_name = lang_names.get(lang_code, "English")
-
         audio_text = _condense_for_audio(text)
 
         if lang_code != "en":
-            tts_prompt = f"Read the following portfolio analysis summary in {lang_name}. Speak clearly and naturally, like a friendly financial advisor. Keep financial terms like Nifty 50, P/E ratio, STCG, LTCG in English. Here is the summary:\n\n{audio_text}"
+            lang_names = {v: k.split(" (")[0] if " (" in k else k for k, v in SUPPORTED_LANGUAGES.items()}
+            lang_name = lang_names.get(lang_code, "English")
+            tts_prompt = f"Repeat the following text verbatim in {lang_name}. Keep financial terms in English: {audio_text}"
         else:
-            tts_prompt = f"Read the following portfolio analysis summary aloud. Speak clearly and naturally, like a friendly financial advisor explaining to a client:\n\n{audio_text}"
+            tts_prompt = f"Repeat the following text verbatim: {audio_text}"
 
         # the newest OpenAI model is "gpt-5" which was released August 7, 2025.
         # do not change this unless explicitly requested by the user
         response = client.chat.completions.create(
             model="gpt-audio",
             modalities=["text", "audio"],
-            audio={"voice": "nova", "format": "wav"},
+            audio={"voice": "nova", "format": "mp3"},
             messages=[
-                {"role": "system", "content": f"You are a professional financial advisor narrating a portfolio analysis report in {lang_name}. Read the content naturally and clearly. Do not add any extra commentary."},
+                {"role": "system", "content": "You are an assistant that performs text-to-speech."},
                 {"role": "user", "content": tts_prompt},
             ],
         )
@@ -262,14 +264,11 @@ def generate_tts_audio(text, lang_code="en"):
         audio_data = getattr(response.choices[0].message, "audio", None)
         if audio_data and hasattr(audio_data, "data"):
             audio_bytes = base64.b64decode(audio_data.data)
-            if len(audio_bytes) > 0:
+            if len(audio_bytes) > 100:
                 return audio_bytes
-            print("TTS: Audio data was empty after decode")
-            return None
-        print(f"TTS: No audio in response. Message: {response.choices[0].message}")
+        st.error("Audio service returned no audio data.")
         return None
     except Exception as e:
-        print(f"TTS error: {str(e)}")
         st.error(f"Audio generation failed: {str(e)[:200]}")
         return None
 
@@ -545,7 +544,7 @@ def render_portfolio_summary(analysis_results, advanced_metrics, recommendations
             <p style='color: white; margin: 0 0 10px 0; font-weight: 600;'>Your Portfolio Analysis Audio</p>
         </div>
         """, unsafe_allow_html=True)
-        st.audio(st.session_state[audio_cache_key], format="audio/wav")
+        st.audio(st.session_state[audio_cache_key], format="audio/mp3")
 
     st.markdown("""
     <div style='background: #fff3cd; border-radius: 8px; padding: 12px; margin-top: 20px; border-left: 4px solid #ffc107;'>
