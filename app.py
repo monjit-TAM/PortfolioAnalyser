@@ -28,6 +28,7 @@ from components.homepage import (
     render_insights_section, render_footer, render_methodology_section, render_metrics_section
 )
 from components.portfolio_summary import render_portfolio_summary
+from components.quantamental_analysis import render_quantamental_tab
 
 def init_database():
     if os.environ.get('DATABASE_URL'):
@@ -89,7 +90,7 @@ def render_zerodha_status():
 def render_disclaimer_overlay(section_type):
     """Render disclaimer as an overlay on top of blurred content preview"""
     
-    preview_text = "Investment Recommendations" if section_type == 'advice' else "Portfolio Rebalancing Suggestions"
+    preview_text = "Investment Recommendations" if section_type == 'advice' else "Quantamental Analysis" if section_type == 'quantamental' else "Portfolio Rebalancing Suggestions"
     
     st.info(f"{preview_text} are available below. Please read and accept the disclaimer to view.")
     
@@ -141,7 +142,7 @@ You are strongly advised to **consult a qualified, SEBI-registered investment ad
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        btn_label = "I Agree - View Investment Advice" if section_type == 'advice' else "I Agree - View Rebalancing Suggestions"
+        btn_label = "I Agree - View Investment Advice" if section_type == 'advice' else "I Agree - View Quantamental Analysis" if section_type == 'quantamental' else "I Agree - View Rebalancing Suggestions"
         if agree_checkbox:
             if st.button(btn_label, type="primary", use_container_width=True, key=f"agree_btn_{section_type}"):
                 st.session_state.disclaimer_accepted = True
@@ -1199,7 +1200,7 @@ def display_analysis():
     """, unsafe_allow_html=True)
     
     # Create tabs for different analysis sections
-    tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7q, tab7, tab8, tab9, tab10 = st.tabs([
         "📋 Summary",
         "📊 Dashboard", 
         "🏭 Sectors", 
@@ -1207,6 +1208,7 @@ def display_analysis():
         "📊 Benchmark", 
         "💡 Advice",
         "⚖️ Rebalance",
+        "🔬 Quantamental",
         "📅 History",
         "👤 Profile",
         "🔬 Advanced",
@@ -1310,6 +1312,16 @@ def display_analysis():
             )
         else:
             render_disclaimer_overlay('rebalance')
+    
+    with tab7q:
+        if st.session_state.get('disclaimer_accepted', False):
+            render_quantamental_tab(
+                st.session_state.analysis_results,
+                st.session_state.get('recommendations', []),
+                st.session_state.get('historical_data', {})
+            )
+        else:
+            render_disclaimer_overlay('quantamental')
     
     with tab7:
         render_page_explainer("history", lang_code, analysis_results=_ar)
