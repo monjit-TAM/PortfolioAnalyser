@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Streamlit application provides comprehensive Indian stock market portfolio analysis, offering investors detailed insights into performance, including sector analysis, benchmark comparisons, historical tracking, and AI-driven investment recommendations. It supports value, growth, and quantamental (fundamental + technical) investment perspectives, aiding informed decision-making based on uploaded portfolio data and real-time market information. The system generates actionable insights across individual stock performance, sector allocation, benchmark comparisons, and rebalancing suggestions. The project's ambition is to provide a robust, data-driven tool for individual investors to optimize their Indian stock portfolios.
+This Streamlit application provides comprehensive Indian stock market portfolio analysis, offering investors detailed insights into performance, including sector analysis, benchmark comparisons, historical tracking, and AI-driven investment recommendations. It supports both value and growth investment perspectives, aiding informed decision-making based on uploaded portfolio data and real-time market information. The system generates actionable insights across individual stock performance, sector allocation, benchmark comparisons, and rebalancing suggestions. The project's ambition is to provide a robust, data-driven tool for individual investors to optimize their Indian stock portfolios.
 
 ## User Preferences
 
