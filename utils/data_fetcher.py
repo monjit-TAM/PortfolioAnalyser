@@ -85,24 +85,22 @@ class DataFetcher:
                 print(f"Database load failed, using defaults: {e}")
         
         self._symbol_aliases = {
-            'RIL': 'RELIANCE',
-            'ICICI': 'ICICIBANK',
-            'HDFC': 'HDFCBANK',
-            'KOTAK': 'KOTAKBANK',
-            'SBI': 'SBIN',
-            'BHARTI': 'BHARTIARTL',
-            'HINDUNILEVER': 'HINDUNILVR',
-            'HUL': 'HINDUNILVR',
-            'M&M': 'M&M',
-            'BAJAJFINSV': 'BAJAJFINSV',
-            'ADANI': 'ADANIENT',
-            'ADANIPORTS': 'ADANIPORTS',
-            'ONGC': 'ONGC',
-            'NTPC': 'NTPC',
-            'POWERGRID': 'POWERGRID',
-            'TATAMOTORS': 'TATAMOTORS',
-            'TATAPOWER': 'TATAPOWER',
-            'TATASTEEL': 'TATASTEEL',
+            'RIL': 'RELIANCE', 'ICICI': 'ICICIBANK', 'HDFC': 'HDFCBANK',
+            'KOTAK': 'KOTAKBANK', 'SBI': 'SBIN', 'BHARTI': 'BHARTIARTL',
+            'HINDUNILEVER': 'HINDUNILVR', 'HUL': 'HINDUNILVR',
+            'M&M': 'M&M', 'BAJAJFINSV': 'BAJAJFINSV',
+            'ADANI': 'ADANIENT', 'ADANIPORTS': 'ADANIPORTS',
+            'ONGC': 'ONGC', 'NTPC': 'NTPC', 'POWERGRID': 'POWERGRID',
+            'TATAMOTORS': 'TATAMOTORS', 'TATAPOWER': 'TATAPOWER',
+            'TATASTEEL': 'TATASTEEL', 'HERO': 'HEROMOTOCO',
+            'EICHER': 'EICHERMOT', 'INDIGO': 'INTERGLOBE',
+            'INDUSIND': 'INDUSINDBK', 'BOB': 'BANKBARODA',
+            'MCDOWELL': 'UBL', 'DMART': 'DMART', 'TATACONS': 'TATACONSUM',
+            'NYKAA': 'NYKAA', 'PAYTM': 'PAYTM', 'ZOMATO': 'ZOMATO',
+            'POLICYBAZAAR': 'POLICYBZR', 'LIC': 'LICI',
+            'MOTHERSUMI': 'MOTHERSON', 'MAPMYINDIA': 'MAPMYINDIA',
+            'JSWSTL': 'JSWSTEEL', 'LODHA': 'LODHA',
+            'LTIMINDTREE': 'LTIM', 'MINDTREE': 'LTIM',
         }
         
         self._indices = {
@@ -112,49 +110,158 @@ class DataFetcher:
         }
         
         self._stock_categories = {
-            'RELIANCE': 'Large Cap',
-            'TCS': 'Large Cap',
-            'HDFCBANK': 'Large Cap',
-            'INFY': 'Large Cap',
-            'ICICIBANK': 'Large Cap',
-            'KOTAKBANK': 'Large Cap',
-            'HINDUNILVR': 'Large Cap',
-            'SBIN': 'Large Cap',
-            'BHARTIARTL': 'Large Cap',
-            'ITC': 'Large Cap',
-            'ASIANPAINT': 'Large Cap',
-            'MARUTI': 'Large Cap',
-            'AXISBANK': 'Large Cap',
-            'LT': 'Large Cap',
-            'SUNPHARMA': 'Large Cap',
-            'TITAN': 'Large Cap',
-            'ULTRACEMCO': 'Large Cap',
-            'NESTLEIND': 'Large Cap',
-            'WIPRO': 'Large Cap',
-            'HCLTECH': 'Large Cap',
+            'RELIANCE': 'Large Cap', 'TCS': 'Large Cap', 'HDFCBANK': 'Large Cap',
+            'INFY': 'Large Cap', 'ICICIBANK': 'Large Cap', 'KOTAKBANK': 'Large Cap',
+            'HINDUNILVR': 'Large Cap', 'SBIN': 'Large Cap', 'BHARTIARTL': 'Large Cap',
+            'ITC': 'Large Cap', 'ASIANPAINT': 'Large Cap', 'MARUTI': 'Large Cap',
+            'AXISBANK': 'Large Cap', 'LT': 'Large Cap', 'SUNPHARMA': 'Large Cap',
+            'TITAN': 'Large Cap', 'ULTRACEMCO': 'Large Cap', 'NESTLEIND': 'Large Cap',
+            'WIPRO': 'Large Cap', 'HCLTECH': 'Large Cap', 'BAJFINANCE': 'Large Cap',
+            'BAJAJFINSV': 'Large Cap', 'ADANIENT': 'Large Cap', 'ADANIPORTS': 'Large Cap',
+            'TATAMOTORS': 'Large Cap', 'M&M': 'Large Cap', 'BAJAJ-AUTO': 'Large Cap',
+            'HEROMOTOCO': 'Large Cap', 'EICHERMOT': 'Large Cap', 'TVSMOTOR': 'Large Cap',
+            'INDUSINDBK': 'Large Cap', 'BANKBARODA': 'Large Cap', 'PNB': 'Large Cap',
+            'JSWSTEEL': 'Large Cap', 'HINDALCO': 'Large Cap', 'VEDL': 'Large Cap',
+            'COALINDIA': 'Large Cap', 'DLF': 'Large Cap', 'GODREJPROP': 'Large Cap',
+            'HAL': 'Large Cap', 'BEL': 'Large Cap', 'INTERGLOBE': 'Large Cap',
+            'APOLLOHOSP': 'Large Cap', 'MAXHEALTH': 'Large Cap', 'DMART': 'Large Cap',
+            'TRENT': 'Large Cap', 'LICI': 'Large Cap', 'SBILIFE': 'Large Cap',
+            'HDFCLIFE': 'Large Cap', 'ICICIGI': 'Large Cap', 'CHOLAFIN': 'Large Cap',
+            'SHRIRAMFIN': 'Large Cap', 'POLYCAB': 'Large Cap', 'SIEMENS': 'Large Cap',
+            'ABB': 'Large Cap', 'HAVELLS': 'Large Cap', 'PIDILITIND': 'Large Cap',
+            'SRF': 'Large Cap', 'GRASIM': 'Large Cap', 'INDUSTOWER': 'Large Cap',
+            'VBL': 'Large Cap', 'TATACONSUM': 'Large Cap', 'DABUR': 'Large Cap',
+            'MARICO': 'Large Cap', 'GODREJCP': 'Large Cap', 'COLPAL': 'Large Cap',
+            'DIVISLAB': 'Large Cap', 'DRREDDY': 'Large Cap', 'CIPLA': 'Large Cap',
+            'GAIL': 'Large Cap', 'IOC': 'Large Cap', 'BPCL': 'Large Cap',
+            'HINDPETRO': 'Large Cap', 'NTPC': 'Large Cap', 'POWERGRID': 'Large Cap',
+            'TATAPOWER': 'Mid Cap', 'SHREECEM': 'Large Cap', 'AMBUJACEM': 'Large Cap',
+            'ACC': 'Large Cap', 'BERGEPAINT': 'Large Cap', 'PAGEIND': 'Large Cap',
+            'INDHOTEL': 'Large Cap', 'LODHA': 'Large Cap', 'ZOMATO': 'Large Cap',
+            'LTIM': 'Large Cap', 'BOSCHLTD': 'Large Cap', 'MRF': 'Large Cap',
+            'MOTHERSON': 'Large Cap', 'UPL': 'Large Cap', 'PFC': 'Large Cap',
+            'RECLTD': 'Large Cap', 'IRFC': 'Large Cap', 'ADANIGREEN': 'Large Cap',
+            'ADANIPOWER': 'Large Cap', 'HINDZINC': 'Large Cap',
         }
         
         self._sector_mapping = {
-            'RELIANCE': 'Energy',
-            'TCS': 'Technology',
-            'HDFCBANK': 'Banking',
-            'INFY': 'Technology',
-            'ICICIBANK': 'Banking',
-            'KOTAKBANK': 'Banking',
-            'HINDUNILVR': 'FMCG',
-            'SBIN': 'Banking',
-            'BHARTIARTL': 'Telecom',
-            'ITC': 'FMCG',
-            'ASIANPAINT': 'Paints',
-            'MARUTI': 'Automobile',
-            'AXISBANK': 'Banking',
-            'LT': 'Construction',
-            'SUNPHARMA': 'Pharmaceuticals',
-            'TITAN': 'Jewellery',
-            'ULTRACEMCO': 'Cement',
-            'NESTLEIND': 'FMCG',
-            'WIPRO': 'Technology',
-            'HCLTECH': 'Technology',
+            'RELIANCE': 'Energy', 'TCS': 'Technology', 'HDFCBANK': 'Banking',
+            'INFY': 'Technology', 'ICICIBANK': 'Banking', 'KOTAKBANK': 'Banking',
+            'HINDUNILVR': 'FMCG', 'SBIN': 'Banking', 'BHARTIARTL': 'Telecom',
+            'ITC': 'FMCG', 'ASIANPAINT': 'Paints', 'MARUTI': 'Automobile',
+            'AXISBANK': 'Banking', 'LT': 'Construction', 'SUNPHARMA': 'Pharmaceuticals',
+            'TITAN': 'Jewellery', 'ULTRACEMCO': 'Cement', 'NESTLEIND': 'FMCG',
+            'WIPRO': 'Technology', 'HCLTECH': 'Technology',
+            'BAJFINANCE': 'Finance', 'BAJAJFINSV': 'Finance',
+            'ADANIENT': 'Conglomerate', 'ADANIPORTS': 'Infrastructure',
+            'TATAMOTORS': 'Automobile', 'M&M': 'Automobile', 'BAJAJ-AUTO': 'Automobile',
+            'HEROMOTOCO': 'Automobile', 'EICHERMOT': 'Automobile', 'TVSMOTOR': 'Automobile',
+            'ASHOKLEY': 'Automobile', 'BALKRISIND': 'Automobile',
+            'MOTHERSON': 'Auto Ancillary', 'BOSCHLTD': 'Auto Ancillary',
+            'MRF': 'Auto Ancillary', 'APOLLOTYRE': 'Auto Ancillary',
+            'CEATLTD': 'Auto Ancillary', 'EXIDEIND': 'Auto Ancillary',
+            'AMARAJABAT': 'Auto Ancillary',
+            'BANKBARODA': 'Banking', 'PNB': 'Banking', 'CANBK': 'Banking',
+            'UNIONBANK': 'Banking', 'INDIANB': 'Banking', 'IDFCFIRSTB': 'Banking',
+            'BANDHANBNK': 'Banking', 'FEDERALBNK': 'Banking', 'RBLBANK': 'Banking',
+            'AUBANK': 'Banking', 'INDUSINDBK': 'Banking', 'YESBANK': 'Banking',
+            'MUTHOOTFIN': 'Finance', 'MANAPPURAM': 'Finance', 'CHOLAFIN': 'Finance',
+            'SHRIRAMFIN': 'Finance', 'M&MFIN': 'Finance', 'POONAWALLA': 'Finance',
+            'LICHSGFIN': 'Finance', 'PFC': 'Finance', 'RECLTD': 'Finance',
+            'CANFINHOME': 'Finance', 'SBICARD': 'Finance', 'HDFCAMC': 'Finance',
+            'IRFC': 'Finance', 'HUDCO': 'Finance',
+            'ICICIGI': 'Insurance', 'ICICIPRULI': 'Insurance', 'SBILIFE': 'Insurance',
+            'HDFCLIFE': 'Insurance', 'LICI': 'Insurance', 'NIACL': 'Insurance',
+            'STARHEALTH': 'Insurance',
+            'LTIM': 'Technology', 'MPHASIS': 'Technology', 'COFORGE': 'Technology',
+            'PERSISTENT': 'Technology', 'LTTS': 'Technology', 'TATAELXSI': 'Technology',
+            'CYIENT': 'Technology', 'ZENSAR': 'Technology', 'BIRLASOFT': 'Technology',
+            'HAPPSTMNDS': 'Technology', 'ROUTE': 'Technology', 'MASTEK': 'Technology',
+            'SONATSOFTW': 'Technology', 'KPITTECH': 'Technology', 'OFSS': 'Technology',
+            'INTELLECT': 'Technology', 'NEWGEN': 'Technology', 'TANLA': 'Technology',
+            'TECHM': 'Technology', 'MAPMYINDIA': 'Technology',
+            'DIVISLAB': 'Pharmaceuticals', 'DRREDDY': 'Pharmaceuticals',
+            'CIPLA': 'Pharmaceuticals', 'LUPIN': 'Pharmaceuticals',
+            'AUROPHARMA': 'Pharmaceuticals', 'BIOCON': 'Pharmaceuticals',
+            'TORNTPHARM': 'Pharmaceuticals', 'ALKEM': 'Pharmaceuticals',
+            'IPCALAB': 'Pharmaceuticals', 'GLENMARK': 'Pharmaceuticals',
+            'ABBOTINDIA': 'Pharmaceuticals', 'SANOFI': 'Pharmaceuticals',
+            'PFIZER': 'Pharmaceuticals', 'LAURUSLABS': 'Pharmaceuticals',
+            'NATCOPHARM': 'Pharmaceuticals', 'GRANULES': 'Pharmaceuticals',
+            'AJANTPHARM': 'Pharmaceuticals',
+            'APOLLOHOSP': 'Healthcare', 'MAXHEALTH': 'Healthcare',
+            'FORTIS': 'Healthcare', 'METROPOLIS': 'Healthcare',
+            'LALPATHLAB': 'Healthcare', 'MEDANTA': 'Healthcare',
+            'DABUR': 'FMCG', 'MARICO': 'FMCG', 'GODREJCP': 'FMCG',
+            'COLPAL': 'FMCG', 'TATACONSUM': 'FMCG', 'EMAMILTD': 'FMCG',
+            'JYOTHYLAB': 'FMCG', 'VBL': 'FMCG', 'UBL': 'FMCG',
+            'PGHH': 'FMCG', 'BIKAJI': 'FMCG', 'BRITANNIA': 'FMCG',
+            'GAIL': 'Energy', 'IOC': 'Energy', 'BPCL': 'Energy',
+            'HINDPETRO': 'Energy', 'ONGC': 'Energy', 'PETRONET': 'Energy',
+            'MGL': 'Energy', 'IGL': 'Energy', 'GSPL': 'Energy',
+            'GUJGASLTD': 'Energy', 'OIL': 'Energy', 'CASTROLIND': 'Energy',
+            'ADANIGREEN': 'Energy',
+            'NTPC': 'Power', 'POWERGRID': 'Power', 'TATAPOWER': 'Power',
+            'ADANITRANS': 'Power', 'NHPC': 'Power', 'SJVN': 'Power',
+            'TORNTPOWER': 'Power', 'CESC': 'Power', 'JSWENERGY': 'Power',
+            'IREDA': 'Power', 'ADANIPOWER': 'Power',
+            'JSWSTEEL': 'Metals', 'HINDALCO': 'Metals', 'VEDL': 'Metals',
+            'COALINDIA': 'Metals', 'NMDC': 'Metals', 'SAIL': 'Metals',
+            'NATIONALUM': 'Metals', 'JINDALSTEL': 'Metals', 'TATASTEEL': 'Metals',
+            'RATNAMANI': 'Metals', 'APLAPOLLO': 'Metals', 'HINDZINC': 'Metals',
+            'SHREECEM': 'Cement', 'AMBUJACEM': 'Cement', 'ACC': 'Cement',
+            'DALMIACBHRT': 'Cement', 'RAMCOCEM': 'Cement', 'JKCEMENT': 'Cement',
+            'BIRLACEM': 'Cement', 'JKLAKSHMI': 'Cement', 'STARCEMENT': 'Cement',
+            'BEL': 'Defence', 'HAL': 'Defence', 'BDL': 'Defence',
+            'COCHINSHIP': 'Defence', 'GRSE': 'Defence', 'MAZAGON': 'Defence',
+            'DATAPATTNS': 'Defence', 'MAZDOCK': 'Defence',
+            'PIDILITIND': 'Chemicals', 'SRF': 'Chemicals', 'ATUL': 'Chemicals',
+            'DEEPAKNTR': 'Chemicals', 'NAVINFLUOR': 'Chemicals', 'CLEAN': 'Chemicals',
+            'FLUOROCHEM': 'Chemicals', 'FINEORG': 'Chemicals', 'TATACHEM': 'Chemicals',
+            'UPL': 'Chemicals', 'PI': 'Chemicals', 'SUMICHEM': 'Chemicals',
+            'BASF': 'Chemicals', 'AARTI': 'Chemicals', 'ALKYLAMINE': 'Chemicals',
+            'GALAXYSURF': 'Chemicals',
+            'SIEMENS': 'Capital Goods', 'ABB': 'Capital Goods', 'HAVELLS': 'Capital Goods',
+            'VOLTAS': 'Capital Goods', 'CROMPTON': 'Capital Goods', 'POLYCAB': 'Capital Goods',
+            'CUMMINSIND': 'Capital Goods', 'THERMAX': 'Capital Goods',
+            'KEI': 'Capital Goods', 'HONAUT': 'Capital Goods', 'BHEL': 'Capital Goods',
+            'TIINDIA': 'Capital Goods', 'SCHAEFFLER': 'Capital Goods',
+            'SKFINDIA': 'Capital Goods', 'TIMKEN': 'Capital Goods',
+            'TITAGARH': 'Capital Goods', 'ELGIEQUIP': 'Capital Goods',
+            'DLF': 'Real Estate', 'GODREJPROP': 'Real Estate', 'OBEROIRLTY': 'Real Estate',
+            'PRESTIGE': 'Real Estate', 'BRIGADE': 'Real Estate', 'PHOENIXLTD': 'Real Estate',
+            'LODHA': 'Real Estate', 'SOBHA': 'Real Estate', 'SUNTECK': 'Real Estate',
+            'PAGEIND': 'Textiles', 'RAYMOND': 'Textiles', 'ARVIND': 'Textiles',
+            'WELSPUNLIV': 'Textiles', 'KPR': 'Textiles', 'TRIDENT': 'Textiles',
+            'BERGEPAINT': 'Paints', 'KANSAINER': 'Paints', 'AKZOINDIA': 'Paints',
+            'IDEA': 'Telecom', 'TATACOMM': 'Telecom', 'INDUSTOWER': 'Telecom',
+            'HFCL': 'Telecom',
+            'DMART': 'Retail', 'TRENT': 'Retail', 'SHOPERSTOP': 'Retail', 'NYKAA': 'Retail',
+            'ZOMATO': 'Consumer Services', 'DEVYANI': 'Consumer Services',
+            'JUBLFOOD': 'Consumer Services', 'WESTLIFE': 'Consumer Services',
+            'CONCOR': 'Logistics', 'DELHIVERY': 'Logistics', 'BLUEDART': 'Logistics',
+            'IRCTC': 'Transport', 'RVNL': 'Infrastructure', 'IRB': 'Infrastructure',
+            'NCC': 'Infrastructure', 'NBCC': 'Infrastructure', 'GMRINFRA': 'Infrastructure',
+            'INTERGLOBE': 'Aviation', 'SPICEJET': 'Aviation',
+            'INDHOTEL': 'Hotels', 'LEMON': 'Hotels', 'CHALET': 'Hotels', 'EIH': 'Hotels',
+            'SUNTV': 'Media & Entertainment', 'ZEEL': 'Media & Entertainment',
+            'PVR': 'Media & Entertainment', 'NAZARA': 'Media & Entertainment',
+            'WHIRLPOOL': 'Consumer Durables', 'BATAINDIA': 'Consumer Durables',
+            'RELAXO': 'Consumer Durables',
+            'DIXON': 'Consumer Electronics', 'AMBER': 'Consumer Electronics',
+            'IEX': 'Exchange', 'BSE': 'Exchange', 'CDSL': 'Exchange',
+            'MCX': 'Exchange', 'CAMS': 'Exchange', 'ANGELONE': 'Exchange',
+            'CHAMBALFERT': 'Fertilizers', 'COROMANDEL': 'Fertilizers',
+            'GNFC': 'Fertilizers', 'GSFC': 'Fertilizers',
+            'DEEPAKFERT': 'Fertilizers', 'RCF': 'Fertilizers',
+            'ASTRAL': 'Building Materials', 'SUPREMEIND': 'Building Materials',
+            'PRINCEPIPE': 'Building Materials', 'CENTURYPLY': 'Building Materials',
+            'SUZLON': 'Renewable Energy', 'INOXWIND': 'Renewable Energy',
+            'BAYER': 'Agriculture', 'RALLIS': 'Agriculture',
+            'PAYTM': 'Fintech', 'POLICYBZR': 'Fintech',
+            'GRASIM': 'Conglomerate', 'GODREJIND': 'Conglomerate',
+            'KALYANKJIL': 'Jewellery', 'RAJESHEXPO': 'Jewellery',
+            'BALRAMCHIN': 'Sugar', 'EIDPARRY': 'Sugar',
         }
     
     def init_zerodha(self):
@@ -387,7 +494,102 @@ class DataFetcher:
         base_name = stock_name.replace(self.nse_suffix, '').replace(self.bse_suffix, '')
         if base_name in self.symbol_aliases:
             base_name = self.symbol_aliases[base_name]
-        return self.sector_mapping.get(base_name, 'Others')
+        sector = self.sector_mapping.get(base_name)
+        if sector:
+            return sector
+        if not hasattr(self, '_sector_lookup_failed'):
+            self._sector_lookup_failed = set()
+        if base_name in self._sector_lookup_failed:
+            return 'Others'
+        try:
+            symbol = self.get_stock_symbol(stock_name)
+            ticker = yf.Ticker(symbol)
+            info = ticker.fast_info if hasattr(ticker, 'fast_info') else {}
+            try:
+                info = ticker.info
+            except Exception:
+                self._sector_lookup_failed.add(base_name)
+                self._sector_mapping[base_name] = 'Others'
+                return 'Others'
+            yf_sector = info.get('sector', '')
+            yf_industry = info.get('industry', '')
+            if yf_sector:
+                sector_map = {
+                    'Financial Services': 'Finance',
+                    'Consumer Cyclical': 'Consumer Durables',
+                    'Consumer Defensive': 'FMCG',
+                    'Basic Materials': 'Chemicals',
+                    'Industrials': 'Capital Goods',
+                    'Communication Services': 'Telecom',
+                    'Real Estate': 'Real Estate',
+                    'Healthcare': 'Healthcare',
+                    'Utilities': 'Power',
+                    'Energy': 'Energy',
+                    'Technology': 'Technology',
+                }
+                mapped = sector_map.get(yf_sector, yf_sector)
+                if yf_industry:
+                    industry_lower = yf_industry.lower()
+                    if 'bank' in industry_lower:
+                        mapped = 'Banking'
+                    elif 'insurance' in industry_lower:
+                        mapped = 'Insurance'
+                    elif 'pharma' in industry_lower or 'drug' in industry_lower:
+                        mapped = 'Pharmaceuticals'
+                    elif 'auto' in industry_lower and 'part' in industry_lower:
+                        mapped = 'Auto Ancillary'
+                    elif 'auto' in industry_lower or 'vehicle' in industry_lower:
+                        mapped = 'Automobile'
+                    elif 'cement' in industry_lower:
+                        mapped = 'Cement'
+                    elif 'steel' in industry_lower or 'metal' in industry_lower or 'mining' in industry_lower or 'aluminum' in industry_lower:
+                        mapped = 'Metals'
+                    elif 'oil' in industry_lower or 'gas' in industry_lower or 'refin' in industry_lower:
+                        mapped = 'Energy'
+                    elif 'telecom' in industry_lower:
+                        mapped = 'Telecom'
+                    elif 'hotel' in industry_lower or 'hospitality' in industry_lower:
+                        mapped = 'Hotels'
+                    elif 'fertil' in industry_lower:
+                        mapped = 'Fertilizers'
+                    elif 'textile' in industry_lower or 'apparel' in industry_lower:
+                        mapped = 'Textiles'
+                    elif 'paint' in industry_lower:
+                        mapped = 'Paints'
+                    elif 'jewel' in industry_lower or 'gold' in industry_lower:
+                        mapped = 'Jewellery'
+                    elif 'defense' in industry_lower or 'defence' in industry_lower or 'aerospace' in industry_lower:
+                        mapped = 'Defence'
+                    elif 'construct' in industry_lower or 'infra' in industry_lower:
+                        mapped = 'Infrastructure'
+                    elif 'retail' in industry_lower:
+                        mapped = 'Retail'
+                    elif 'media' in industry_lower or 'entertainment' in industry_lower:
+                        mapped = 'Media & Entertainment'
+                    elif 'chemical' in industry_lower:
+                        mapped = 'Chemicals'
+                    elif 'food' in industry_lower or 'beverage' in industry_lower or 'consumer' in industry_lower:
+                        mapped = 'FMCG'
+                    elif 'power' in industry_lower or 'electric' in industry_lower or 'utility' in industry_lower:
+                        mapped = 'Power'
+                    elif 'logistic' in industry_lower or 'shipping' in industry_lower:
+                        mapped = 'Logistics'
+                    elif 'real estate' in industry_lower or 'property' in industry_lower:
+                        mapped = 'Real Estate'
+                    elif 'renewable' in industry_lower or 'solar' in industry_lower or 'wind' in industry_lower:
+                        mapped = 'Renewable Energy'
+                    elif 'sugar' in industry_lower:
+                        mapped = 'Sugar'
+                    elif 'paper' in industry_lower:
+                        mapped = 'Paper'
+                    elif 'software' in industry_lower or 'it ' in industry_lower:
+                        mapped = 'Technology'
+                self._sector_mapping[base_name] = mapped
+                return mapped
+        except Exception:
+            self._sector_lookup_failed.add(base_name)
+        self._sector_mapping[base_name] = 'Others'
+        return 'Others'
     
     def get_dividend_yield(self, stock_name):
         """Get dividend yield for a stock from yfinance. Returns yield as percentage (e.g. 2.5 means 2.5%)"""
