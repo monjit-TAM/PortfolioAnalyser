@@ -299,6 +299,17 @@ def main():
         st.session_state.razorpay_order = None
     if 'show_upload_page' not in st.session_state:
         st.session_state.show_upload_page = False
+    if 'awaiting_price_confirmation' not in st.session_state:
+        st.session_state.awaiting_price_confirmation = False
+    if 'price_warnings' not in st.session_state:
+        st.session_state.price_warnings = []
+    if 'price_valid_rows' not in st.session_state:
+        st.session_state.price_valid_rows = []
+    
+    if st.session_state.awaiting_price_confirmation and st.session_state.portfolio_data is not None:
+        display_price_warnings()
+        add_footer()
+        return
     
     if st.session_state.show_subscription and st.session_state.authenticated:
         display_subscription_page()
@@ -869,29 +880,67 @@ def analyze_portfolio():
         portfolio_analyzer = PortfolioAnalyzer()
         recommendation_engine = RecommendationEngine()
         
-        # Fetch current market data
         progress_bar = st.progress(0)
+        total_stocks = len(portfolio_df)
+
+        skip_validation = st.session_state.get('skip_price_validation', False)
+        if skip_validation:
+            st.session_state.skip_price_validation = False
+        else:
+            st.text("Validating buy prices against actual market data...")
+
+            price_warnings = []
+            valid_rows = []
+
+            for idx, (row_idx, stock) in enumerate(portfolio_df.iterrows()):
+                stock_name = stock['Stock Name']
+                buy_date = stock['Buy Date']
+                buy_price = stock['Buy Price']
+
+                is_valid, actual_price, msg = data_fetcher.validate_buy_price(
+                    stock_name, buy_date, buy_price
+                )
+                if not is_valid:
+                    price_warnings.append({
+                        'stock': stock_name,
+                        'buy_price': buy_price,
+                        'actual_price': actual_price,
+                        'buy_date': buy_date,
+                        'message': msg,
+                        'row_idx': row_idx
+                    })
+                else:
+                    valid_rows.append(row_idx)
+
+                progress_bar.progress((idx + 1) / (total_stocks * 2))
+
+            if price_warnings:
+                st.session_state.price_warnings = price_warnings
+                st.session_state.price_valid_rows = valid_rows
+                st.session_state.awaiting_price_confirmation = True
+                progress_bar.empty()
+                st.rerun()
+                return
+
         st.text("Fetching current stock prices...")
-        
+
         current_data = {}
         historical_data = {}
-        
+
         for idx, (_, stock) in enumerate(portfolio_df.iterrows()):
             stock_name = stock['Stock Name']
             buy_date = stock['Buy Date']
-            
-            # Fetch current price and historical data
+
             current_price, hist_data = data_fetcher.get_stock_data(stock_name, buy_date)
-            
-            # Only add to current_data if price was successfully fetched
+
             if current_price is not None:
                 current_data[stock_name] = current_price
                 historical_data[stock_name] = hist_data
             else:
                 st.error(f"⚠️ Skipping {stock_name} due to data fetch failure")
-            
-            progress_bar.progress((idx + 1) / len(portfolio_df))
-        
+
+            progress_bar.progress(0.5 + (idx + 1) / (total_stocks * 2))
+
         st.text("Analyzing portfolio performance...")
         
         # Perform analysis
@@ -2068,6 +2117,107 @@ def display_welcome_screen():
     render_cta_section(st.session_state.authenticated, show_signup)
     
     render_footer()
+
+def display_price_warnings():
+    """Display price validation warnings and let user choose how to proceed"""
+    render_auth_header()
+
+    warnings = st.session_state.price_warnings
+    valid_rows = st.session_state.price_valid_rows
+    portfolio_df = st.session_state.portfolio_data
+
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+                padding: 20px 24px; border-radius: 12px; border-left: 5px solid #ffc107;
+                margin: 20px auto; max-width: 900px;'>
+        <h3 style='color: #856404; margin: 0 0 8px 0; font-size: 20px;'>
+            ⚠️ Buy Price Mismatch Detected
+        </h3>
+        <p style='color: #856404; margin: 0; font-size: 15px; line-height: 1.5;'>
+            Some buy prices in your portfolio don't match the actual trading prices on the buy dates. 
+            This can lead to highly skewed analysis results (e.g., showing 11000% returns when that's not accurate).
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("")
+
+    cols_header = st.columns([2, 1.5, 1.5, 1.5, 2])
+    cols_header[0].markdown("**Stock**")
+    cols_header[1].markdown("**Your Buy Price**")
+    cols_header[2].markdown("**Actual Price**")
+    cols_header[3].markdown("**Buy Date**")
+    cols_header[4].markdown("**Deviation**")
+
+    for w in warnings:
+        deviation = ((w['buy_price'] - w['actual_price']) / w['actual_price']) * 100
+        dev_color = "#dc3545" if abs(deviation) > 100 else "#fd7e14"
+        cols = st.columns([2, 1.5, 1.5, 1.5, 2])
+        cols[0].markdown(f"**{w['stock']}**")
+        cols[1].markdown(f"₹{w['buy_price']:.2f}")
+        cols[2].markdown(f"₹{w['actual_price']:.2f}")
+        buy_dt = pd.to_datetime(w['buy_date'])
+        cols[3].markdown(f"{buy_dt.strftime('%d-%b-%Y')}")
+        cols[4].markdown(f"<span style='color:{dev_color}; font-weight:600;'>{deviation:+.1f}%</span>", unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    st.markdown("""
+    <div style='background: #f8f9fa; padding: 16px 20px; border-radius: 10px; margin-bottom: 16px;'>
+        <p style='color: #495057; margin: 0; font-size: 14px; line-height: 1.6;'>
+            <strong>What would you like to do?</strong><br>
+            • <strong>Use Actual Prices</strong> — Replace mismatched buy prices with the actual trading prices for accurate analysis<br>
+            • <strong>Skip These Stocks</strong> — Remove the flagged stocks and analyze only the remaining portfolio<br>
+            • <strong>Proceed Anyway</strong> — Keep your original prices (analysis may be skewed)<br>
+            • <strong>Go Back</strong> — Upload a corrected file
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        if st.button("✅ Use Actual Prices", type="primary", use_container_width=True):
+            for w in warnings:
+                portfolio_df.loc[portfolio_df.index == w['row_idx'], 'Buy Price'] = w['actual_price']
+            st.session_state.portfolio_data = portfolio_df
+            st.session_state.awaiting_price_confirmation = False
+            st.session_state.price_warnings = []
+            st.session_state.skip_price_validation = True
+            st.session_state.analysis_complete = False
+            with st.spinner("Analyzing portfolio with corrected prices..."):
+                analyze_portfolio()
+
+    with col2:
+        if st.button("🚫 Skip These Stocks", use_container_width=True):
+            st.session_state.portfolio_data = portfolio_df.loc[valid_rows].reset_index(drop=True)
+            st.session_state.awaiting_price_confirmation = False
+            st.session_state.price_warnings = []
+            st.session_state.skip_price_validation = True
+            st.session_state.analysis_complete = False
+            if len(valid_rows) > 0:
+                with st.spinner("Analyzing portfolio without flagged stocks..."):
+                    analyze_portfolio()
+            else:
+                st.error("No valid stocks remaining after removing flagged entries.")
+
+    with col3:
+        if st.button("⚡ Proceed Anyway", use_container_width=True):
+            st.session_state.awaiting_price_confirmation = False
+            st.session_state.price_warnings = []
+            st.session_state.skip_price_validation = True
+            st.session_state.analysis_complete = False
+            with st.spinner("Analyzing portfolio with original prices..."):
+                analyze_portfolio()
+
+    with col4:
+        if st.button("← Go Back", use_container_width=True):
+            st.session_state.awaiting_price_confirmation = False
+            st.session_state.price_warnings = []
+            st.session_state.portfolio_data = None
+            st.session_state.analysis_complete = False
+            st.rerun()
+
 
 def display_portfolio_preview():
     """Display portfolio preview after upload"""

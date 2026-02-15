@@ -403,6 +403,50 @@ class DataFetcher:
         
         return nse_symbol
     
+    def validate_buy_price(self, stock_name, buy_date, buy_price, tolerance=0.40):
+        """Validate that the user's buy price is within a reasonable range of the actual trading price on the buy date.
+        Returns (is_valid, actual_price, message)"""
+        try:
+            symbol = self.get_stock_symbol(stock_name)
+            buy_dt = pd.to_datetime(buy_date)
+            fetch_start = buy_dt - pd.Timedelta(days=10)
+            fetch_end = buy_dt + pd.Timedelta(days=10)
+            hist = _flatten_yf_columns(yf.download(symbol, start=fetch_start, end=fetch_end, progress=False))
+            if hist.empty:
+                return True, None, ""
+
+            if hasattr(hist.index, 'tz') and hist.index.tz is not None:
+                hist.index = hist.index.tz_localize(None)
+
+            buy_date_normalized = buy_dt.normalize()
+            exact = hist[hist.index.normalize() == buy_date_normalized]
+            if not exact.empty:
+                actual_price = float(exact['Close'].iloc[0])
+            else:
+                hist['_diff'] = abs(hist.index - buy_date_normalized)
+                nearest_idx = hist['_diff'].idxmin()
+                actual_price = float(hist.loc[nearest_idx, 'Close'])
+                hist.drop(columns=['_diff'], inplace=True)
+
+            if actual_price <= 0:
+                return True, None, ""
+
+            low_prices = hist['Low'].min() if 'Low' in hist.columns else actual_price * (1 - tolerance)
+            high_prices = hist['High'].max() if 'High' in hist.columns else actual_price * (1 + tolerance)
+            extended_low = float(low_prices) * (1 - tolerance)
+            extended_high = float(high_prices) * (1 + tolerance)
+
+            if buy_price < extended_low or buy_price > extended_high:
+                deviation = ((buy_price - actual_price) / actual_price) * 100
+                return False, actual_price, (
+                    f"Buy price ₹{buy_price:.2f} for {stock_name} on {buy_dt.strftime('%d-%b-%Y')} "
+                    f"is significantly different from the actual trading price (~₹{actual_price:.2f}). "
+                    f"Deviation: {deviation:+.1f}%"
+                )
+            return True, actual_price, ""
+        except Exception:
+            return True, None, ""
+
     def get_stock_data(self, stock_name, start_date):
         symbol = self.get_stock_symbol(stock_name)
         
