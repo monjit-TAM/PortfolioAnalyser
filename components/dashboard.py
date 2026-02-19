@@ -108,18 +108,20 @@ class Dashboard:
             
             c1, c2 = st.columns(2)
             with c1:
-                st.metric("Portfolio Yield", f"{portfolio_yield:.2f}%", 
-                         help="Weighted average dividend yield of your portfolio")
+                st.metric("Portfolio Yield on Cost", f"{portfolio_yield:.2f}%", 
+                         help="Dividend yield calculated on your buy price (invested price), not current market price")
                 st.metric("Dividend Stocks", f"{dividend_stocks}", 
                          help="Number of stocks paying dividends")
             with c2:
                 st.metric("Annual Dividend", f"₹{annual_dividend:,.0f}",
-                         help="Expected annual dividend income")
+                         help="Expected annual dividend income based on current dividend rates")
                 st.metric("Non-Dividend", f"{non_dividend}",
                          help="Stocks not paying dividends")
             
             if highest_yield_stock != 'N/A':
-                st.info(f"🏆 Highest Yield: **{highest_yield_stock}** at **{highest_yield_value:.2f}%**")
+                st.info(f"🏆 Highest Yield on Cost: **{highest_yield_stock}** at **{highest_yield_value:.2f}%**")
+            
+            st.caption("💡 Yield on Cost = Annual Dividend ÷ Your Buy Price. This shows your true income return on invested capital.")
         
         with col_tax:
             st.markdown("""

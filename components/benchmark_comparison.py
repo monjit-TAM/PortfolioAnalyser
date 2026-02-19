@@ -11,12 +11,29 @@ class BenchmarkComparison:
     def __init__(self):
         self.data_fetcher = DataFetcher()
         
-        # Benchmark mapping based on stock categories
         self.benchmark_mapping = {
             'Large Cap': 'NIFTY50',
             'Mid Cap': 'NIFTY_MIDCAP_100',
             'Small Cap': 'NIFTY_SMALLCAP_100'
         }
+
+        self.sector_benchmark_mapping = {
+            'Banking': 'NIFTY_BANK',
+            'Finance': 'NIFTY_BANK',
+            'Technology': 'NIFTY_IT',
+            'Pharmaceuticals': 'NIFTY_PHARMA',
+            'Healthcare': 'NIFTY_PHARMA',
+            'FMCG': 'NIFTY_FMCG',
+            'Automobile': 'NIFTY_AUTO',
+            'Auto Ancillary': 'NIFTY_AUTO',
+            'Metals': 'NIFTY_METAL',
+            'Real Estate': 'NIFTY_REALTY',
+            'Energy': 'NIFTY_ENERGY',
+            'Power': 'NIFTY_ENERGY',
+            'Infrastructure': 'NIFTY_INFRA',
+        }
+
+        self.default_benchmarks = ['NIFTY50', 'SENSEX', 'NIFTY_BANK', 'NIFTY_MIDCAP_100']
     
     def render(self, analysis_results, portfolio_data, lang_code="en"):
         """Render benchmark comparison analysis"""
@@ -31,58 +48,69 @@ class BenchmarkComparison:
         
         render_section_explainer("Portfolio vs Market Indices", "portfolio_vs_nifty", lang_code=lang_code, analysis_results=analysis_results, icon="🎯")
         
-        # Calculate portfolio-level benchmark comparison
         portfolio_return = analysis_results['portfolio_summary']['total_gain_loss_percentage']
         
-        # Get benchmark data for comparison
-        benchmark_returns = self.get_benchmark_returns(stock_performance)
+        all_indices = list(self.data_fetcher.indices.keys())
+        display_names = self.data_fetcher._index_display_names
+
+        selected_benchmarks = st.multiselect(
+            "Select benchmarks to compare against:",
+            options=all_indices,
+            default=[b for b in self.default_benchmarks if b in all_indices],
+            format_func=lambda x: display_names.get(x, x),
+            help="Choose from 17 Indian market indices for comparison"
+        )
+
+        if not selected_benchmarks:
+            st.warning("Please select at least one benchmark index.")
+            return
+
+        benchmark_returns = self.get_benchmark_returns(stock_performance, selected_benchmarks)
         
-        # Display benchmark comparison cards
-        col1, col2, col3, col4 = st.columns(4)
+        num_cols = min(len(selected_benchmarks) + 1, 5)
+        cols = st.columns(num_cols)
         
-        with col1:
+        with cols[0]:
             st.metric(
                 label="Portfolio Return",
                 value=f"{portfolio_return:+.2f}%",
                 delta=None
             )
         
-        with col2:
-            nifty50_return = benchmark_returns.get('NIFTY50', 0)
-            portfolio_vs_nifty50 = portfolio_return - nifty50_return
-            st.metric(
-                label="NIFTY 50 Return",
-                value=f"{nifty50_return:+.2f}%",
-                delta=f"{portfolio_vs_nifty50:+.2f}% vs Portfolio"
-            )
+        for i, benchmark_name in enumerate(selected_benchmarks[:num_cols-1]):
+            with cols[i + 1]:
+                b_return = benchmark_returns.get(benchmark_name, 0)
+                diff = portfolio_return - b_return
+                st.metric(
+                    label=display_names.get(benchmark_name, benchmark_name),
+                    value=f"{b_return:+.2f}%",
+                    delta=f"{diff:+.2f}% vs Portfolio"
+                )
         
-        with col3:
-            midcap_return = benchmark_returns.get('NIFTY_MIDCAP_100', 0)
-            portfolio_vs_midcap = portfolio_return - midcap_return
-            st.metric(
-                label="NIFTY Midcap 100",
-                value=f"{midcap_return:+.2f}%",
-                delta=f"{portfolio_vs_midcap:+.2f}% vs Portfolio"
-            )
-        
-        with col4:
-            smallcap_return = benchmark_returns.get('NIFTY_SMALLCAP_100', 0)
-            portfolio_vs_smallcap = portfolio_return - smallcap_return
-            st.metric(
-                label="NIFTY Smallcap 100",
-                value=f"{smallcap_return:+.2f}%",
-                delta=f"{portfolio_vs_smallcap:+.2f}% vs Portfolio"
-            )
-        
+        if len(selected_benchmarks) > num_cols - 1:
+            extra_cols = st.columns(min(len(selected_benchmarks) - (num_cols - 1), 5))
+            for i, benchmark_name in enumerate(selected_benchmarks[num_cols-1:]):
+                if i < len(extra_cols):
+                    with extra_cols[i]:
+                        b_return = benchmark_returns.get(benchmark_name, 0)
+                        diff = portfolio_return - b_return
+                        st.metric(
+                            label=display_names.get(benchmark_name, benchmark_name),
+                            value=f"{b_return:+.2f}%",
+                            delta=f"{diff:+.2f}% vs Portfolio"
+                        )
+
+        st.markdown("---")
+
+        self.render_benchmark_chart(portfolio_return, benchmark_returns, display_names)
+
         st.markdown("---")
         
-        # Category-wise Benchmark Comparison
         render_section_explainer("Category-wise Benchmark Analysis", "portfolio_vs_sensex", lang_code=lang_code, analysis_results=analysis_results, icon="📈")
         
         category_analysis = pd.DataFrame(analysis_results['category_analysis'])
         
         if not category_analysis.empty:
-            # Create comparison chart
             categories = category_analysis['Category'].tolist()
             portfolio_returns = category_analysis['Category Return %'].tolist()
             benchmark_returns_list = []
@@ -122,16 +150,14 @@ class BenchmarkComparison:
             
             st.plotly_chart(fig, use_container_width=True)
             
-            # Analysis table
             comparison_df = pd.DataFrame({
                 'Category': categories,
                 'Portfolio Return %': portfolio_returns,
                 'Benchmark Return %': benchmark_returns_list,
                 'Outperformance': [p - b for p, b in zip(portfolio_returns, benchmark_returns_list)],
-                'Benchmark Index': [self.benchmark_mapping.get(cat, 'NIFTY50') for cat in categories]
+                'Benchmark Index': [display_names.get(self.benchmark_mapping.get(cat, 'NIFTY50'), 'NIFTY 50') for cat in categories]
             })
             
-            # Format for display
             display_df = comparison_df.copy()
             for col in ['Portfolio Return %', 'Benchmark Return %', 'Outperformance']:
                 display_df[col] = display_df[col].apply(lambda x: f"{x:+.2f}%")
@@ -144,18 +170,30 @@ class BenchmarkComparison:
         
         st.markdown("---")
         
-        # Individual Stock Benchmark Comparison
         st.subheader("🔍 Individual Stock vs Benchmark")
         
-        # Select stock for detailed comparison
-        selected_stock = st.selectbox(
-            "Select stock for benchmark comparison:",
-            options=stock_performance['Stock Name'].tolist()
-        )
+        col_stock, col_bench = st.columns(2)
+        with col_stock:
+            selected_stock = st.selectbox(
+                "Select stock:",
+                options=stock_performance['Stock Name'].tolist()
+            )
         
         stock_data = stock_performance[stock_performance['Stock Name'] == selected_stock].iloc[0]
         stock_category = stock_data['Category']
-        benchmark_index = self.benchmark_mapping.get(stock_category, 'NIFTY50')
+        stock_sector = stock_data.get('Sector', '')
+        
+        default_benchmark = self.sector_benchmark_mapping.get(stock_sector, 
+                           self.benchmark_mapping.get(stock_category, 'NIFTY50'))
+        
+        with col_bench:
+            stock_benchmark = st.selectbox(
+                "Compare against:",
+                options=all_indices,
+                index=all_indices.index(default_benchmark) if default_benchmark in all_indices else 0,
+                format_func=lambda x: display_names.get(x, x),
+                key="stock_benchmark_select"
+            )
         
         col1, col2 = st.columns(2)
         
@@ -163,19 +201,20 @@ class BenchmarkComparison:
             st.subheader(f"📊 {selected_stock} Performance")
             
             stock_return = stock_data['Percentage Gain/Loss']
-            benchmark_return = benchmark_returns.get(benchmark_index, 0)
+            benchmark_return = benchmark_returns.get(stock_benchmark, 0)
             outperformance = stock_return - benchmark_return
             
             st.metric(
                 label="Stock Return",
                 value=f"{stock_return:+.2f}%",
-                delta=f"{outperformance:+.2f}% vs {benchmark_index}"
+                delta=f"{outperformance:+.2f}% vs {display_names.get(stock_benchmark, stock_benchmark)}"
             )
             
             performance_data = {
                 "Stock": stock_data['Stock Name'],
                 "Category": stock_category,
-                "Benchmark": benchmark_index,
+                "Sector": stock_sector,
+                "Benchmark": display_names.get(stock_benchmark, stock_benchmark),
                 "Buy Price": f"₹{stock_data['Buy Price']:.2f}",
                 "Current Price": f"₹{stock_data['Current Price']:.2f}",
                 "Stock Return": f"{stock_return:+.2f}%",
@@ -189,10 +228,9 @@ class BenchmarkComparison:
         with col2:
             st.subheader("📈 Performance Comparison Chart")
             
-            # Create comparison chart for individual stock
             fig_stock = go.Figure()
             
-            categories_stock = [selected_stock, benchmark_index]
+            categories_stock = [selected_stock, display_names.get(stock_benchmark, stock_benchmark)]
             returns_stock = [stock_return, benchmark_return]
             colors = ['green' if stock_return >= benchmark_return else 'red', 'blue']
             
@@ -205,7 +243,7 @@ class BenchmarkComparison:
             ))
             
             fig_stock.update_layout(
-                title=f'{selected_stock} vs {benchmark_index}',
+                title=f'{selected_stock} vs {display_names.get(stock_benchmark, stock_benchmark)}',
                 yaxis_title='Return (%)',
                 height=400,
                 showlegend=False
@@ -215,28 +253,25 @@ class BenchmarkComparison:
         
         st.markdown("---")
         
-        # Performance Insights
         render_section_explainer("Benchmark Analysis Insights", "alpha", lang_code=lang_code, analysis_results=analysis_results, icon="💡")
         
-        # Calculate overall portfolio performance vs benchmarks
         insights = []
         
         portfolio_return = analysis_results['portfolio_summary']['total_gain_loss_percentage']
         
-        # Compare with each benchmark
         for benchmark_name, benchmark_return in benchmark_returns.items():
+            bname = display_names.get(benchmark_name, benchmark_name)
             outperformance = portfolio_return - benchmark_return
             
             if outperformance > 5:
-                insights.append(f"🎯 **Strong outperformance vs {benchmark_name}**: Portfolio beat the index by {outperformance:.2f}%")
+                insights.append(f"🎯 **Strong outperformance vs {bname}**: Portfolio beat the index by {outperformance:.2f}%")
             elif outperformance > 0:
-                insights.append(f"✅ **Modest outperformance vs {benchmark_name}**: Portfolio ahead by {outperformance:.2f}%")
+                insights.append(f"✅ **Modest outperformance vs {bname}**: Portfolio ahead by {outperformance:.2f}%")
             elif outperformance > -5:
-                insights.append(f"📊 **Close to {benchmark_name}**: Portfolio trailing by {abs(outperformance):.2f}%")
+                insights.append(f"📊 **Close to {bname}**: Portfolio trailing by {abs(outperformance):.2f}%")
             else:
-                insights.append(f"📉 **Underperformance vs {benchmark_name}**: Portfolio behind by {abs(outperformance):.2f}%")
+                insights.append(f"📉 **Underperformance vs {bname}**: Portfolio behind by {abs(outperformance):.2f}%")
         
-        # Category-specific insights
         if not category_analysis.empty:
             for _, category in category_analysis.iterrows():
                 cat_name = str(category['Category'])
@@ -246,26 +281,23 @@ class BenchmarkComparison:
                 cat_outperformance = cat_return - benchmark_return
                 
                 if cat_outperformance > 10:
-                    insights.append(f"🚀 **{cat_name} stocks excelling**: Outperforming {benchmark_index} by {cat_outperformance:.2f}%")
+                    insights.append(f"🚀 **{cat_name} stocks excelling**: Outperforming {display_names.get(benchmark_index, benchmark_index)} by {cat_outperformance:.2f}%")
                 elif cat_outperformance < -10:
-                    insights.append(f"⚠️ **{cat_name} stocks struggling**: Underperforming {benchmark_index} by {abs(cat_outperformance):.2f}%")
+                    insights.append(f"⚠️ **{cat_name} stocks struggling**: Underperforming {display_names.get(benchmark_index, benchmark_index)} by {abs(cat_outperformance):.2f}%")
         
         for insight in insights:
             st.markdown(insight)
         
-        # Recommendations based on benchmark analysis
         st.markdown("---")
         render_section_explainer("Benchmark-Based Recommendations", "beta", lang_code=lang_code, analysis_results=analysis_results, icon="📋")
         
         recommendations = []
         
-        # Overall portfolio recommendations
         if portfolio_return > max(benchmark_returns.values(), default=0):
             recommendations.append("✅ **Continue current strategy**: Your portfolio is outperforming major indices")
         elif portfolio_return < min(benchmark_returns.values(), default=0):
             recommendations.append("🔄 **Review strategy**: Consider index investing or strategy revision as portfolio is underperforming")
         
-        # Category-specific recommendations
         if not category_analysis.empty:
             underperforming_categories = []
             for _, category in category_analysis.iterrows():
@@ -274,7 +306,7 @@ class BenchmarkComparison:
                 benchmark_index = self.benchmark_mapping.get(cat_name, 'NIFTY50')
                 benchmark_return = benchmark_returns.get(benchmark_index, 0)
                 
-                if cat_return < benchmark_return - 5:  # Underperforming by more than 5%
+                if cat_return < benchmark_return - 5:
                     underperforming_categories.append(cat_name)
             
             if underperforming_categories:
@@ -283,16 +315,44 @@ class BenchmarkComparison:
         for rec in recommendations:
             st.markdown(rec)
     
-    def get_benchmark_returns(self, stock_performance):
+    def render_benchmark_chart(self, portfolio_return, benchmark_returns, display_names):
+        """Render comprehensive benchmark comparison bar chart"""
+        
+        labels = ['Your Portfolio'] + [display_names.get(k, k) for k in benchmark_returns.keys()]
+        values = [portfolio_return] + list(benchmark_returns.values())
+        colors = ['#2563eb'] + ['#22c55e' if portfolio_return > v else '#ef4444' for v in benchmark_returns.values()]
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=labels,
+            y=values,
+            marker_color=colors,
+            text=[f"{v:+.2f}%" for v in values],
+            textposition='outside'
+        ))
+        
+        fig.update_layout(
+            title='Portfolio vs Selected Benchmarks',
+            yaxis_title='Return (%)',
+            height=450,
+            showlegend=False,
+            xaxis_tickangle=-30
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+
+    def get_benchmark_returns(self, stock_performance, selected_benchmarks=None):
         """Calculate benchmark returns for comparison"""
         benchmark_returns = {}
         
-        # Get earliest buy date for benchmark comparison period
         earliest_date = pd.to_datetime(stock_performance['Buy Date']).min()
         
-        for benchmark_name, benchmark_symbol in self.data_fetcher.indices.items():
+        indices_to_fetch = selected_benchmarks if selected_benchmarks else list(self.data_fetcher.indices.keys())
+        
+        for benchmark_name in indices_to_fetch:
+            if benchmark_name not in self.data_fetcher.indices:
+                continue
             try:
-                # Fetch benchmark data
                 benchmark_data = self.data_fetcher.get_index_data(benchmark_name, earliest_date)
                 
                 if not benchmark_data.empty:
@@ -301,23 +361,11 @@ class BenchmarkComparison:
                     benchmark_return = ((end_price - start_price) / start_price) * 100
                     benchmark_returns[benchmark_name] = benchmark_return
                 else:
-                    # Fallback dummy data for demonstration
-                    if benchmark_name == 'NIFTY50':
-                        benchmark_returns[benchmark_name] = 12.5  # Typical NIFTY return
-                    elif benchmark_name == 'NIFTY_MIDCAP_100':
-                        benchmark_returns[benchmark_name] = 15.2
-                    else:
-                        benchmark_returns[benchmark_name] = 18.7
+                    benchmark_returns[benchmark_name] = 0
                         
             except Exception as e:
                 st.warning(f"Could not fetch {benchmark_name} data: {str(e)}")
-                # Use fallback data
-                if benchmark_name == 'NIFTY50':
-                    benchmark_returns[benchmark_name] = 12.5
-                elif benchmark_name == 'NIFTY_MIDCAP_100':
-                    benchmark_returns[benchmark_name] = 15.2
-                else:
-                    benchmark_returns[benchmark_name] = 18.7
+                benchmark_returns[benchmark_name] = 0
         
         return benchmark_returns
     
@@ -367,9 +415,6 @@ class BenchmarkComparison:
         
         heatmap_df = pd.DataFrame(heatmap_data)
         heatmap_df = heatmap_df.sort_values('Difference', ascending=False)
-        
-        colors = ['#e74c3c' if x < -5 else '#f39c12' if x < -2 else '#2ecc71' if x > 5 else '#27ae60' if x > 2 else '#95a5a6' 
-                  for x in heatmap_df['Difference']]
         
         fig = go.Figure()
         

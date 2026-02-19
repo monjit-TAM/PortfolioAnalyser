@@ -38,6 +38,26 @@ class DataFetcher:
         self._zerodha_kite = None
         self._zerodha_initialized = False
         self._zerodha_instruments = None
+        
+        self._index_display_names = {
+            'NIFTY50': 'NIFTY 50',
+            'NIFTY_MIDCAP_100': 'NIFTY Midcap 100',
+            'NIFTY_SMALLCAP_100': 'NIFTY Smallcap 100',
+            'SENSEX': 'BSE Sensex',
+            'NIFTY_BANK': 'NIFTY Bank',
+            'NIFTY_IT': 'NIFTY IT',
+            'NIFTY_PHARMA': 'NIFTY Pharma',
+            'NIFTY_FMCG': 'NIFTY FMCG',
+            'NIFTY_AUTO': 'NIFTY Auto',
+            'NIFTY_METAL': 'NIFTY Metal',
+            'NIFTY_REALTY': 'NIFTY Realty',
+            'NIFTY_ENERGY': 'NIFTY Energy',
+            'NIFTY_INFRA': 'NIFTY Infrastructure',
+            'NIFTY_PSE': 'NIFTY PSE',
+            'NIFTY_NEXT50': 'NIFTY Next 50',
+            'NIFTY_200': 'NIFTY 200',
+            'NIFTY_500': 'NIFTY 500',
+        }
     
     @property
     def symbol_aliases(self):
@@ -106,7 +126,21 @@ class DataFetcher:
         self._indices = {
             'NIFTY50': '^NSEI',
             'NIFTY_MIDCAP_100': '^NSEMDCP50',
-            'NIFTY_SMALLCAP_100': '^NSESMLCAP'
+            'NIFTY_SMALLCAP_100': '^NSESMLCAP',
+            'SENSEX': '^BSESN',
+            'NIFTY_BANK': '^NSEBANK',
+            'NIFTY_IT': '^CNXIT',
+            'NIFTY_PHARMA': '^CNXPHARMA',
+            'NIFTY_FMCG': '^CNXFMCG',
+            'NIFTY_AUTO': '^CNXAUTO',
+            'NIFTY_METAL': '^CNXMETAL',
+            'NIFTY_REALTY': '^CNXREALTY',
+            'NIFTY_ENERGY': '^CNXENERGY',
+            'NIFTY_INFRA': '^CNXINFRA',
+            'NIFTY_PSE': '^CNXPSE',
+            'NIFTY_NEXT50': '^NSMIDCP',
+            'NIFTY_200': '^CNX200',
+            'NIFTY_500': '^CNX500',
         }
         
         self._stock_categories = {
@@ -635,24 +669,43 @@ class DataFetcher:
         self._sector_mapping[base_name] = 'Others'
         return 'Others'
     
-    def get_dividend_yield(self, stock_name):
-        """Get dividend yield for a stock from yfinance. Returns yield as percentage (e.g. 2.5 means 2.5%)"""
+    def get_dividend_yield(self, stock_name, buy_price=None):
+        """Get dividend yield for a stock from yfinance.
+        If buy_price is provided, calculates yield-on-cost (dividend / buy price).
+        Returns yield as percentage (e.g. 2.5 means 2.5%)"""
         try:
             symbol = self.get_stock_symbol(stock_name)
             ticker = yf.Ticker(symbol)
             info = ticker.info
 
             dividend_rate = info.get('dividendRate', 0) or info.get('trailingAnnualDividendRate', 0)
-            current_price = info.get('regularMarketPrice') or info.get('currentPrice', 0)
-            if dividend_rate and current_price and dividend_rate > 0 and current_price > 0:
-                return round((dividend_rate / current_price) * 100, 2)
+
+            if dividend_rate and dividend_rate > 0:
+                if buy_price and buy_price > 0:
+                    return round((dividend_rate / buy_price) * 100, 2)
+                current_price = info.get('regularMarketPrice') or info.get('currentPrice', 0)
+                if current_price and current_price > 0:
+                    return round((dividend_rate / current_price) * 100, 2)
 
             trailing_yield = info.get('trailingAnnualDividendYield', 0)
             if trailing_yield and 0 < trailing_yield < 1:
+                if buy_price and buy_price > 0:
+                    current_price = info.get('regularMarketPrice') or info.get('currentPrice', 0)
+                    if current_price and current_price > 0:
+                        implied_dividend = trailing_yield * current_price
+                        return round((implied_dividend / buy_price) * 100, 2)
                 return round(trailing_yield * 100, 2)
 
             forward_yield = info.get('dividendYield', 0)
             if forward_yield:
+                if buy_price and buy_price > 0:
+                    current_price = info.get('regularMarketPrice') or info.get('currentPrice', 0)
+                    if current_price and current_price > 0:
+                        if forward_yield > 1:
+                            implied_dividend = (forward_yield / 100) * current_price
+                        else:
+                            implied_dividend = forward_yield * current_price
+                        return round((implied_dividend / buy_price) * 100, 2)
                 if forward_yield > 1:
                     return round(forward_yield, 2)
                 else:
@@ -662,6 +715,42 @@ class DataFetcher:
         except Exception as e:
             print(f"Error fetching dividend for {stock_name}: {e}")
             return 0.0
+
+    def get_dividend_rate(self, stock_name):
+        """Get annual dividend per share in INR for a stock"""
+        try:
+            symbol = self.get_stock_symbol(stock_name)
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+            dividend_rate = info.get('dividendRate', 0) or info.get('trailingAnnualDividendRate', 0)
+            if dividend_rate and dividend_rate > 0:
+                return round(dividend_rate, 2)
+            trailing_yield = info.get('trailingAnnualDividendYield', 0)
+            current_price = info.get('regularMarketPrice') or info.get('currentPrice', 0)
+            if trailing_yield and current_price and 0 < trailing_yield < 1:
+                return round(trailing_yield * current_price, 2)
+            forward_yield = info.get('dividendYield', 0)
+            if forward_yield and current_price:
+                if forward_yield > 1:
+                    return round((forward_yield / 100) * current_price, 2)
+                else:
+                    return round(forward_yield * current_price, 2)
+            return 0.0
+        except Exception:
+            return 0.0
+
+    def get_market_cap(self, stock_name):
+        """Get market capitalization for a stock from yfinance. Returns value in INR."""
+        try:
+            symbol = self.get_stock_symbol(stock_name)
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+            market_cap = info.get('marketCap', 0)
+            if market_cap and market_cap > 0:
+                return market_cap
+            return 0
+        except Exception:
+            return 0
     
     def _init_twelve_data(self):
         if self._twelve_data_initialized:

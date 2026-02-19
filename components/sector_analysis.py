@@ -62,6 +62,10 @@ class SectorAnalysis:
             st.plotly_chart(fig_bar, use_container_width=True)
         
         st.markdown("---")
+
+        self.render_market_cap_chart(analysis_results, lang_code)
+
+        st.markdown("---")
         
         render_section_explainer("Detailed Sector Analysis", "sector_insights", lang_code=lang_code, analysis_results=analysis_results, icon="📋")
         
@@ -202,3 +206,79 @@ class SectorAnalysis:
                 st.markdown(rec)
         else:
             st.success("✅ Your sector allocation appears well-balanced with no immediate concerns.")
+
+    def render_market_cap_chart(self, analysis_results, lang_code="en"):
+        """Render Market Cap allocation pie chart"""
+        
+        stock_performance = pd.DataFrame(analysis_results.get('stock_performance', []))
+        
+        if stock_performance.empty or 'Market Cap' not in stock_performance.columns:
+            return
+        
+        render_section_explainer("Market Cap Allocation", "market_cap_allocation", lang_code=lang_code, analysis_results=analysis_results, icon="🏢")
+        
+        df = stock_performance[stock_performance['Market Cap'] > 0].copy()
+        
+        if df.empty:
+            st.info("Market cap data not available for portfolio stocks.")
+            return
+
+        def classify_market_cap(mc):
+            if mc >= 200_000_000_000:
+                return 'Large Cap (₹20,000Cr+)'
+            elif mc >= 50_000_000_000:
+                return 'Mid Cap (₹5,000-20,000Cr)'
+            elif mc >= 10_000_000_000:
+                return 'Small Cap (₹1,000-5,000Cr)'
+            else:
+                return 'Micro Cap (<₹1,000Cr)'
+
+        df['Market Cap Category'] = df['Market Cap'].apply(classify_market_cap)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            cap_allocation = df.groupby('Market Cap Category')['Current Value'].sum().reset_index()
+            cap_allocation.columns = ['Category', 'Value']
+            
+            color_map = {
+                'Large Cap (₹20,000Cr+)': '#2563eb',
+                'Mid Cap (₹5,000-20,000Cr)': '#7c3aed',
+                'Small Cap (₹1,000-5,000Cr)': '#db2777',
+                'Micro Cap (<₹1,000Cr)': '#ea580c'
+            }
+            
+            fig_cap = px.pie(
+                cap_allocation,
+                values='Value',
+                names='Category',
+                title='Portfolio by Market Cap',
+                color='Category',
+                color_discrete_map=color_map
+            )
+            fig_cap.update_traces(textposition='inside', textinfo='percent+label')
+            fig_cap.update_layout(height=420)
+            st.plotly_chart(fig_cap, use_container_width=True)
+
+        with col2:
+            cap_detail = df.groupby('Market Cap Category').agg(
+                Stocks=('Stock Name', 'count'),
+                Investment=('Investment Value', 'sum'),
+                Current_Value=('Current Value', 'sum')
+            ).reset_index()
+            cap_detail.columns = ['Market Cap Category', 'No. of Stocks', 'Investment', 'Current Value']
+            cap_detail['Gain/Loss'] = cap_detail['Current Value'] - cap_detail['Investment']
+            cap_detail['Return %'] = ((cap_detail['Current Value'] - cap_detail['Investment']) / cap_detail['Investment'] * 100)
+            cap_detail['Allocation %'] = (cap_detail['Current Value'] / cap_detail['Current Value'].sum() * 100)
+
+            display_cap = cap_detail.copy()
+            display_cap['Investment'] = display_cap['Investment'].apply(lambda x: f"₹{x:,.0f}")
+            display_cap['Current Value'] = display_cap['Current Value'].apply(lambda x: f"₹{x:,.0f}")
+            display_cap['Gain/Loss'] = display_cap['Gain/Loss'].apply(lambda x: f"₹{x:+,.0f}")
+            display_cap['Return %'] = display_cap['Return %'].apply(lambda x: f"{x:+.2f}%")
+            display_cap['Allocation %'] = display_cap['Allocation %'].apply(lambda x: f"{x:.1f}%")
+            st.dataframe(display_cap, use_container_width=True, hide_index=True)
+
+            st.markdown("")
+            top_stock = df.loc[df['Market Cap'].idxmax()]
+            st.info(f"🏆 Largest company: **{top_stock['Stock Name']}** (Market Cap: ₹{top_stock['Market Cap']/10_000_000:,.0f} Cr)")
