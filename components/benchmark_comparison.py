@@ -33,7 +33,7 @@ class BenchmarkComparison:
             'Infrastructure': 'NIFTY_INFRA',
         }
 
-        self.default_benchmarks = ['NIFTY50', 'SENSEX', 'NIFTY_BANK', 'NIFTY_MIDCAP_100']
+        self.default_benchmarks = ['NIFTY50', 'SENSEX', 'NIFTY_BANK', 'NIFTY_500']
     
     def render(self, analysis_results, portfolio_data, lang_code="en"):
         """Render benchmark comparison analysis"""
@@ -106,11 +106,27 @@ class BenchmarkComparison:
 
         st.markdown("---")
         
-        render_section_explainer("Category-wise Benchmark Analysis", "portfolio_vs_sensex", lang_code=lang_code, analysis_results=analysis_results, icon="📈")
+        render_section_explainer("Category Analysis", "portfolio_vs_sensex", lang_code=lang_code, analysis_results=analysis_results, icon="📈")
         
         category_analysis = pd.DataFrame(analysis_results['category_analysis'])
         
         if not category_analysis.empty:
+            # Recommendation Distribution Chart
+            st.subheader("🎯 Recommendation Distribution")
+            rec_counts = category_analysis.groupby('Category')['Number of Stocks'].sum().reset_index()
+            fig_rec = px.bar(
+                rec_counts,
+                x='Category',
+                y='Number of Stocks',
+                color='Category',
+                title='Portfolio Distribution by Category',
+                color_discrete_sequence=px.colors.qualitative.Pastel
+            )
+            st.plotly_chart(fig_rec, use_container_width=True)
+
+            st.markdown("---")
+            st.subheader("📈 Category vs Benchmark Performance")
+            
             categories = category_analysis['Category'].tolist()
             portfolio_returns = category_analysis['Category Return %'].tolist()
             benchmark_returns_list = []

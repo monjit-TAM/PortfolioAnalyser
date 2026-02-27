@@ -78,12 +78,13 @@ class PortfolioRebalancing:
             strategy = st.selectbox(
                 "Choose Strategy:",
                 options=list(self.strategies.keys()),
+                index=list(self.strategies.keys()).index('Balanced') if 'Balanced' in self.strategies else 0,
                 help="Select investment strategy based on your risk tolerance"
             )
         
         with col2:
             st.info(f"""
-            **{strategy} Strategy:**
+            **Recommended Strategy: {strategy}**
             - Large Cap: {self.strategies[strategy]['Large Cap']}%
             - Mid Cap: {self.strategies[strategy]['Mid Cap']}%
             - Small Cap: {self.strategies[strategy]['Small Cap']}%
@@ -135,7 +136,7 @@ class PortfolioRebalancing:
         st.markdown("---")
         
         # Rebalancing Actions
-        render_section_explainer("Recommended Rebalancing Actions", "overweight_positions", lang_code=lang_code, analysis_results=analysis_results, icon="💡")
+        render_section_explainer("Detailed Rebalancing Actions", "overweight_positions", lang_code=lang_code, analysis_results=analysis_results, icon="💡")
         
         portfolio_value = analysis_results['portfolio_summary']['current_value']
         rebalancing_actions = self.generate_rebalancing_actions(
@@ -171,7 +172,7 @@ class PortfolioRebalancing:
             )
         
         # Detailed actions
-        st.subheader("📋 Detailed Action Plan")
+        st.subheader("📋 Detailed Action Plan & Recommended Actions")
         
         # Group by action type
         buy_actions = [a for a in rebalancing_actions if a['action'] == 'BUY']
@@ -179,7 +180,7 @@ class PortfolioRebalancing:
         hold_actions = [a for a in rebalancing_actions if a['action'] == 'HOLD']
         
         if buy_actions:
-            st.success("🟢 **Stocks to Buy / Increase Position**")
+            st.success("🟢 **Recommended Action: Increase Exposure (BUY)**")
             for action in buy_actions:
                 with st.expander(f"📈 {action['stock']} - Invest ₹{action['amount']:,.2f}"):
                     st.write(f"**Category:** {action['category']}")
@@ -191,7 +192,7 @@ class PortfolioRebalancing:
                     st.write(f"**Rationale:** {action['rationale']}")
         
         if sell_actions:
-            st.error("🔴 **Stocks to Sell / Reduce Position**")
+            st.error("🔴 **Recommended Action: Reduce Exposure (SELL)**")
             for action in sell_actions:
                 with st.expander(f"📉 {action['stock']} - Reduce ₹{abs(action['amount']):,.2f}"):
                     st.write(f"**Category:** {action['category']}")
@@ -203,14 +204,14 @@ class PortfolioRebalancing:
                     st.write(f"**Rationale:** {action['rationale']}")
         
         if hold_actions:
-            st.info("🟡 **Stocks to Hold (Well-Allocated)**")
+            st.info("🟡 **Recommended Action: Maintain Position (HOLD)**")
             for action in hold_actions:
                 st.write(f"• **{action['stock']}** ({action['category']}): Current {action['current_allocation']:.1f}% vs Target {action['target_allocation']:.1f}%")
         
         st.markdown("---")
         
         # Sector Rebalancing
-        render_section_explainer("Sector Rebalancing Recommendations", "underweight_positions", lang_code=lang_code, analysis_results=analysis_results, icon="🏭")
+        render_section_explainer("Sector Rebalancing Analysis", "underweight_positions", lang_code=lang_code, analysis_results=analysis_results, icon="🏭")
         
         current_sector_allocation = self.calculate_sector_allocation(analysis_results)
         sector_actions = self.generate_sector_recommendations(current_sector_allocation)
@@ -241,7 +242,7 @@ class PortfolioRebalancing:
         ))
         
         fig_sector.update_layout(
-            title='Sector Allocation: Current vs Ideal',
+            title='Sector Allocation Analysis: Current vs Ideal',
             xaxis_title='Sector',
             yaxis_title='Allocation (%)',
             barmode='group',
@@ -262,7 +263,7 @@ class PortfolioRebalancing:
         st.markdown("---")
         
         # Implementation Tips
-        st.subheader("💭 Implementation Tips")
+        st.subheader("💡 Implementation Tips")
         
         st.markdown("""
         **Best Practices for Rebalancing:**
@@ -281,6 +282,17 @@ class PortfolioRebalancing:
         
         7. **Use New Funds First**: When adding new money, direct it toward underweight categories.
         """)
+
+        st.markdown("---")
+        st.subheader("🛡️ Personalized Strategy Recommendation")
+        st.markdown("""
+        <div style='background: #f0f7ff; border-left: 5px solid #0056b3; padding: 20px; border-radius: 8px;'>
+            <h3>🎯 Panchamrit (RIA) Recommendation</h3>
+            <p>Based on your portfolio risk profile and rebalancing needs, we recommend exploring the <b>Panchamrit RIA Strategy</b>. This strategy focuses on 5 core pillars of wealth creation specifically tailored for the Indian market.</p>
+            <p style='font-weight: bold; color: #0056b3;'>Ready to professionalize your portfolio?</p>
+            <a href='#' style='display: inline-block; background: #0056b3; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;'>Connect with AR Team</a>
+        </div>
+        """, unsafe_allow_html=True)
     
     def calculate_current_allocation(self, analysis_results):
         """Calculate current portfolio allocation by category"""

@@ -488,6 +488,19 @@ def render_quantamental_tab(analysis_results, recommendations, historical_data):
 
     results.sort(key=lambda x: x['composite_score'], reverse=True)
 
+    # Value Investing Perspective Additions
+    st.subheader("💎 Value Investing Perspective")
+    value_df = pd.DataFrame(results)[['stock_name', 'sector', 'gain_loss_pct', 'composite_score', 'signal_label']]
+    
+    # Calculate Sector Average Return
+    sector_avg = value_df.groupby('sector')['gain_loss_pct'].mean().to_dict()
+    value_df['Sector Return'] = value_df['sector'].map(lambda x: f"{sector_avg.get(x, 0):+.2f}%")
+    value_df.rename(columns={'stock_name': 'Stock Name', 'gain_loss_pct': 'Stock Return', 'composite_score': 'Quality Score', 'signal_label': 'Signal'}, inplace=True)
+    value_df['Stock Return'] = value_df['Stock Return'].apply(lambda x: f"{x:+.2f}%")
+    
+    st.dataframe(value_df[['Stock Name', 'Stock Return', 'Sector Return', 'Quality Score', 'Signal']], use_container_width=True, hide_index=True)
+    st.markdown("---")
+
     buy_stocks = [r for r in results if r['action'] == 'BUY']
     hold_stocks = [r for r in results if r['action'] == 'HOLD']
     sell_stocks = [r for r in results if r['action'] == 'SELL']

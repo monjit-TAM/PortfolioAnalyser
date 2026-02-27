@@ -81,34 +81,6 @@ class SectorAnalysis:
         
         st.markdown("---")
         
-        render_section_explainer("Sector Insights", "sector_insights", lang_code, analysis_results, icon="💡")
-        
-        # Find best and worst performing sectors
-        best_sector = sector_data.loc[sector_data['Sector Return %'].idxmax()]
-        worst_sector = sector_data.loc[sector_data['Sector Return %'].idxmin()]
-        most_allocated = sector_data.loc[sector_data['Percentage of Portfolio'].idxmax()]
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.success(f"**Best Performing Sector**\n\n"
-                      f"🏆 {best_sector['Sector']}\n\n"
-                      f"Return: {best_sector['Sector Return %']:+.2f}%\n\n"
-                      f"Allocation: {best_sector['Percentage of Portfolio']:.1f}%")
-        
-        with col2:
-            st.error(f"**Worst Performing Sector**\n\n"
-                    f"📉 {worst_sector['Sector']}\n\n"
-                    f"Return: {worst_sector['Sector Return %']:+.2f}%\n\n"
-                    f"Allocation: {worst_sector['Percentage of Portfolio']:.1f}%")
-        
-        with col3:
-            st.info(f"**Largest Allocation**\n\n"
-                   f"📊 {most_allocated['Sector']}\n\n"
-                   f"Allocation: {most_allocated['Percentage of Portfolio']:.1f}%\n\n"
-                   f"Return: {most_allocated['Sector Return %']:+.2f}%")
-        
-        st.markdown("---")
         render_section_explainer("Diversification Analysis", "diversification_analysis", lang_code, analysis_results, icon="🎯")
         
         total_sectors = len(sector_data)
@@ -163,7 +135,41 @@ class SectorAnalysis:
             st.caption(concentration_advice)
         
         st.markdown("---")
+        
+        render_section_explainer("Sector Insights", "sector_insights", lang_code, analysis_results, icon="💡")
+        
+        # Find best and worst performing sectors
+        best_sector = sector_data.loc[sector_data['Sector Return %'].idxmax()]
+        worst_sector = sector_data.loc[sector_data['Sector Return %'].idxmin()]
+        most_allocated = sector_data.loc[sector_data['Percentage of Portfolio'].idxmax()]
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.success(f"**Best Performing Sector**\n\n"
+                      f"🏆 {best_sector['Sector']}\n\n"
+                      f"Return: {best_sector['Sector Return %']:+.2f}%\n\n"
+                      f"Stocks: {best_sector['Number of Stocks']}\n\n"
+                      f"Allocation: {best_sector['Percentage of Portfolio']:.1f}%")
+        
+        with col2:
+            st.error(f"**Worst Performing Sector**\n\n"
+                    f"📉 {worst_sector['Sector']}\n\n"
+                    f"Return: {worst_sector['Sector Return %']:+.2f}%\n\n"
+                    f"Stocks: {worst_sector['Number of Stocks']}\n\n"
+                    f"Allocation: {worst_sector['Percentage of Portfolio']:.1f}%")
+        
+        with col3:
+            st.info(f"**Largest Allocation**\n\n"
+                   f"📊 {most_allocated['Sector']}\n\n"
+                   f"Allocation: {most_allocated['Percentage of Portfolio']:.1f}%\n\n"
+                   f"Stocks: {most_allocated['Number of Stocks']}\n\n"
+                   f"Return: {most_allocated['Sector Return %']:+.2f}%")
+        
+        st.markdown("---")
         render_section_explainer("Sector Recommendations", "sector_recommendations", lang_code, analysis_results, icon="📝")
+        
+        st.info("💡 **About 'Others' Category:** The 'Others' sector includes stocks that do not fall into predefined major industry classifications or have very small allocations in your portfolio. This ensures focus on your primary sector exposures while grouping smaller positions together.")
         
         recommendations = []
         
